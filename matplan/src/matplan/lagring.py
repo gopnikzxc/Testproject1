@@ -8,6 +8,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
+from .bunkra import Bunkring
 from .butiker import Produkt
 from .naring import Naring
 from .planerare import Plan
@@ -27,6 +28,8 @@ STANDARDINSTALLNINGAR = {
     "manadsbudget": 5000,
     "rea_procent": 25,
     "rea_veckor": 8,
+    "frys_kg": 10,
+    "torr_kg": 2,
 }
 
 _SCHEMA = """
@@ -72,6 +75,10 @@ CREATE TABLE IF NOT EXISTS naring (
     fiber REAL,
     vatten REAL,
     hamtad TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS bunkring (
+    ingrediens TEXT PRIMARY KEY,
+    data BLOB NOT NULL
 );
 CREATE TABLE IF NOT EXISTS aktiv_plan (
     id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -218,3 +225,24 @@ class Lagring:
             "SELECT ingrediens, kalla, kcal, protein, fett, kolhydrater, fiber, vatten FROM naring"
         )
         return {rad[0]: Naring(*rad[1:]) for rad in rader}
+
+    def spara_bunkring(self, bunkring: Bunkring) -> None:
+        with self._db:
+            self._db.execute("INSERT OR REPLACE INTO bunkring VALUES (?, ?)", (bunkring.ingrediens, pickle.dumps(bunkring)))
+
+    def ta_bort_bunkring(self, ingrediens: str | None = None) -> bool:
+        """Tar bort en accepterad bunkring, eller alla om ingen ingrediens anges."""
+        with self._db:
+            if ingrediens is None:
+                return self._db.execute("DELETE FROM bunkring").rowcount > 0
+            return self._db.execute("DELETE FROM bunkring WHERE ingrediens = ?", (ingrediens,)).rowcount > 0
+
+    def bunkringar(self) -> list[Bunkring]:
+        rader = self._db.execute("SELECT data FROM bunkring ORDER BY ingrediens")
+        resultat = []
+        for (data,) in rader:
+            try:
+                resultat.append(pickle.loads(data))
+            except Exception:  # sparad med en äldre version av koden
+                continue
+        return resultat

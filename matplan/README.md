@@ -13,6 +13,7 @@ python3 -m venv .venv
 .venv/bin/matplan export [folder]                   # save plan.md and inkopslista.md for your phone
 .venv/bin/matplan produkter Kycklingfilé            # fetched products with ids
 .venv/bin/matplan lås Kycklingfilé "City Gross Ytterby" <id>   # always use that product there
+.venv/bin/matplan bunkra [--ta X | --ta-bort X]    # stock-up suggestions; --ta adds one to the shopping list
 .venv/bin/matplan köpt [--butik B | --delad]        # add the shopping list to inventory; the plan becomes active
 .venv/bin/matplan lagat [--block N]                 # subtract a cooked batch from inventory
 .venv/bin/matplan lager [ingredient grams]          # show inventory or set an amount
@@ -36,6 +37,7 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 | `vikt_protein` / `vikt_volym` / `vikt_kostnad` | 1 / 1 / 1 | How much protein density (g/100 kcal), volume (g/kcal) and low cost (kr/g protein) count when picking meals |
 | `veckobudget` / `manadsbudget` | 1250 / 5000 | Ceilings for planned food. A month counts as 4 weeks, and no day may cost more than the stricter of the two |
 | `rea_procent` / `rea_veckor` | 25 / 8 | A price is a deal when it is at least this many percent below the median of the last weeks |
+| `frys_kg` / `torr_kg` | 10 / 2 | Storage space for stock-up in the freezer and the dry store. What's already in stock counts against it |
 
 Planning uses inventory first: whatever is already at home costs 0 kr, and the shopping list only covers what's missing. Once you've run `köpt`, that plan stays in place until it ends or you run `plan --ny`.
 
@@ -44,6 +46,10 @@ Planning uses inventory first: whatever is already at home costs 0 kr, and the s
 Every refresh is saved as price history, one price per day. With at least 3 days of history in the window, a product is a deal when it is `rea_procent` below the median. Before that, the store's own offer flag decides, and that flag also covers multi-buy offers. Deals are marked "(rea)" in the plan, the shopping list and the export.
 
 A fresh protein deal (eggs, dairy, fresh meat) that gives more protein per krona than a frozen or dry item in stock goes first. That stock item then costs its normal price in the plan instead of 0 kr, because it keeps. The plan says when this happens.
+
+## Stock-up
+
+`matplan bunkra` suggests extra purchases. An item qualifies when it is a protein source, keeps (frozen or dry), is on a deal right now, and gives more protein per krona than the average of your protein sources. The best protein per krona gets space first. Quantities come in whole packages, within the space left in the freezer or dry store. A suggestion you accept with `--ta` goes in a separate section of the shopping list, outside the budget, and `köpt` puts it into inventory.
 
 ## Stores
 
@@ -64,6 +70,6 @@ Once fetched, values are kept in the database, and the plan names its sources. U
 
 ## Status
 
-Done: #2, #3, #4, #5, #6, #7, #9, #10, #11, #12, #13
+Done: #2, #3, #4, #5, #6, #7, #9, #10, #11, #12, #13, #14
 
 ICA Maxi (#8) is shelved because ICA blocks automated access.
