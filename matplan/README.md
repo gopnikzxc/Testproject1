@@ -38,13 +38,23 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 
 Planning uses inventory first: whatever is already at home costs 0 kr, and the shopping list only covers what's missing. Once you've run `köpt`, that plan stays in place until it ends or you run `plan --ny`.
 
+## Stores
+
+| Store | Status | Notes |
+|---|---|---|
+| City Gross Ytterby | ✅ | Store number 3240, looked up from siteId 31 via the web shop's GraphQL. Search returns Ytterby's own range and prices |
+| ICA Maxi Kungälv | coming in #8 | |
+| Willys Kungälv | coming in #12 | |
+
+`refresh` searches with each ingredient's Swedish search terms. A product counts only if its name contains the search words as whole words and the store's category fits, which keeps out cat food, ready meals and pickled cucumber. Eggs are compared per egg and converted to kr/kg at 60 g per egg. Products sold by weight count as loose weight. Responses are cached for 6 hours under `~/.cache/matplan/http`.
+
 ## Status
 
-Done: #2, #3, #4, #7, #9, #10, #11, plus the split-trip comparison from #8.
+Done:
+- #2, #3, #4, #6, #7, #9, #10, #11
+- the split-trip comparison from #8
 
-Waiting on network access from the build environment:
-- #5: Livsmedelsverket.
-- #6: the price pipeline works, but the City Gross module is missing.
+Left:
+- #5: Livsmedelsverket, so nutrition values are still hand-entered.
 - #8: the ICA Maxi module.
-
-Until then, the plan and shopping list use placeholder prices.
+- #12: Willys.

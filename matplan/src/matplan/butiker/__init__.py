@@ -25,6 +25,7 @@ class Produkt:
     pris_kr: float
     kr_per_kg: float
     erbjudande: bool = False
+    kategori: str = ""  # butikens egen kategori, t.ex. "Fryst / Frysta bär & frukt"
 
 
 class Butik(Protocol):
@@ -41,3 +42,12 @@ def matchar(produktnamn: str, sokord: tuple[str, ...]) -> bool:
     """Sant om alla ord i någon sökterm finns som hela ord i produktnamnet."""
     namnord = _ord(produktnamn)
     return any(_ord(term) <= namnord for term in sokord)
+
+
+def ratt_kategori(produktkategori: str, butikskategori: tuple[str, ...]) -> bool:
+    """Sant om butikens kategori innehåller något av orden, eller om något av
+    dem saknas (butiken anger ingen kategori eller ingrediensen kräver ingen)."""
+    if not produktkategori or not butikskategori:
+        return True
+    kategori = produktkategori.casefold()
+    return any(ord in kategori for ord in butikskategori)

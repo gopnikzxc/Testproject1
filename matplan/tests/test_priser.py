@@ -138,3 +138,39 @@ def test_cli_refresh_utan_butiker(tmp_path, monkeypatch, capsys):
     assert main(["refresh"]) == 0
 
     assert "Inga butiker" in capsys.readouterr().out
+
+
+def test_butikskategori_sorterar_bort_fel_sorts_produkter(tmp_path):
+    butik = FalskButik(
+        "City Gross Ytterby",
+        [
+            Produkt("City Gross Ytterby", "katt", "Nötfärs 10% i Gelé", "", 400, 20.0, 50.0, kategori="Husdjur / Katt"),
+            Produkt("City Gross Ytterby", "farser", "Nötfärs 10%", "", 1000, 110.0, 110.0, kategori="Kött & fågel / Färser"),
+            Produkt("City Gross Ytterby", "yoghurt", "Blåbär Yoghurt", "", 1000, 20.0, 20.0, kategori="Mejeri, ost & ägg / Yoghurt"),
+            Produkt("City Gross Ytterby", "frysta", "Blåbär Vilda", "", 2500, 189.0, 75.6, kategori="Fryst / Frysta bär & frukt"),
+        ],
+    )
+    app = Matplan(tmp_path / "m.db", butiker=(butik,))
+
+    app.refresh(nu=NU)
+
+    assert [p.produkt_id for p in app.produkter("Nötfärs 10 %")] == ["farser"]
+    assert [p.produkt_id for p in app.produkter("Blåbär, frysta")] == ["frysta"]
+
+
+def test_ratt_kategori():
+    from matplan.butiker import ratt_kategori
+
+    assert ratt_kategori("Fryst / Frysta grönsaker & kryddor", ("frysta grönsaker",))
+    assert not ratt_kategori("Frukt & grönt / Grönsaker", ("frysta grönsaker",))
+    assert ratt_kategori("", ("frysta grönsaker",))  # butiken anger ingen kategori
+    assert ratt_kategori("Vad som helst", ())
+
+
+def test_refresh_rapporterar_framsteg(tmp_path):
+    steg = []
+    app = Matplan(tmp_path / "m.db", butiker=(_city(),))
+
+    app.refresh(nu=NU, framsteg=lambda butik, namn: steg.append((butik, namn)))
+
+    assert ("City Gross Ytterby", "Kycklingfilé") in steg

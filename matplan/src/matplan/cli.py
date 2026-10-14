@@ -9,8 +9,10 @@ from rich.console import Console
 from rich.table import Table
 
 from .butiker import Butik
+from .butiker.citygross import CityGross
 from .core import DAGAR_PER_MANAD, Hamtningsresultat, Matplan, PlaneringsFel
 from .export import exportera
+from .http import HttpKlient
 from .inkop import Inkopslista
 from .planerare import Maltid, Plan
 from .text import datum as _datum
@@ -24,8 +26,9 @@ def _db_sokvag() -> Path:
 
 
 def _butiker() -> tuple[Butik, ...]:
-    # Butiksadaptrarna (City Gross, ICA Maxi, Willys) läggs till här när de finns.
-    return ()
+    # ICA Maxi och Willys läggs till här när deras adaptrar finns (#8, #12).
+    http = HttpKlient(Path.home() / ".cache" / "matplan" / "http")
+    return (CityGross(http),)
 
 
 def _maltidstabell(titel: str, maltid: Maltid, personer: tuple[str, ...], antal: int = 0) -> Table:
@@ -228,7 +231,8 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
         planfil, listfil = exportera(app.plan(), app.inkopslista(), Path(args.mapp))
         konsol.print(f"Sparade {planfil} och {listfil}")
     elif kommando == "refresh":
-        resultat = app.refresh()
+        with konsol.status("Hämtar priser …") as status:
+            resultat = app.refresh(framsteg=lambda butik, namn: status.update(f"{butik}: {namn} …"))
         _visa_hamtning(konsol, resultat)
         return 1 if resultat.fel and not resultat.antal_produkter else 0
     elif kommando == "produkter":

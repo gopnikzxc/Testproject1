@@ -7,8 +7,9 @@ import dataclasses
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
+from typing import Callable
 
-from .butiker import Butik, ButiksFel, Produkt, matchar
+from .butiker import Butik, ButiksFel, Produkt, matchar, ratt_kategori
 from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
@@ -174,18 +175,27 @@ class Matplan:
 
     # --- Priser, produktlås --------------------------------------------------
 
-    def refresh(self, nu: datetime | None = None) -> Hamtningsresultat:
-        """Hämtar priser från alla butiker. En trasig butik stoppar inte de andra."""
+    def refresh(
+        self, nu: datetime | None = None, framsteg: Callable[[str, str], None] | None = None
+    ) -> Hamtningsresultat:
+        """Hämtar priser från alla butiker. En trasig butik stoppar inte de andra.
+        `framsteg(butik, ingrediens)` anropas före varje ingrediens."""
         resultat = Hamtningsresultat(tid=nu or datetime.now().replace(microsecond=0))
         priser: dict[str, list[Produkt]] = {}
         for butik in self._butiker:
             try:
                 fynd = {}
                 for ingrediens in self._katalog:
+                    if framsteg:
+                        framsteg(butik.namn, ingrediens.namn)
                     traffar = {}
                     for term in ingrediens.sokord:
                         for produkt in butik.sok(term):
-                            if produkt.kr_per_kg > 0 and matchar(produkt.namn, ingrediens.sokord):
+                            if (
+                                produkt.kr_per_kg > 0
+                                and matchar(produkt.namn, ingrediens.sokord)
+                                and ratt_kategori(produkt.kategori, ingrediens.butikskategori)
+                            ):
                                 traffar[produkt.produkt_id] = produkt
                     fynd[ingrediens.namn] = list(traffar.values())
             except ButiksFel as fel:

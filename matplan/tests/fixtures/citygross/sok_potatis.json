@@ -1,0 +1,300 @@
+{
+ "searchResults": {
+  "products": [
+   {
+    "id": "101058267_ST",
+    "gtin": "7340083475603",
+    "name": "Potatis Fast",
+    "subtitle": "2KG KLASS 1",
+    "brand": "GARANT",
+    "superCategory": "Frukt & grönt",
+    "category": "Potatis & rotsaker",
+    "descriptiveSize": "2KG",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 2000
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 29.95,
+       "unit": "PCE",
+       "comparativePrice": 14.98,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 29.95,
+       "unit": "PCE",
+       "comparativePrice": 14.98,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "100150587_KG",
+    "gtin": "2090201900009",
+    "name": "Potatis Fast",
+    "subtitle": "CA120G KLASS 1",
+    "brand": null,
+    "superCategory": "Frukt & grönt",
+    "category": "Potatis & rotsaker",
+    "descriptiveSize": "CA120G",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 120
+    },
+    "sellingUnitOfMeasure": 2,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "2026-10-29",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 14.95,
+       "unit": "KGM",
+       "comparativePrice": 14.95,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 14.95,
+       "unit": "KGM",
+       "comparativePrice": 14.95,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "101301935_ST",
+    "gtin": "7340083475580",
+    "name": "Potatis Fast",
+    "subtitle": "900G KLASS 1",
+    "brand": "GARANT",
+    "superCategory": "Frukt & grönt",
+    "category": "Potatis & rotsaker",
+    "descriptiveSize": "900G",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 900
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": true,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 16.95,
+       "unit": "PCE",
+       "comparativePrice": 18.83,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 16.95,
+       "unit": "PCE",
+       "comparativePrice": 18.83,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [
+       {
+        "id": "1658021,2500328992",
+        "type": "1",
+        "campaignTypeId": "0",
+        "name": "2500328992",
+        "couponId": null,
+        "effectType": "ItemsTotal",
+        "membersOnly": false,
+        "from": "2026-10-12T00:00:00+02:00",
+        "to": "2026-10-18T23:59:00+02:00",
+        "minAmount": null,
+        "minQuantity": 1,
+        "value": 9.95,
+        "maxAppliedPerReceipt": 0,
+        "displayLowestPriceLast30Days": false,
+        "priceDetails": {
+         "price": 9.95,
+         "unit": "PCE",
+         "comparativePrice": 11.06,
+         "comparativePriceUnit": "KGM"
+        }
+       }
+      ],
+      "activePromotion": {
+       "id": "1658021,2500328992",
+       "type": "1",
+       "campaignTypeId": "0",
+       "name": "2500328992",
+       "couponId": null,
+       "effectType": "ItemsTotal",
+       "membersOnly": false,
+       "from": "2026-10-12T00:00:00+02:00",
+       "to": "2026-10-18T23:59:00+02:00",
+       "minAmount": null,
+       "minQuantity": 1,
+       "value": 9.95,
+       "maxAppliedPerReceipt": 0,
+       "displayLowestPriceLast30Days": false,
+       "priceDetails": {
+        "price": 9.95,
+        "unit": "PCE",
+        "comparativePrice": 11.06,
+        "comparativePriceUnit": "KGM"
+       }
+      },
+      "hasDiscount": true,
+      "hasPromotion": true,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "100225490_ST",
+    "gtin": "74838",
+    "name": "Potatis Fast",
+    "subtitle": "5 KG KLASS 2",
+    "brand": null,
+    "superCategory": "Frukt & grönt",
+    "category": "Potatis & rotsaker",
+    "descriptiveSize": "5 KG",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 5000
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 54.95,
+       "unit": "PCE",
+       "comparativePrice": 10.99,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 54.95,
+       "unit": "PCE",
+       "comparativePrice": 10.99,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "100150827_KG",
+    "gtin": "2090202900008",
+    "name": "Sötpotatis",
+    "subtitle": "CA250G KLASS 1",
+    "brand": null,
+    "superCategory": "Frukt & grönt",
+    "category": "Potatis & rotsaker",
+    "descriptiveSize": "CA250G",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 250
+    },
+    "sellingUnitOfMeasure": 2,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 29.95,
+       "unit": "KGM",
+       "comparativePrice": 29.95,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 29.95,
+       "unit": "KGM",
+       "comparativePrice": 29.95,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   }
+  ],
+  "cateredMeals": [],
+  "recipes": [],
+  "pages": [],
+  "categories": [],
+  "stores": [],
+  "facets": [],
+  "totalCount": 757,
+  "pageSize": 50,
+  "currentPage": 0,
+  "totalPages": 16
+ }
+}
