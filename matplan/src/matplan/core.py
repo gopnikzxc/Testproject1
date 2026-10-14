@@ -9,6 +9,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Callable
 
+from .bunkra import Bunkring, forslag
 from .butiker import Butik, ButiksFel, Produkt, matchar, ratt_kategori, utesluten
 from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
@@ -172,7 +173,8 @@ class Matplan:
                 behov[namn] -= gram
         behov = {namn: max(gram - int(lager.get(namn, 0)), 0) for namn, gram in behov.items()}
         priser = self._priser()
-        return bygg_lista(behov, priser.produkter, {i.namn: i.kr_per_kg for i in self._katalog}, priser.rea)
+        lista = bygg_lista(behov, priser.produkter, {i.namn: i.kr_per_kg for i in self._katalog}, priser.rea)
+        return dataclasses.replace(lista, bunkring=tuple(self._lagring.bunkringar()))
 
     def kopt(self, start: date | None = None, butik: str | None = None) -> dict[str, float]:
         """Lägger in inköpslistan i lagret och gör planen aktiv, så att den inte
@@ -191,11 +193,46 @@ class Matplan:
                 kopt[rad.ingrediens] = kop.antal * kop.produkt.forpackning_g
             else:
                 kopt[rad.ingrediens] = rad.gram
+        for bunkring in lista.bunkring:
+            kopt[bunkring.ingrediens] = kopt.get(bunkring.ingrediens, 0) + bunkring.gram
         lager = self._lagring.lager()
         for namn, gram in kopt.items():
             self._lagring.satt_lager(namn, lager.get(namn, 0) + gram)
+        self._lagring.ta_bort_bunkring()
         self._lagring.spara_aktiv_plan(dataclasses.replace(plan, aktiv=False))
         return kopt
+
+    # --- Bunkring ----------------------------------------------------------
+
+    def bunkra(self) -> list[Bunkring]:
+        """Förslag på bunkring av proteinkällor som håller sig och är på rea.
+        Utrymmet räknas efter det som redan finns i lagret och det som redan
+        accepterats för bunkring."""
+        inst = self._lagring.installningar()
+        priser = self._priser()
+        lager = dict(self._lagring.lager())
+        accepterade = {b.ingrediens for b in self._lagring.bunkringar()}
+        for bunkring in self._lagring.bunkringar():
+            lager[bunkring.ingrediens] = lager.get(bunkring.ingrediens, 0) + bunkring.gram
+        return [
+            b
+            for b in forslag(
+                self._butikspriser(priser), priser.produkter, priser.rea, lager,
+                {"fryst": inst["frys_kg"] * 1000, "torrvara": inst["torr_kg"] * 1000},
+            )
+            if b.ingrediens not in accepterade
+        ]
+
+    def acceptera_bunkring(self, ingrediens: str) -> Bunkring:
+        """Lägger förslaget för ingrediensen på inköpslistan, i bunkringsdelen."""
+        for bunkring in self.bunkra():
+            if bunkring.ingrediens == ingrediens:
+                self._lagring.spara_bunkring(bunkring)
+                return bunkring
+        raise KeyError(f"Inget bunkringsförslag för {ingrediens}.")
+
+    def ta_bort_bunkring(self, ingrediens: str) -> bool:
+        return self._lagring.ta_bort_bunkring(ingrediens)
 
     def lagat(self, start: date | None = None, block: int = 1) -> list[str]:
         """Drar ett lagat blocks lunch- och middagsbatch från lagret. Returnerar

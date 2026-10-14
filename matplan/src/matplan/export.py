@@ -54,7 +54,7 @@ def lista_markdown(lista: Inkopslista) -> str:
         for rad in lista.rader:
             rader.append(f"| {rad.ingrediens} | {rad.gram} g | {rad.platshallar_kr:.0f} |")
         rader += ["", f"**Totalt ca {lista.platshallar_kr:.0f} kr**"]
-        return "\n".join(rader) + "\n"
+        return "\n".join(rader + _bunkring(lista)) + "\n"
 
     rader += [f"## {basta.butik}: {basta.kostnad:.2f} kr", ""]
     rader += ["- [ ] " + _kopstext(rad.ingrediens, rad.alternativ[basta.butik]) for rad in lista.rader if basta.butik in rad.alternativ]
@@ -66,7 +66,17 @@ def lista_markdown(lista: Inkopslista) -> str:
             if rad.billigast:
                 butik, kop = rad.billigast
                 rader.append(f"- [ ] {_kopstext(rad.ingrediens, kop)} – {butik}")
-    return "\n".join(rader) + "\n"
+    return "\n".join(rader + _bunkring(lista)) + "\n"
+
+
+def _bunkring(lista: Inkopslista) -> list[str]:
+    if not lista.bunkring:
+        return []
+    rader = ["", f"## Bunkring (utanför budgeten): {lista.bunkring_kr:.2f} kr", ""]
+    for b in lista.bunkring:
+        mangd = f"{b.antal} st" if b.antal is not None else f"{b.gram:.0f} g lösvikt"
+        rader.append(f"- [ ] {b.ingrediens}: {mangd} {b.produkt.namn} ({b.kostnad:.2f} kr, {b.produkt.kr_per_kg:.2f} kr/kg) – {b.produkt.butik}")
+    return rader
 
 
 def _kopstext(ingrediens: str, kop) -> str:

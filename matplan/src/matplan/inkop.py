@@ -7,6 +7,7 @@ saknas). Listan jämför billigaste enskilda butik mot billigaste uppdelning.
 import math
 from dataclasses import dataclass
 
+from .bunkra import Bunkring
 from .butiker import Produkt
 
 
@@ -43,6 +44,11 @@ class Butikstotal:
 class Inkopslista:
     rader: tuple[Listrad, ...]
     butiker: tuple[Butikstotal, ...]  # bäst först: kompletta, sedan billigast
+    bunkring: tuple[Bunkring, ...] = ()  # accepterade bunkringsköp, utanför budgeten
+
+    @property
+    def bunkring_kr(self) -> float:
+        return sum(b.kostnad for b in self.bunkring)
 
     @property
     def basta_butik(self) -> Butikstotal | None:

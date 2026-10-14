@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .butiker import Butik
+from .bunkra import Bunkring
 from .butiker.citygross import CityGross
 from .butiker.willys import Willys
 from .core import DAGAR_PER_MANAD, Hamtningsresultat, Matplan, PlaneringsFel
@@ -192,7 +193,36 @@ def _visa_lista(konsol: Console, app: Matplan, lista: Inkopslista) -> None:
         konsol.print(jamforelse)
         if lista.besparing > 0.005:
             konsol.print(f"Uppdelat på flera butiker sparar {lista.besparing:.2f} kr jämfört med {basta.butik}.")
+    if lista.bunkring:
+        bunkring = Table(title="Bunkring (utanför budgeten)", title_justify="left")
+        for rubrik, just in (("Vara", "left"), ("Produkt", "left"), ("Butik", "left"), ("Antal", "right"), ("kr", "right")):
+            bunkring.add_column(rubrik, justify=just)
+        for b in lista.bunkring:
+            bunkring.add_row(b.ingrediens, b.produkt.namn, b.produkt.butik, _bunkringsmangd(b), f"{b.kostnad:.2f}")
+        bunkring.add_section()
+        bunkring.add_row("Totalt", "", "", "", f"{lista.bunkring_kr:.2f}", style="bold")
+        konsol.print(bunkring)
     _visa_budget(konsol, app, app.plan())
+
+
+def _bunkringsmangd(b: Bunkring) -> str:
+    return f"{b.antal} st ({b.gram / 1000:g} kg)" if b.antal is not None else f"{b.gram / 1000:g} kg lösvikt"
+
+
+def _visa_bunkringsforslag(konsol: Console, forslag: list[Bunkring]) -> None:
+    if not forslag:
+        konsol.print("Inga bunkringsförslag just nu: ingen proteinkälla som håller sig är på rea "
+                     "med bättre protein per krona än snittet, eller så är förrådet fullt.")
+        return
+    tabell = Table(title="Bunkringsförslag", title_justify="left")
+    for rubrik, just in (("Vara", "left"), ("Produkt", "left"), ("Butik", "left"), ("Antal", "right"),
+                         ("kr/kg", "right"), ("g protein/kr", "right"), ("kr", "right")):
+        tabell.add_column(rubrik, justify=just)
+    for b in forslag:
+        tabell.add_row(b.ingrediens, b.produkt.namn, b.produkt.butik, _bunkringsmangd(b),
+                       f"{b.produkt.kr_per_kg:.2f}", f"{b.protein_per_kr:.2f}", f"{b.kostnad:.2f}")
+    konsol.print(tabell)
+    konsol.print("Lägg på inköpslistan med `matplan bunkra --ta <vara>`.")
 
 
 def _visa_produkter(konsol: Console, app: Matplan, ingrediens: str) -> None:
@@ -227,6 +257,9 @@ def main(argv: list[str] | None = None) -> int:
     kopt = kommandon.add_parser("köpt", aliases=["kopt"], help="Lägg in inköpslistan i lagret")
     kopt.add_argument("--butik", help="Butiken där allt köptes (standard: bästa enskilda butik)")
     kopt.add_argument("--delad", action="store_true", help="Varje vara köptes i sin billigaste butik")
+    bunkra = kommandon.add_parser("bunkra", help="Visa bunkringsförslag eller lägg ett på inköpslistan")
+    bunkra.add_argument("--ta", metavar="VARA", help="Lägg förslaget för varan på inköpslistan")
+    bunkra.add_argument("--ta-bort", metavar="VARA", help="Ta bort varan från bunkringen på inköpslistan")
     lagat = kommandon.add_parser("lagat", help="Dra ett lagat blocks batch från lagret")
     lagat.add_argument("--block", type=int, default=1)
     lager = kommandon.add_parser("lager", help="Visa lagret eller sätt en varas mängd")
@@ -278,6 +311,14 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
         kopt = app.kopt(butik="delad" if args.delad else args.butik)
         for namn, gram in kopt.items():
             konsol.print(f"+ {namn}: {gram:.0f} g")
+    elif kommando == "bunkra":
+        if args.ta:
+            b = app.acceptera_bunkring(args.ta)
+            konsol.print(f"{b.ingrediens}: {_bunkringsmangd(b)} för {b.kostnad:.2f} kr ligger nu på inköpslistan.")
+        elif args.ta_bort:
+            konsol.print("Borttagen från bunkringen." if app.ta_bort_bunkring(args.ta_bort) else "Den fanns inte i bunkringen.")
+        else:
+            _visa_bunkringsforslag(konsol, app.bunkra())
     elif kommando == "lagat":
         for varning in app.lagat(block=args.block):
             konsol.print(f"[yellow]{varning}[/yellow]")
