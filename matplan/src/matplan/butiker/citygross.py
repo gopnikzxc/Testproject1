@@ -66,6 +66,7 @@ class CityGross:
                 kr_per_kg=float(kr_per_kg),
                 erbjudande=bool(priser.get("hasDiscount") or priser.get("hasPromotion")),
                 kategori=" / ".join(k for k in (rad.get("superCategory"), rad.get("category")) if k),
+                beskrivning=rad.get("subtitle") or "",
             )
         except (KeyError, TypeError, ZeroDivisionError):
             return None  # en enskild konstig produkt ska inte fälla sökningen

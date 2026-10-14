@@ -48,13 +48,20 @@ Planning uses inventory first: whatever is already at home costs 0 kr, and the s
 
 `refresh` searches with each ingredient's Swedish search terms. A product counts only if its name contains the search words as whole words and the store's category fits, which keeps out cat food, ready meals and pickled cucumber. Eggs are compared per egg and converted to kr/kg at 60 g per egg. Products sold by weight count as loose weight. Responses are cached for 6 hours under `~/.cache/matplan/http`.
 
+## Nutrition values
+
+`refresh` also fetches nutrition values for ingredients that don't have any stored yet:
+- **Livsmedelsverket's food database** (CC BY 4.0), by food number.
+- **Open Food Facts** (ODbL), by barcode, for branded products Livsmedelsverket doesn't have: Keso 1.5% and Arla Greek yoghurt 0%.
+
+Once fetched, values are kept in the database, and the plan names its sources. Until then, the catalog's hand-entered values are used.
+
 ## Status
 
 Done:
-- #2, #3, #4, #6, #7, #9, #10, #11
+- #2, #3, #4, #5, #6, #7, #9, #10, #11
 - the split-trip comparison from #8
 
 Left:
-- #5: Livsmedelsverket, so nutrition values are still hand-entered.
 - #8: the ICA Maxi module.
 - #12: Willys.

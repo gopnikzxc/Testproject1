@@ -174,3 +174,12 @@ def test_refresh_rapporterar_framsteg(tmp_path):
     app.refresh(nu=NU, framsteg=lambda butik, namn: steg.append((butik, namn)))
 
     assert ("City Gross Ytterby", "Kycklingfilé") in steg
+
+
+def test_matchning_med_beskrivning():
+    assert matchar("Keso Mini Naturell", ("keso naturell 1,5",), "500G 1,5% KESO")
+    assert not matchar("Keso Naturell", ("keso naturell 1,5",), "500G 4% KESO")
+    assert matchar("Naturell Grekisk Yoghurt", ("grekisk yoghurt naturell 0",), "1KG 0% ARLA")
+    assert not matchar("Grekisk Yoghurt Naturell", ("grekisk yoghurt naturell 0",), "1KG 10% ARLA")
+    # Första ordet måste stå i namnet, inte bara i beskrivningen.
+    assert not matchar("Smoothie Jordgubb Banan", ("blåbär",), "750G JORDGUBB BANAN BLÅBÄR")

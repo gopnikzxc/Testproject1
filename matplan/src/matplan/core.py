@@ -13,6 +13,7 @@ from .butiker import Butik, ButiksFel, Produkt, matchar, ratt_kategori
 from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
+from .naring import Livsmedelsverket, NaringsFel, OpenFoodFacts
 from .planerare import Plan, PlaneringsFel, Profil, Vikter, planera
 
 __all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD"]
@@ -23,11 +24,13 @@ PERSONER = ("jag", "fru")
 DAGAR_PER_MANAD = 28
 
 
-@dataclass(frozen=True)
+@dataclass
 class Hamtningsresultat:
     tid: datetime
     antal_produkter: dict[str, int] = field(default_factory=dict)
     fel: dict[str, str] = field(default_factory=dict)
+    naring_hamtad: int = 0
+    naring_fel: dict[str, str] = field(default_factory=dict)  # ingrediens -> fel
 
 
 @dataclass(frozen=True)
@@ -43,10 +46,14 @@ class Matplan:
         db_sokvag: Path,
         katalog: tuple[Ingrediens, ...] = STARTKATALOG,
         butiker: tuple[Butik, ...] = (),
+        livsmedelsverket: Livsmedelsverket | None = None,
+        openfoodfacts: OpenFoodFacts | None = None,
     ):
         self._lagring = Lagring(db_sokvag)
-        self._katalog = tuple(sorted(katalog, key=lambda i: i.namn))
         self._butiker = butiker
+        self._livsmedelsverket = livsmedelsverket
+        self._openfoodfacts = openfoodfacts
+        self._grundkatalog = tuple(sorted(katalog, key=lambda i: i.namn))
 
     # --- Planering -------------------------------------------------------
 
@@ -82,8 +89,11 @@ class Matplan:
             plan = self._planera(med_lager(andel), start)
 
         utan_pris = tuple(i.namn for i in self._katalog if i.namn not in priser.produkter) if priser.hamtade else ()
+        anvanda = plan.total_gram()
+        kallor = tuple(sorted({n.kalla for namn, n in self._lagring.naring().items() if namn in anvanda}))
         return dataclasses.replace(
-            plan, priser_hamtade=priser.hamtade, utan_butikspris=utan_pris, varningar=priser.varningar
+            plan, priser_hamtade=priser.hamtade, utan_butikspris=utan_pris, varningar=priser.varningar,
+            naringskallor=kallor,
         )
 
     def _planera(self, katalog: tuple[Ingrediens, ...], start: date | None) -> Plan:
@@ -193,7 +203,7 @@ class Matplan:
                         for produkt in butik.sok(term):
                             if (
                                 produkt.kr_per_kg > 0
-                                and matchar(produkt.namn, ingrediens.sokord)
+                                and matchar(produkt.namn, ingrediens.sokord, produkt.beskrivning)
                                 and ratt_kategori(produkt.kategori, ingrediens.butikskategori)
                             ):
                                 traffar[produkt.produkt_id] = produkt
@@ -209,7 +219,43 @@ class Matplan:
             resultat.antal_produkter[butik.namn] = sum(len(p) for p in fynd.values())
         if resultat.antal_produkter:
             self._lagring.spara_hamtning(resultat.tid, priser)
+        self._hamta_naring(resultat, framsteg)
         return resultat
+
+    def _hamta_naring(self, resultat: Hamtningsresultat, framsteg: Callable[[str, str], None] | None) -> None:
+        """Hämtar näringsvärden för ingredienser som saknar sparade värden.
+        Livsmedelsverket i första hand, Open Food Facts för märkesvaror."""
+        sparade = self._lagring.naring()
+        for ingrediens in self._grundkatalog:
+            if ingrediens.namn in sparade:
+                continue
+            try:
+                if ingrediens.livsmedelsverket is not None and self._livsmedelsverket:
+                    if framsteg:
+                        framsteg("Livsmedelsverket", ingrediens.namn)
+                    naring = self._livsmedelsverket.hamta(ingrediens.livsmedelsverket)
+                elif ingrediens.ean and self._openfoodfacts:
+                    if framsteg:
+                        framsteg("Open Food Facts", ingrediens.namn)
+                    naring = self._openfoodfacts.hamta(ingrediens.ean)
+                else:
+                    continue
+            except NaringsFel as fel:
+                resultat.naring_fel[ingrediens.namn] = str(fel)
+                continue
+            self._lagring.spara_naring(ingrediens.namn, naring, resultat.tid)
+            resultat.naring_hamtad += 1
+
+    @property
+    def _katalog(self) -> tuple[Ingrediens, ...]:
+        """Katalogen med hämtade näringsvärden där sådana finns."""
+        naring = self._lagring.naring()
+        return tuple(
+            dataclasses.replace(i, kcal_100g=naring[i.namn].kcal, protein_100g=naring[i.namn].protein)
+            if i.namn in naring
+            else i
+            for i in self._grundkatalog
+        )
 
     def produkter(self, ingrediens: str) -> list[Produkt]:
         """Senast hämtade matchande produkter, billigast per kg först (före lås)."""

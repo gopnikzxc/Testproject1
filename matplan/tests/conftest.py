@@ -43,3 +43,4 @@ def inga_riktiga_butiker(monkeypatch):
     import matplan.cli
 
     monkeypatch.setattr(matplan.cli, "_butiker", lambda: ())
+    monkeypatch.setattr(matplan.cli, "_naringskallor", lambda: (None, None))

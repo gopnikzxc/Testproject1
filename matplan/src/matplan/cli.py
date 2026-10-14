@@ -14,6 +14,7 @@ from .core import DAGAR_PER_MANAD, Hamtningsresultat, Matplan, PlaneringsFel
 from .export import exportera
 from .http import HttpKlient
 from .inkop import Inkopslista
+from .naring import KALLHANVISNING, Livsmedelsverket, OpenFoodFacts
 from .planerare import Maltid, Plan
 from .text import datum as _datum
 from .text import forpackning
@@ -25,10 +26,18 @@ def _db_sokvag() -> Path:
     return Path.home() / ".local" / "share" / "matplan" / "matplan.db"
 
 
+def _http() -> HttpKlient:
+    return HttpKlient(Path.home() / ".cache" / "matplan" / "http")
+
+
 def _butiker() -> tuple[Butik, ...]:
-    # ICA Maxi och Willys läggs till här när deras adaptrar finns (#8, #12).
-    http = HttpKlient(Path.home() / ".cache" / "matplan" / "http")
-    return (CityGross(http),)
+    # Willys läggs till här när dess adapter finns (#12).
+    return (CityGross(_http()),)
+
+
+def _naringskallor() -> tuple[Livsmedelsverket | None, OpenFoodFacts | None]:
+    http = _http()
+    return Livsmedelsverket(http), OpenFoodFacts(http)
 
 
 def _maltidstabell(titel: str, maltid: Maltid, personer: tuple[str, ...], antal: int = 0) -> Table:
@@ -71,6 +80,13 @@ def _visa_prisstatus(konsol: Console, plan: Plan) -> None:
         konsol.print(f"[yellow]Platshållarpris för: {', '.join(plan.utan_butikspris)}[/yellow]")
 
 
+def _visa_kallor(konsol: Console, plan: Plan) -> None:
+    if not plan.naringskallor:
+        konsol.print("[dim]Näringsvärden: handinmatade ungefärliga värden – kör `matplan refresh`.[/dim]")
+    for kalla in plan.naringskallor:
+        konsol.print(f"[dim]{KALLHANVISNING[kalla]}[/dim]")
+
+
 def _visa_varningar(konsol: Console, plan: Plan) -> None:
     for varning in plan.varningar:
         konsol.print(f"[yellow]{varning}[/yellow]")
@@ -91,6 +107,10 @@ def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
         konsol.print(f"{butik}: {antal} produkter")
     for butik, fel in resultat.fel.items():
         konsol.print(f"[red]{butik}: {fel}[/red]")
+    if resultat.naring_hamtad:
+        konsol.print(f"Näringsvärden hämtade för {resultat.naring_hamtad} ingredienser")
+    for ingrediens, fel in resultat.naring_fel.items():
+        konsol.print(f"[yellow]{ingrediens}: {fel}[/yellow]")
 
 
 def _visa_plan(konsol: Console, app: Matplan, plan: Plan) -> None:
@@ -125,6 +145,7 @@ def _visa_plan(konsol: Console, app: Matplan, plan: Plan) -> None:
         summor.add_row(*celler, f"{dag.kr:.2f}")
     konsol.print(summor)
     _visa_budget(konsol, app, plan)
+    _visa_kallor(konsol, plan)
 
 
 def _visa_lista(konsol: Console, app: Matplan, lista: Inkopslista) -> None:
@@ -212,7 +233,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     konsol = Console()
-    app = Matplan(_db_sokvag(), butiker=_butiker())
+    livsmedelsverket, openfoodfacts = _naringskallor()
+    app = Matplan(_db_sokvag(), butiker=_butiker(), livsmedelsverket=livsmedelsverket, openfoodfacts=openfoodfacts)
     try:
         return _kor(konsol, app, args)
     except (PlaneringsFel, KeyError) as fel:

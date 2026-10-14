@@ -22,31 +22,40 @@ def test_standardbudget(app):
     assert inst["manadsbudget"] == 5000
 
 
-# Standardplanen kostar runt 171 kr/dag och billigaste möjliga runt 157 kr/dag,
-# så en budget däremellan tvingar fram ett billigare val.
-SNAV_VECKA = 1150
+def _snav_dagsbudget(app):
+    """En dagsbudget mellan billigaste möjliga dag och standardplanens dyraste dag,
+    så att budgeten tvingar fram billigare val men fortfarande går att nå."""
+    standard = max(dag.kr for dag in app.plan(START).dagar)
+    with pytest.raises(PlaneringsFel) as fel:
+        app.satt_installning("veckobudget", 7)
+        app.plan(START)
+    billigaste = float(str(fel.value).split("kostar ")[1].split(" kr")[0])
+    app.satt_installning("veckobudget", 1250)
+    assert billigaste + 2 < standard
+    return (billigaste + standard) / 2
 
 
 def test_planen_haller_sig_inom_veckobudgeten(app):
-    assert app.plan(START).kr_per_dag * 7 > SNAV_VECKA
-    app.satt_installning("veckobudget", SNAV_VECKA)
+    dag = _snav_dagsbudget(app)
+    app.satt_installning("veckobudget", dag * 7)
 
     plan = app.plan(START)
 
-    assert all(dag.kr * 7 <= SNAV_VECKA + 1e-6 for dag in plan.dagar)
+    assert all(d.kr <= dag + 1e-6 for d in plan.dagar)
 
 
 def test_planen_haller_sig_inom_manadstaket(app):
+    dag = _snav_dagsbudget(app)
     app.satt_installning("veckobudget", 10_000)
-    app.satt_installning("manadsbudget", 4500)
+    app.satt_installning("manadsbudget", dag * DAGAR_PER_MANAD)
 
     plan = app.plan(START)
 
-    assert all(dag.kr * DAGAR_PER_MANAD <= 4500 + 1e-6 for dag in plan.dagar)
+    assert all(d.kr <= dag + 1e-6 for d in plan.dagar)
 
 
 def test_malen_haller_aven_med_snav_budget(app):
-    app.satt_installning("veckobudget", SNAV_VECKA)
+    app.satt_installning("veckobudget", _snav_dagsbudget(app) * 7)
 
     plan = app.plan(START)
 
