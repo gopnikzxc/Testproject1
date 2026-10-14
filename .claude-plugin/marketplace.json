@@ -1,0 +1,14 @@
+{
+  "name": "mwallq-toolkit",
+  "owner": {
+    "name": "mwallq"
+  },
+  "plugins": [
+    {
+      "name": "software-team",
+      "source": "./plugins/software-team",
+      "description": "Orchestrated multi-agent software team for Claude Code"
+    }
+  ],
+  "description": "Personal Claude Code toolkit: an orchestrated software team of specialist agents."
+}

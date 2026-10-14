@@ -1,0 +1,11 @@
+{
+  "extraKnownMarketplaces": {
+    "mwallq-toolkit": {
+      "source": { "source": "github", "repo": "gopnikzxc/claude-toolkit" }
+    }
+  },
+  "enabledPlugins": {
+    "software-team@mwallq-toolkit": true,
+    "mattpocock-skills@claude-plugins-official": true
+  }
+}

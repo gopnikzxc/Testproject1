@@ -1,0 +1,6 @@
+{
+  "name": "software-team",
+  "version": "1.0.0",
+  "description": "An orchestrated team of eight specialist subagents (scout, architect, implementer, tester, reviewer, security, debugger, docs) driven by /software-team:team.",
+  "author": { "name": "mwallq" }
+}
