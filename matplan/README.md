@@ -7,7 +7,9 @@ Personal meal planner: high protein, low kcal, high volume, with current grocery
 ```
 python3 -m venv .venv
 .venv/bin/pip install -e '.[dev]'
+.venv/bin/matplan gui                               # interactive terminal GUI (see below)
 .venv/bin/matplan plan                              # plan the coming days in 3-day blocks
+.venv/bin/matplan byt 1 kolhydrater Potatis         # swap an ingredient in block 1 (without an ingredient: next in turn)
 .venv/bin/matplan refresh                           # fetch current prices from the stores
 .venv/bin/matplan lista                             # shopping list: whole packages, kr/kg, single store vs split
 .venv/bin/matplan export [folder]                   # save plan.md and inkopslista.md for your phone
@@ -24,6 +26,23 @@ python3 -m venv .venv
 ```
 
 The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` to use a different file.
+
+## Terminal GUI
+
+`matplan gui` opens a Textual app with tabs for Plan, Inköpslista, Lager, Bunkring, Priser and Inställningar. Everything comes from the same commands as the CLI. The bottom line shows cost against the budget, each person's kcal and protein, and the cheapest store.
+
+| Key | Does |
+|---|---|
+| `b` | Swaps the selected ingredient in a block's lunch and dinner. Totals and the list update right away |
+| `k` | Bought: puts the shopping list (and accepted stock-ups) into inventory |
+| `l` | Cooked: subtracts the selected block's batch from inventory |
+| `t` | Accepts the selected stock-up suggestion (Bunkring tab) |
+| `r` | Refreshes prices in the background |
+| `e` | Exports plan.md and inkopslista.md |
+| `n` | New plan, dropping the bought plan and any swaps |
+| `q` | Quit |
+
+Settings and inventory amounts are changed in the input box at the bottom of their tabs, for example `veckobudget 1300` or `Havregryn 750`.
 
 ## Settings
 
@@ -70,6 +89,6 @@ Once fetched, values are kept in the database, and the plan names its sources. U
 
 ## Status
 
-Done: #2, #3, #4, #5, #6, #7, #9, #10, #11, #12, #13, #14
+Done: #2–#7 and #9–#15, which is the whole spec in #1
 
 ICA Maxi (#8) is shelved because ICA blocks automated access.

@@ -15,7 +15,7 @@ from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
 from .naring import Livsmedelsverket, NaringsFel, OpenFoodFacts
-from .planerare import Plan, PlaneringsFel, Profil, Vikter, planera
+from .planerare import HUVUDSLOTAR, Plan, PlaneringsFel, Profil, Vikter, planera
 from .rea import ar_rea
 
 __all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD"]
@@ -65,6 +65,7 @@ class Matplan:
         En ny plan använder lagret först: det som redan finns hemma kostar 0 kr."""
         if ny:
             self._lagring.rensa_aktiv_plan()
+            self._lagring.satt_plan_val({})
         aktiv = self._lagring.aktiv_plan()
         if aktiv is not None and (start or date.today()) <= aktiv.dagar[-1].datum:
             return dataclasses.replace(aktiv, aktiv=True)
@@ -152,7 +153,48 @@ class Matplan:
             antal_mellanmal=int(inst["antal_mellanmal"]),
             vikter=Vikter(inst["vikt_protein"], inst["vikt_volym"], inst["vikt_kostnad"]),
             dagsbudget=self.dagsbudget(),
+            val=self._lagring.plan_val(),
         )
+
+    def byt(self, block: int, slot: str, ingrediens: str | None = None, start: date | None = None) -> Plan:
+        """Byter ingrediensen i en slot ("protein", "kolhydrater" eller "grönsaker")
+        i ett blocks lunch- och middagsbatch. Utan ingrediens väljs nästa i tur som
+        går att planera. Bytet sparas tills `plan --ny` eller `rensa_byten`."""
+        plan = self.plan(start)
+        if plan.aktiv:
+            raise PlaneringsFel("Planen är köpt och ligger fast. Kör `matplan plan --ny` för att kunna byta.")
+        if not 1 <= block <= len(plan.block):
+            raise KeyError(f"Block {block} finns inte; planen har {len(plan.block)} block.")
+        if slot not in HUVUDSLOTAR:
+            raise KeyError(f"Okänd slot: {slot}. Välj {', '.join(HUVUDSLOTAR)}.")
+        alternativ = [i.namn for i in self._grundkatalog if i.kategori == slot]
+        if ingrediens is not None:
+            if ingrediens not in alternativ:
+                raise KeyError(f"{ingrediens} är ingen ingrediens för {slot}.")
+            forsok = [ingrediens]
+        else:
+            nuvarande = next(r.namn for r in plan.block[block - 1].batch.portioner[0].rader if r.slot == slot)
+            i = alternativ.index(nuvarande)
+            forsok = alternativ[i + 1 :] + alternativ[:i]
+
+        tidigare = self._lagring.plan_val()
+        senaste_fel: PlaneringsFel | None = None
+        for namn in forsok:
+            self._lagring.satt_plan_val({**tidigare, (block, slot): namn})
+            try:
+                return self.plan(start)
+            except PlaneringsFel as fel:
+                senaste_fel = fel
+        self._lagring.satt_plan_val(tidigare)
+        if ingrediens is not None and senaste_fel is not None:
+            raise senaste_fel
+        raise PlaneringsFel(f"Inget annat val för {slot} i block {block} når allas mål.")
+
+    def byten(self) -> dict[tuple[int, str], str]:
+        return self._lagring.plan_val()
+
+    def rensa_byten(self) -> None:
+        self._lagring.satt_plan_val({})
 
     def dagsbudget(self) -> float:
         """Den strängaste av veckobudgeten och månadstaket, per dag."""
@@ -344,6 +386,24 @@ class Matplan:
             (p for namn, p, _ in self._lagring.senaste_priser() if namn == ingrediens),
             key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id),
         )
+
+    def prisoversikt(self) -> list[tuple[str, Produkt | None, bool, bool]]:
+        """Per ingrediens: billigaste produkt per kg (efter lås), om den är på rea
+        och om den är låst."""
+        priser = self._priser()
+        lasta = self._lagring.lasningar()
+        rader = []
+        for ingrediens in self._grundkatalog:
+            produkter = priser.produkter.get(ingrediens.namn)
+            if not produkter:
+                rader.append((ingrediens.namn, None, False, False))
+                continue
+            p = min(produkter, key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id))
+            rader.append((
+                ingrediens.namn, p, (p.butik, p.produkt_id) in priser.rea,
+                lasta.get((ingrediens.namn, p.butik)) == p.produkt_id,
+            ))
+        return rader
 
     def las(self, ingrediens: str, butik: str, produkt_id: str) -> None:
         self._ingrediens(ingrediens)

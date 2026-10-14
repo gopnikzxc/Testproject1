@@ -15,6 +15,7 @@ from itertools import product
 from .katalog import Ingrediens
 
 BLOCKDAGAR = 3
+HUVUDSLOTAR = ("protein", "kolhydrater", "grönsaker")
 GRONSAKER_GRAM = 300
 BAR_GRAM = 100
 AVRUNDNING_GRAM = 5
@@ -325,17 +326,20 @@ def planera(
     antal_mellanmal: int = 2,
     vikter: Vikter = Vikter(),
     dagsbudget: float | None = None,
+    val: dict[tuple[int, str], str] | None = None,
 ) -> Plan:
     """Planerar `plandagar` dagar. Med `dagsbudget` får ingen dag kosta mer än så;
     räcker inte budgeten med poängvalda frukostar och mellanmål görs ett nytt
-    försök där de väljs efter lägst kostnad."""
+    försök där de väljs efter lägst kostnad. `val` låser en slot i ett block
+    till en ingrediens: {(blocknummer från 1, "protein"/"kolhydrater"/"grönsaker"): namn}."""
+    val = val or {}
     try:
-        return _planera(ingredienser, profiler, start, plandagar, frukost, antal_mellanmal, vikter, vikter, dagsbudget)
+        return _planera(ingredienser, profiler, start, plandagar, frukost, antal_mellanmal, vikter, vikter, dagsbudget, val)
     except _BudgetFel:
         pass
     try:
         return _planera(
-            ingredienser, profiler, start, plandagar, frukost, antal_mellanmal, Vikter(0, 0, 1), vikter, dagsbudget
+            ingredienser, profiler, start, plandagar, frukost, antal_mellanmal, Vikter(0, 0, 1), vikter, dagsbudget, val
         )
     except _BudgetFel as fel:
         raise PlaneringsFel(
@@ -359,6 +363,7 @@ def _planera(
     vikter_fasta: Vikter,
     vikter_huvudmal: Vikter,
     dagsbudget: float | None,
+    val: dict[tuple[int, str], str],
 ) -> Plan:
     vikt_total = 2 * VIKT_HUVUDMAL + (VIKT_FRUKOST if frukost else 0) + antal_mellanmal * VIKT_MELLANMAL
 
@@ -426,13 +431,21 @@ def _planera(
 
     block = []
     foregaende = None
-    for blockstart in range(0, plandagar, BLOCKDAGAR):
+    for nummer, blockstart in enumerate(range(0, plandagar, BLOCKDAGAR), start=1):
+        valda = {slot: namn for (b, slot), namn in val.items() if b == nummer}
+        kombinationer = [
+            k for k in huvudkombinationer if all(k[HUVUDSLOTAR.index(slot)].namn == namn for slot, namn in valda.items())
+        ]
         lunch = _valj(
-            "lunch", huvudkombinationer, profiler, huvudmal, dimensionera_huvudmal, vikter_huvudmal,
-            undvik=foregaende, max_kr=max_kr,
+            "lunch", kombinationer, profiler, huvudmal, dimensionera_huvudmal, vikter_huvudmal,
+            undvik=None if valda else foregaende, max_kr=max_kr,
         )
         if lunch is None:
-            billigast = _billigaste_kr(huvudkombinationer, profiler, huvudmal, dimensionera_huvudmal)
+            billigast = _billigaste_kr(kombinationer, profiler, huvudmal, dimensionera_huvudmal)
+            if billigast is None and valda:
+                raise PlaneringsFel(
+                    f"Bytet i block {nummer} ({', '.join(valda.values())}) når inte allas mål inom kcal-taket."
+                )
             if billigast is None:
                 raise _fel("lunch och middag")
             raise _BudgetFel(fasta_kr + 2 * billigast)
