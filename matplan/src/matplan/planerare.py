@@ -9,7 +9,7 @@ målen väljs den med bäst viktad poäng på proteintäthet, volym och kostnad.
 
 import math
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from itertools import product
 
 from .katalog import Ingrediens
@@ -152,6 +152,8 @@ class Block:
 class Plan:
     profiler: tuple[Profil, ...]
     block: tuple[Block, ...]
+    priser_hamtade: datetime | None = None
+    utan_butikspris: tuple[str, ...] = ()
 
     @property
     def dagar(self) -> tuple[Dag, ...]:

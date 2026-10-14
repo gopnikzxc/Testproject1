@@ -1,9 +1,13 @@
-"""SQLite-lagring för inställningar och ingredienskatalog."""
+"""SQLite-lagring för inställningar och prishistorik.
+
+Ingredienskatalogen ägs av koden tills Livsmedelsverket kopplas in (#5).
+"""
 
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
-from .katalog import STARTKATALOG, Ingrediens
+from .butiker import Produkt
 
 STANDARDINSTALLNINGAR = {
     "jag.kcal_mal": 2000,
@@ -18,27 +22,34 @@ STANDARDINSTALLNINGAR = {
     "vikt_kostnad": 1,
 }
 
-# Katalogen ägs av koden tills Livsmedelsverket och butikspriser finns
-# (#5, #6), så tabellen byggs om från startkatalogen vid varje start.
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS installningar (
     nyckel TEXT PRIMARY KEY,
     varde REAL NOT NULL
 );
 DROP TABLE IF EXISTS ingredienser;
-CREATE TABLE ingredienser (
-    namn TEXT PRIMARY KEY,
-    kategori TEXT NOT NULL,
-    kcal_100g REAL NOT NULL,
-    protein_100g REAL NOT NULL,
-    kr_per_kg REAL NOT NULL
+CREATE TABLE IF NOT EXISTS hamtningar (
+    id INTEGER PRIMARY KEY,
+    tid TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS priser (
+    hamtning INTEGER NOT NULL REFERENCES hamtningar(id),
+    ingrediens TEXT NOT NULL,
+    butik TEXT NOT NULL,
+    produkt_id TEXT NOT NULL,
+    namn TEXT NOT NULL,
+    varumarke TEXT NOT NULL,
+    forpackning_g REAL,
+    pris_kr REAL NOT NULL,
+    kr_per_kg REAL NOT NULL,
+    erbjudande INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS priser_butik ON priser (butik, hamtning);
 """
 
 
 class Lagring:
-    def __init__(self, sokvag: Path, katalog: tuple[Ingrediens, ...] = STARTKATALOG):
-        self._katalog = katalog
+    def __init__(self, sokvag: Path):
         sokvag = Path(sokvag)
         sokvag.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(sokvag)
@@ -56,13 +67,6 @@ class Lagring:
                 "INSERT OR IGNORE INTO installningar VALUES (?, ?)",
                 STANDARDINSTALLNINGAR.items(),
             )
-            self._db.executemany(
-                "INSERT INTO ingredienser VALUES (?, ?, ?, ?, ?)",
-                [
-                    (i.namn, i.kategori, i.kcal_100g, i.protein_100g, i.kr_per_kg)
-                    for i in self._katalog
-                ],
-            )
 
     def installningar(self) -> dict[str, float]:
         rader = self._db.execute("SELECT nyckel, varde FROM installningar ORDER BY nyckel")
@@ -72,8 +76,39 @@ class Lagring:
         with self._db:
             self._db.execute("UPDATE installningar SET varde = ? WHERE nyckel = ?", (varde, nyckel))
 
-    def ingredienser(self) -> list[Ingrediens]:
+    def spara_hamtning(self, tid: datetime, priser: dict[str, list[Produkt]]) -> None:
+        """Sparar en hämtning: produkter per ingrediens."""
+        with self._db:
+            hamtning = self._db.execute("INSERT INTO hamtningar (tid) VALUES (?)", (tid.isoformat(),)).lastrowid
+            self._db.executemany(
+                "INSERT INTO priser VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    (
+                        hamtning, ingrediens, p.butik, p.produkt_id, p.namn, p.varumarke,
+                        p.forpackning_g, p.pris_kr, p.kr_per_kg, int(p.erbjudande),
+                    )
+                    for ingrediens, produkter in priser.items()
+                    for p in produkter
+                ],
+            )
+
+    def senaste_priser(self) -> list[tuple[str, Produkt, datetime]]:
+        """Varje butiks priser från dess senaste hämtning med data."""
         rader = self._db.execute(
-            "SELECT namn, kategori, kcal_100g, protein_100g, kr_per_kg FROM ingredienser ORDER BY namn"
+            """
+            SELECT p.ingrediens, p.butik, p.produkt_id, p.namn, p.varumarke, p.forpackning_g,
+                   p.pris_kr, p.kr_per_kg, p.erbjudande, h.tid
+            FROM priser p
+            JOIN hamtningar h ON h.id = p.hamtning
+            JOIN (SELECT butik, MAX(hamtning) AS senaste FROM priser GROUP BY butik) s
+              ON s.butik = p.butik AND s.senaste = p.hamtning
+            ORDER BY p.ingrediens, p.butik, p.produkt_id
+            """
         )
-        return [Ingrediens(*rad) for rad in rader]
+        return [
+            (ingrediens, Produkt(butik, pid, namn, marke, forp, pris, krkg, bool(erb)), datetime.fromisoformat(tid))
+            for ingrediens, butik, pid, namn, marke, forp, pris, krkg, erb, tid in rader
+        ]
+
+    def antal_hamtningar(self) -> int:
+        return self._db.execute("SELECT COUNT(*) FROM hamtningar").fetchone()[0]

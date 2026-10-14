@@ -8,6 +8,7 @@ Personal meal planner: high protein, low kcal, high volume, with current grocery
 python3 -m venv .venv
 .venv/bin/pip install -e '.[dev]'
 .venv/bin/matplan plan                              # plan the coming days in 3-day blocks
+.venv/bin/matplan refresh                           # fetch current prices from the stores
 .venv/bin/matplan installningar                     # list settings
 .venv/bin/matplan installningar jag.kcal_mal 1800   # change a setting
 .venv/bin/pytest
@@ -28,4 +29,4 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 
 ## Status
 
-#2, #3 and #4 are done. The catalog still has hand-entered nutrition values and placeholder prices (#5, #6).
+#2, #3 and #4 are done. For #6, the price pipeline is in place: the store interface, `refresh` with cache and spacing, whole-word matching to the cheapest kr/kg, price history and price age. No store module is connected yet, so the plan uses placeholder prices. Nutrition values are still hand-entered (#5).

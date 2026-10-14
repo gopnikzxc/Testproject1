@@ -2,13 +2,14 @@
 
 import argparse
 import os
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
-from .core import Matplan, PlaneringsFel
+from .butiker import Butik
+from .core import Hamtningsresultat, Matplan, PlaneringsFel
 from .planerare import Maltid, Plan
 
 
@@ -16,6 +17,11 @@ def _db_sokvag() -> Path:
     if miljo := os.environ.get("MATPLAN_DB"):
         return Path(miljo)
     return Path.home() / ".local" / "share" / "matplan" / "matplan.db"
+
+
+def _butiker() -> tuple[Butik, ...]:
+    # Butiksadaptrarna (City Gross, ICA Maxi, Willys) läggs till här när de finns.
+    return ()
 
 
 VECKODAGAR = ("mån", "tis", "ons", "tor", "fre", "lör", "sön")
@@ -56,8 +62,28 @@ def _maltidstabell(titel: str, maltid: Maltid, personer: tuple[str, ...], antal:
     return tabell
 
 
+def _visa_prisstatus(konsol: Console, plan: Plan) -> None:
+    if plan.priser_hamtade is None:
+        konsol.print("[yellow]Platshållarpriser – kör `matplan refresh` för butikspriser.[/yellow]")
+        return
+    dagar = (datetime.now() - plan.priser_hamtade).days
+    konsol.print(f"Priser hämtade {plan.priser_hamtade:%Y-%m-%d %H:%M} ({dagar} {'dag' if dagar == 1 else 'dagar'} sedan)")
+    if plan.utan_butikspris:
+        konsol.print(f"[yellow]Platshållarpris för: {', '.join(plan.utan_butikspris)}[/yellow]")
+
+
+def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
+    if not resultat.antal_produkter and not resultat.fel:
+        konsol.print("[yellow]Inga butiker är konfigurerade ännu.[/yellow]")
+    for butik, antal in resultat.antal_produkter.items():
+        konsol.print(f"{butik}: {antal} produkter")
+    for butik, fel in resultat.fel.items():
+        konsol.print(f"[red]{butik}: {fel}[/red]")
+
+
 def _visa_plan(konsol: Console, plan: Plan) -> None:
     personer = tuple(p.namn for p in plan.profiler)
+    _visa_prisstatus(konsol, plan)
     for nummer, block in enumerate(plan.block, start=1):
         dagar = len(block.dagar)
         konsol.print(
@@ -88,14 +114,15 @@ def _visa_plan(konsol: Console, plan: Plan) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="matplan", description="Måltidsplanerare")
     kommandon = parser.add_subparsers(dest="kommando", required=True)
-    kommandon.add_parser("plan", help="Visa ett tredagarsblock")
+    kommandon.add_parser("plan", help="Planera kommande dagar i tredagarsblock")
+    kommandon.add_parser("refresh", help="Hämta aktuella priser från butikerna")
     inst = kommandon.add_parser("installningar", help="Visa eller ändra inställningar")
     inst.add_argument("nyckel", nargs="?")
     inst.add_argument("varde", nargs="?", type=float)
     args = parser.parse_args(argv)
 
     konsol = Console()
-    app = Matplan(_db_sokvag())
+    app = Matplan(_db_sokvag(), butiker=_butiker())
 
     if args.kommando == "plan":
         try:
@@ -104,6 +131,11 @@ def main(argv: list[str] | None = None) -> int:
             konsol.print(f"[red]{fel}[/red]")
             return 1
         return 0
+
+    if args.kommando == "refresh":
+        resultat = app.refresh()
+        _visa_hamtning(konsol, resultat)
+        return 1 if resultat.fel and not resultat.antal_produkter else 0
 
     if args.varde is not None:
         try:
