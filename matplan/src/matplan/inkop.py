@@ -15,6 +15,7 @@ class Kop:
     produkt: Produkt
     antal: int | None  # förpackningar; None betyder lösvikt
     kostnad: float
+    rea: bool = False
 
 
 @dataclass(frozen=True)
@@ -64,19 +65,21 @@ class Inkopslista:
         return sum(rad.platshallar_kr for rad in self.rader)
 
 
-def _kop(produkt: Produkt, gram: int) -> Kop:
+def _kop(produkt: Produkt, gram: int, rea: bool) -> Kop:
     if produkt.forpackning_g:
         antal = math.ceil(gram / produkt.forpackning_g - 1e-9)
-        return Kop(produkt, antal, antal * produkt.pris_kr)
-    return Kop(produkt, None, produkt.kr_per_kg * gram / 1000)
+        return Kop(produkt, antal, antal * produkt.pris_kr, rea)
+    return Kop(produkt, None, produkt.kr_per_kg * gram / 1000, rea)
 
 
 def bygg_lista(
     behov: dict[str, int],
     produkter: dict[str, list[Produkt]],
     platshallarpris: dict[str, float],
+    rea: frozenset[tuple[str, str]] = frozenset(),
 ) -> Inkopslista:
-    """`behov`: gram att köpa per ingrediens. `produkter`: matchade produkter per ingrediens."""
+    """`behov`: gram att köpa per ingrediens. `produkter`: matchade produkter per ingrediens.
+    `rea`: (butik, produkt_id) som är på rea."""
     rader = []
     for ingrediens in sorted(behov):
         gram = behov[ingrediens]
@@ -84,7 +87,7 @@ def bygg_lista(
             continue
         alternativ: dict[str, Kop] = {}
         for produkt in produkter.get(ingrediens, []):
-            kop = _kop(produkt, gram)
+            kop = _kop(produkt, gram, (produkt.butik, produkt.produkt_id) in rea)
             nuvarande = alternativ.get(produkt.butik)
             if nuvarande is None or (kop.kostnad, produkt.kr_per_kg) < (nuvarande.kostnad, nuvarande.produkt.kr_per_kg):
                 alternativ[produkt.butik] = kop

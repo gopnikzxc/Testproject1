@@ -158,6 +158,7 @@ class Plan:
     aktiv: bool = False  # köpt plan som gäller tills en ny begärs
     lagade_block: tuple[int, ...] = ()  # blocknummer (från 1) som redan dragits från lagret
     naringskallor: tuple[str, ...] = ()  # varifrån näringsvärdena kommer, för källhänvisning
+    rea: tuple[str, ...] = ()  # ingredienser vars billigaste produkt är på rea
 
     @property
     def dagar(self) -> tuple[Dag, ...]:

@@ -41,7 +41,9 @@ def _naringskallor() -> tuple[Livsmedelsverket | None, OpenFoodFacts | None]:
     return Livsmedelsverket(http), OpenFoodFacts(http)
 
 
-def _maltidstabell(titel: str, maltid: Maltid, personer: tuple[str, ...], antal: int = 0) -> Table:
+def _maltidstabell(
+    titel: str, maltid: Maltid, personer: tuple[str, ...], antal: int = 0, rea: tuple[str, ...] = ()
+) -> Table:
     """Tabell med en kolumn per person; med antal > 0 även batchens totalmängd."""
     tabell = Table(title=titel, title_justify="left")
     tabell.add_column("Ingrediens")
@@ -54,7 +56,7 @@ def _maltidstabell(titel: str, maltid: Maltid, personer: tuple[str, ...], antal:
     portioner = [maltid.portion(p) for p in personer]
     for i, namn in enumerate(maltid.ingredienser):
         rader = [p.rader[i] for p in portioner]
-        celler = [namn, *(f"{r.gram}" for r in rader)]
+        celler = [f"{namn} [green](rea)[/green]" if namn in rea else namn, *(f"{r.gram}" for r in rader)]
         if antal:
             celler += [f"{sum(r.gram for r in rader) * antal}", f"{sum(r.kr for r in rader) * antal:.2f}"]
         tabell.add_row(*celler)
@@ -126,12 +128,12 @@ def _visa_plan(konsol: Console, app: Matplan, plan: Plan) -> None:
             f"[bold]Block {nummer}: {_datum(block.dagar[0].datum)} – {_datum(block.dagar[-1].datum)} "
             f"({dagar} {'dag' if dagar == 1 else 'dagar'})[/bold]"
         )
-        konsol.print(_maltidstabell("Lunch och middag", block.batch, personer, antal=2 * dagar))
+        konsol.print(_maltidstabell("Lunch och middag", block.batch, personer, antal=2 * dagar, rea=plan.rea))
 
     konsol.print("[bold]Varje dag[/bold]")
     for maltid in plan.dagar[0].maltider:
         if maltid.typ not in ("lunch", "middag"):
-            konsol.print(_maltidstabell(maltid.typ.capitalize(), maltid, personer))
+            konsol.print(_maltidstabell(maltid.typ.capitalize(), maltid, personer, rea=plan.rea))
 
     summor = Table(title="Dagssummor", title_justify="left")
     summor.add_column("Dag")
@@ -171,7 +173,9 @@ def _visa_lista(konsol: Console, app: Matplan, lista: Inkopslista) -> None:
                 tabell.add_row(rad.ingrediens, "[red]saknas i butiken[/red]", "", "", "")
                 continue
             tabell.add_row(
-                rad.ingrediens, f"{kop.produkt.namn} ({kop.produkt.produkt_id})", forpackning(kop),
+                rad.ingrediens,
+                f"{kop.produkt.namn} ({kop.produkt.produkt_id})" + (" [green](rea)[/green]" if kop.rea else ""),
+                forpackning(kop),
                 f"{kop.produkt.kr_per_kg:.2f}", f"{kop.kostnad:.2f}",
             )
         tabell.add_section()

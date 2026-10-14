@@ -25,6 +25,8 @@ STANDARDINSTALLNINGAR = {
     "vikt_kostnad": 1,
     "veckobudget": 1250,
     "manadsbudget": 5000,
+    "rea_procent": 25,
+    "rea_veckor": 8,
 }
 
 _SCHEMA = """
@@ -139,6 +141,25 @@ class Lagring:
             (ingrediens, Produkt(butik, pid, namn, marke, forp, pris, krkg, bool(erb)), datetime.fromisoformat(tid))
             for ingrediens, butik, pid, namn, marke, forp, pris, krkg, erb, tid in rader
         ]
+
+    def prishistorik(self, fran: datetime) -> dict[tuple[str, str], list[tuple[datetime, float]]]:
+        """kr/kg per (butik, produkt) från hämtningar sedan `fran`."""
+        rader = self._db.execute(
+            """
+            SELECT p.butik, p.produkt_id, h.tid, p.kr_per_kg
+            FROM priser p JOIN hamtningar h ON h.id = p.hamtning
+            WHERE h.tid >= ?
+            """,
+            (fran.isoformat(),),
+        )
+        historik: dict[tuple[str, str], list[tuple[datetime, float]]] = {}
+        for butik, produkt_id, tid, kr_per_kg in rader:
+            historik.setdefault((butik, produkt_id), []).append((datetime.fromisoformat(tid), kr_per_kg))
+        return historik
+
+    def senaste_hamtning(self) -> datetime | None:
+        rad = self._db.execute("SELECT MAX(tid) FROM hamtningar").fetchone()
+        return datetime.fromisoformat(rad[0]) if rad[0] else None
 
     def antal_hamtningar(self) -> int:
         return self._db.execute("SELECT COUNT(*) FROM hamtningar").fetchone()[0]
