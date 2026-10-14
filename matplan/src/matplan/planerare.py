@@ -156,6 +156,7 @@ class Plan:
     utan_butikspris: tuple[str, ...] = ()
     varningar: tuple[str, ...] = ()
     aktiv: bool = False  # köpt plan som gäller tills en ny begärs
+    lagade_block: tuple[int, ...] = ()  # blocknummer (från 1) som redan dragits från lagret
 
     @property
     def dagar(self) -> tuple[Dag, ...]:

@@ -147,3 +147,22 @@ def test_cli_kopt_lagat_och_lager(tmp_path, monkeypatch, capsys):
 def test_lagat_okant_block_ger_tydligt_fel(app):
     with pytest.raises(KeyError, match="Block 9 finns inte"):
         app.lagat(START, block=9)
+
+
+def test_lagat_block_kommer_inte_tillbaka_pa_inkopslistan(app):
+    app.kopt(START)
+
+    app.lagat(START, block=1)
+
+    assert app.inkopslista(START).rader == ()
+
+
+def test_samma_block_dras_inte_tva_ganger(app):
+    app.kopt(START)
+    app.lagat(START, block=1)
+    efter_forsta = app.lager()
+
+    varningar = app.lagat(START, block=1)
+
+    assert varningar == ["Block 1 är redan draget från lagret."]
+    assert app.lager() == efter_forsta

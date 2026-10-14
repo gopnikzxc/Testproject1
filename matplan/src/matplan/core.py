@@ -114,7 +114,11 @@ class Matplan:
 
     def _lista(self, plan: Plan) -> Inkopslista:
         lager = self._lagring.lager()
-        behov = {namn: max(gram - int(lager.get(namn, 0)), 0) for namn, gram in plan.total_gram().items()}
+        behov = plan.total_gram()
+        for nummer in plan.lagade_block:
+            for namn, gram in plan.block[nummer - 1].batchmangd.items():
+                behov[namn] -= gram
+        behov = {namn: max(gram - int(lager.get(namn, 0)), 0) for namn, gram in behov.items()}
         return bygg_lista(behov, self._priser().produkter, {i.namn: i.kr_per_kg for i in self._katalog})
 
     def kopt(self, start: date | None = None, butik: str | None = None) -> dict[str, float]:
@@ -146,6 +150,8 @@ class Matplan:
         plan = self.plan(start)
         if not 1 <= block <= len(plan.block):
             raise KeyError(f"Block {block} finns inte; planen har {len(plan.block)} block.")
+        if block in plan.lagade_block:
+            return [f"Block {block} är redan draget från lagret."]
         lager = self._lagring.lager()
         varningar = []
         for namn, gram in plan.block[block - 1].batchmangd.items():
@@ -153,6 +159,10 @@ class Matplan:
             if kvar < 0:
                 varningar.append(f"{namn}: lagret räckte inte ({-kvar:.0f} g saknades)")
             self._lagring.satt_lager(namn, kvar)
+        if plan.aktiv:
+            self._lagring.spara_aktiv_plan(
+                dataclasses.replace(plan, aktiv=False, lagade_block=plan.lagade_block + (block,))
+            )
         return varningar
 
     def lager(self) -> dict[str, float]:
