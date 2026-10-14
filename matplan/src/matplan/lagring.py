@@ -80,6 +80,12 @@ CREATE TABLE IF NOT EXISTS bunkring (
     ingrediens TEXT PRIMARY KEY,
     data BLOB NOT NULL
 );
+CREATE TABLE IF NOT EXISTS plan_val (
+    block INTEGER NOT NULL,
+    slot TEXT NOT NULL,
+    ingrediens TEXT NOT NULL,
+    PRIMARY KEY (block, slot)
+);
 CREATE TABLE IF NOT EXISTS aktiv_plan (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     plan BLOB NOT NULL
@@ -246,3 +252,14 @@ class Lagring:
             except Exception:  # sparad med en äldre version av koden
                 continue
         return resultat
+
+    def plan_val(self) -> dict[tuple[int, str], str]:
+        rader = self._db.execute("SELECT block, slot, ingrediens FROM plan_val")
+        return {(block, slot): ingrediens for block, slot, ingrediens in rader}
+
+    def satt_plan_val(self, val: dict[tuple[int, str], str]) -> None:
+        with self._db:
+            self._db.execute("DELETE FROM plan_val")
+            self._db.executemany(
+                "INSERT INTO plan_val VALUES (?, ?, ?)", [(b, slot, namn) for (b, slot), namn in val.items()]
+            )

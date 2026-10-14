@@ -7,7 +7,7 @@ name = "matplan"
 version = "0.1.0"
 description = "Måltidsplanerare: mycket protein, låg kcal, stor volym, med aktuella matpriser."
 requires-python = ">=3.11"
-dependencies = ["rich>=13"]
+dependencies = ["rich>=13", "textual>=0.80"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]

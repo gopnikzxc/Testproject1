@@ -243,6 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     kommandon = parser.add_subparsers(dest="kommando", required=True)
     plan = kommandon.add_parser("plan", help="Planera kommande dagar i tredagarsblock")
     plan.add_argument("--ny", action="store_true", help="Släpp den köpta planen och planera om")
+    kommandon.add_parser("gui", help="Interaktivt terminalgränssnitt")
     kommandon.add_parser("lista", help="Inköpslista för planen")
     export = kommandon.add_parser("export", help="Spara plan och inköpslista som Markdown")
     export.add_argument("mapp", nargs="?", default="matplan-export")
@@ -257,6 +258,11 @@ def main(argv: list[str] | None = None) -> int:
     kopt = kommandon.add_parser("köpt", aliases=["kopt"], help="Lägg in inköpslistan i lagret")
     kopt.add_argument("--butik", help="Butiken där allt köptes (standard: bästa enskilda butik)")
     kopt.add_argument("--delad", action="store_true", help="Varje vara köptes i sin billigaste butik")
+    byt = kommandon.add_parser("byt", help="Byt en ingrediens i ett blocks lunch och middag")
+    byt.add_argument("block", nargs="?", type=int)
+    byt.add_argument("slot", nargs="?", choices=("protein", "kolhydrater", "grönsaker"))
+    byt.add_argument("ingrediens", nargs="?", help="Utan ingrediens väljs nästa i tur")
+    byt.add_argument("--rensa", action="store_true", help="Ta bort alla byten")
     bunkra = kommandon.add_parser("bunkra", help="Visa bunkringsförslag eller lägg ett på inköpslistan")
     bunkra.add_argument("--ta", metavar="VARA", help="Lägg förslaget för varan på inköpslistan")
     bunkra.add_argument("--ta-bort", metavar="VARA", help="Ta bort varan från bunkringen på inköpslistan")
@@ -283,7 +289,11 @@ def main(argv: list[str] | None = None) -> int:
 def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
     kommando = {"las": "lås", "kopt": "köpt"}.get(args.kommando, args.kommando)
 
-    if kommando == "plan":
+    if kommando == "gui":
+        from .tui import MatplanApp
+
+        MatplanApp(app).run()
+    elif kommando == "plan":
         _visa_plan(konsol, app, app.plan(ny=args.ny))
     elif kommando == "lista":
         _visa_lista(konsol, app, app.inkopslista())
@@ -311,6 +321,17 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
         kopt = app.kopt(butik="delad" if args.delad else args.butik)
         for namn, gram in kopt.items():
             konsol.print(f"+ {namn}: {gram:.0f} g")
+    elif kommando == "byt":
+        if args.rensa:
+            app.rensa_byten()
+            konsol.print("Alla byten borttagna.")
+        elif args.block is None or args.slot is None:
+            for (block, slot), namn in sorted(app.byten().items()):
+                konsol.print(f"Block {block}, {slot}: {namn}")
+        else:
+            plan = app.byt(args.block, args.slot, args.ingrediens)
+            konsol.print(f"Block {args.block}: {', '.join(plan.block[args.block - 1].batch.ingredienser)}")
+            _visa_plan(konsol, app, plan)
     elif kommando == "bunkra":
         if args.ta:
             b = app.acceptera_bunkring(args.ta)
