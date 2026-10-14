@@ -18,6 +18,8 @@ GRAM_PER_AGG = 60
 
 
 class CityGross:
+    nyckel = "citygross"
+
     def __init__(self, http: HttpKlient, butiksnummer: int = YTTERBY, namn: str = "City Gross Ytterby"):
         self._http = http
         self._butiksnummer = butiksnummer

@@ -29,6 +29,8 @@ def _kronor(text: str) -> float:
 
 
 class Willys:
+    nyckel = "willys"
+
     def __init__(self, http: HttpKlient, butik_id: str = KUNGALV, namn: str = "Willys Kungälv"):
         self._http = http
         self._butik_id = butik_id

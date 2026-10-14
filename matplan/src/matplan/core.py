@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Callable
 
 from .bunkra import Bunkring, forslag
-from .butiker import Butik, ButiksFel, Produkt, matchar, ratt_kategori, utesluten
+from .butiker import BUTIKSNYCKLAR, Butik, ButiksFel, Produkt, matchar, ratt_kategori, utesluten
 from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
@@ -313,7 +313,7 @@ class Matplan:
         `framsteg(butik, ingrediens)` anropas före varje ingrediens."""
         resultat = Hamtningsresultat(tid=nu or datetime.now().replace(microsecond=0))
         priser: dict[str, list[Produkt]] = {}
-        for butik in self._butiker:
+        for butik in self._aktiva_butiker():
             try:
                 fynd = {}
                 for ingrediens in self._katalog:
@@ -383,7 +383,10 @@ class Matplan:
         """Senast hämtade matchande produkter, billigast per kg först (före lås)."""
         self._ingrediens(ingrediens)
         return sorted(
-            (p for namn, p, _ in self._lagring.senaste_priser() if namn == ingrediens),
+            (
+                p for namn, p, _ in self._lagring.senaste_priser()
+                if namn == ingrediens and p.butik not in self._avstangda_butiker()
+            ),
             key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id),
         )
 
@@ -415,10 +418,25 @@ class Matplan:
     def lasningar(self) -> dict[tuple[str, str], str]:
         return self._lagring.lasningar()
 
+    def _aktiva_butiker(self) -> tuple[Butik, ...]:
+        """Butiker som är påslagna med inställningen butik_<nyckel> (utan nyckel: alltid på)."""
+        inst = self._lagring.installningar()
+        return tuple(b for b in self._butiker if inst.get(f"butik_{getattr(b, 'nyckel', '')}", 1))
+
+    def _avstangda_butiker(self) -> set[str]:
+        """Namnen på avstängda butiker, så att deras sparade priser ignoreras även
+        när kärnan körs utan butiksadaptrar."""
+        inst = self._lagring.installningar()
+        nycklar = {**BUTIKSNYCKLAR, **{b.namn: b.nyckel for b in self._butiker if hasattr(b, "nyckel")}}
+        return {namn for namn, nyckel in nycklar.items() if not inst.get(f"butik_{nyckel}", 1)}
+
     def _priser(self) -> _Priser:
         produkter: dict[str, list[Produkt]] = {}
         hamtade: datetime | None = None
+        avstangda = self._avstangda_butiker()
         for ingrediens, produkt, tid in self._lagring.senaste_priser():
+            if produkt.butik in avstangda:
+                continue
             produkter.setdefault(ingrediens, []).append(produkt)
             hamtade = tid if hamtade is None else min(hamtade, tid)
 

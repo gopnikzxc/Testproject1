@@ -15,6 +15,10 @@ class ButiksFel(Exception):
     pass
 
 
+# Butiksnamn (som de sparas med priserna) -> nyckel i inställningen butik_<nyckel>.
+BUTIKSNYCKLAR = {"City Gross Ytterby": "citygross", "Willys Kungälv": "willys"}
+
+
 @dataclass(frozen=True)
 class Produkt:
     butik: str
@@ -31,6 +35,7 @@ class Produkt:
 
 class Butik(Protocol):
     namn: str
+    nyckel: str  # kort namn för inställningen butik_<nyckel>, t.ex. "citygross"
 
     def sok(self, sokord: str, butikskategori: tuple[str, ...] = ()) -> list[Produkt]:
         """Produkter som matchar söktermen. `butikskategori` är ingrediensens
