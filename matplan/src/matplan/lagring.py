@@ -6,18 +6,26 @@ from pathlib import Path
 from .katalog import STARTKATALOG, Ingrediens
 
 STANDARDINSTALLNINGAR = {
-    "kcal_mal": 2000,
-    "protein_mal": 180,
+    "jag.kcal_mal": 2000,
+    "jag.protein_mal": 180,
+    "fru.kcal_mal": 1700,
+    "fru.protein_mal": 110,
+    "frukost": 1,
+    "antal_mellanmal": 2,
+    "plandagar": 7,
 }
 
+# Katalogen ägs av koden tills Livsmedelsverket och butikspriser finns
+# (#5, #6), så tabellen byggs om från startkatalogen vid varje start.
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS installningar (
     nyckel TEXT PRIMARY KEY,
     varde REAL NOT NULL
 );
-CREATE TABLE IF NOT EXISTS ingredienser (
+DROP TABLE IF EXISTS ingredienser;
+CREATE TABLE ingredienser (
     namn TEXT PRIMARY KEY,
-    slot TEXT NOT NULL,
+    kategori TEXT NOT NULL,
     kcal_100g REAL NOT NULL,
     protein_100g REAL NOT NULL,
     kr_per_kg REAL NOT NULL
@@ -35,14 +43,19 @@ class Lagring:
 
     def _seeda(self) -> None:
         with self._db:
+            nycklar = tuple(STANDARDINSTALLNINGAR)
+            self._db.execute(
+                f"DELETE FROM installningar WHERE nyckel NOT IN ({','.join('?' * len(nycklar))})",
+                nycklar,
+            )
             self._db.executemany(
                 "INSERT OR IGNORE INTO installningar VALUES (?, ?)",
                 STANDARDINSTALLNINGAR.items(),
             )
             self._db.executemany(
-                "INSERT OR IGNORE INTO ingredienser VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO ingredienser VALUES (?, ?, ?, ?, ?)",
                 [
-                    (i.namn, i.slot, i.kcal_100g, i.protein_100g, i.kr_per_kg)
+                    (i.namn, i.kategori, i.kcal_100g, i.protein_100g, i.kr_per_kg)
                     for i in STARTKATALOG
                 ],
             )
@@ -57,6 +70,6 @@ class Lagring:
 
     def ingredienser(self) -> list[Ingrediens]:
         rader = self._db.execute(
-            "SELECT namn, slot, kcal_100g, protein_100g, kr_per_kg FROM ingredienser ORDER BY namn"
+            "SELECT namn, kategori, kcal_100g, protein_100g, kr_per_kg FROM ingredienser ORDER BY namn"
         )
         return [Ingrediens(*rad) for rad in rader]

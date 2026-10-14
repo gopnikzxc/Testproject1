@@ -3,24 +3,34 @@
 CLI och (senare) Textual-GUI är tunna skal ovanpå den här klassen.
 """
 
+from datetime import date
 from pathlib import Path
 
 from .lagring import Lagring
-from .planerare import Plan, PlaneringsFel, planera
+from .planerare import Plan, PlaneringsFel, Profil, planera
 
-__all__ = ["Matplan", "PlaneringsFel"]
+__all__ = ["Matplan", "PlaneringsFel", "PERSONER"]
+
+# Barnet planeras inte (se spec #1).
+PERSONER = ("jag", "fru")
 
 
 class Matplan:
     def __init__(self, db_sokvag: Path):
         self._lagring = Lagring(db_sokvag)
 
-    def plan(self) -> Plan:
-        installningar = self._lagring.installningar()
+    def plan(self, start: date | None = None) -> Plan:
+        inst = self._lagring.installningar()
+        profiler = tuple(
+            Profil(namn, inst[f"{namn}.kcal_mal"], inst[f"{namn}.protein_mal"]) for namn in PERSONER
+        )
         return planera(
             self._lagring.ingredienser(),
-            kcal_mal=installningar["kcal_mal"],
-            protein_mal=installningar["protein_mal"],
+            profiler,
+            start=start or date.today(),
+            plandagar=int(inst["plandagar"]),
+            frukost=bool(inst["frukost"]),
+            antal_mellanmal=int(inst["antal_mellanmal"]),
         )
 
     def installningar(self) -> dict[str, float]:

@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from datetime import date
 from pathlib import Path
 
 from rich.console import Console
@@ -17,34 +18,65 @@ def _db_sokvag() -> Path:
     return Path.home() / ".local" / "share" / "matplan" / "matplan.db"
 
 
-def _maltidstabell(titel: str, maltid: Maltid) -> Table:
+VECKODAGAR = ("mån", "tis", "ons", "tor", "fre", "lör", "sön")
+MANADER = ("jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec")
+
+
+def _datum(d: date) -> str:
+    return f"{VECKODAGAR[d.weekday()]} {d.day} {MANADER[d.month - 1]}"
+
+
+def _maltidstabell(titel: str, maltid: Maltid, personer: tuple[str, ...], antal: int = 0) -> Table:
+    """Tabell med en kolumn per person; med antal > 0 även batchens totalmängd."""
     tabell = Table(title=titel, title_justify="left")
     tabell.add_column("Ingrediens")
-    tabell.add_column("Gram", justify="right")
-    tabell.add_column("kcal", justify="right")
-    tabell.add_column("Protein (g)", justify="right")
-    tabell.add_column("Pris (kr)", justify="right")
-    for rad in maltid.rader:
-        tabell.add_row(rad.namn, f"{rad.gram}", f"{rad.kcal:.0f}", f"{rad.protein:.1f}", f"{rad.kr:.2f}")
+    for person in personer:
+        tabell.add_column(f"{person.capitalize()} (g)", justify="right")
+    if antal:
+        tabell.add_column("Batch (g)", justify="right")
+        tabell.add_column("Batch (kr)", justify="right")
+
+    portioner = [maltid.portion(p) for p in personer]
+    for i, namn in enumerate(maltid.ingredienser):
+        rader = [p.rader[i] for p in portioner]
+        celler = [namn, *(f"{r.gram}" for r in rader)]
+        if antal:
+            celler += [f"{sum(r.gram for r in rader) * antal}", f"{sum(r.kr for r in rader) * antal:.2f}"]
+        tabell.add_row(*celler)
     tabell.add_section()
-    tabell.add_row("Summa", "", f"{maltid.kcal:.0f}", f"{maltid.protein:.1f}", f"{maltid.kr:.2f}", style="bold")
+    extra = ["", ""] if antal else []
+    tabell.add_row("kcal", *(f"{p.kcal:.0f}" for p in portioner), *extra, style="bold")
+    tabell.add_row("Protein (g)", *(f"{p.protein:.1f}" for p in portioner), *extra, style="bold")
     return tabell
 
 
 def _visa_plan(konsol: Console, plan: Plan) -> None:
-    konsol.print(f"[bold]Block: {len(plan.dagar)} dagar, samma lunch och middag varje dag[/bold]")
-    dag = plan.dagar[0]
-    konsol.print(_maltidstabell("Lunch", dag.lunch))
-    konsol.print(_maltidstabell("Middag", dag.middag))
+    personer = tuple(p.namn for p in plan.profiler)
+    for nummer, block in enumerate(plan.block, start=1):
+        dagar = len(block.dagar)
+        konsol.print(
+            f"[bold]Block {nummer}: {_datum(block.dagar[0].datum)} – {_datum(block.dagar[-1].datum)} "
+            f"({dagar} {'dag' if dagar == 1 else 'dagar'})[/bold]"
+        )
+        konsol.print(_maltidstabell("Lunch och middag", block.batch, personer, antal=2 * dagar))
 
-    dagar = Table(title="Dagssummor", title_justify="left")
-    dagar.add_column("Dag")
-    dagar.add_column("kcal", justify="right")
-    dagar.add_column("Protein (g)", justify="right")
-    dagar.add_column("Pris (kr)", justify="right")
-    for nummer, d in enumerate(plan.dagar, start=1):
-        dagar.add_row(f"Dag {nummer}", f"{d.kcal:.0f}", f"{d.protein:.1f}", f"{d.kr:.2f}")
-    konsol.print(dagar)
+    konsol.print("[bold]Varje dag[/bold]")
+    for maltid in plan.dagar[0].maltider:
+        if maltid.typ not in ("lunch", "middag"):
+            konsol.print(_maltidstabell(maltid.typ.capitalize(), maltid, personer))
+
+    summor = Table(title="Dagssummor", title_justify="left")
+    summor.add_column("Dag")
+    for person in personer:
+        summor.add_column(f"{person.capitalize()} kcal", justify="right")
+        summor.add_column(f"{person.capitalize()} protein (g)", justify="right")
+    summor.add_column("Pris (kr)", justify="right")
+    for dag in plan.dagar:
+        celler = [_datum(dag.datum)]
+        for person in personer:
+            celler += [f"{dag.kcal(person):.0f}", f"{dag.protein(person):.1f}"]
+        summor.add_row(*celler, f"{dag.kr:.2f}")
+    konsol.print(summor)
 
 
 def main(argv: list[str] | None = None) -> int:
