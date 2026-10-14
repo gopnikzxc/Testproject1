@@ -30,8 +30,8 @@ def _city(*extra, fel=None):
     )
 
 
-def _ica(fel=None):
-    return FalskButik("ICA Maxi Kungälv", [_p("ICA Maxi Kungälv", "ica-1", "Kycklingfilé 1,5kg", 79.0)], fel=fel)
+def _willys(fel=None):
+    return FalskButik("Willys Kungälv", [_p("Willys Kungälv", "willys-1", "Kycklingfilé 1,5kg", 79.0)], fel=fel)
 
 
 def _kyckling_kr_per_kg(plan):
@@ -50,13 +50,13 @@ def test_utan_hamtning_anvands_platshallarpriser(tmp_path):
 
 
 def test_refresh_sparar_priser_och_planen_anvander_billigaste_kr_per_kg(tmp_path):
-    app = Matplan(tmp_path / "m.db", butiker=(_city(), _ica()))
+    app = Matplan(tmp_path / "m.db", butiker=(_city(), _willys()))
 
     resultat = app.refresh(nu=NU)
     plan = app.plan(START)
 
     assert resultat.fel == {}
-    assert resultat.antal_produkter == {"City Gross Ytterby": 3, "ICA Maxi Kungälv": 1}
+    assert resultat.antal_produkter == {"City Gross Ytterby": 3, "Willys Kungälv": 1}
     assert plan.priser_hamtade == NU
     assert _kyckling_kr_per_kg(plan) == pytest.approx(79.0)
     assert "Kycklingfilé" not in plan.utan_butikspris
@@ -75,12 +75,12 @@ def test_produkter_som_inte_matchar_hela_ord_ignoreras(tmp_path):
 
 @pytest.mark.parametrize("fel", [ButiksFel("Sidan har ändrats"), KeyError("products")])
 def test_trasig_butik_stoppar_inte_ovriga(tmp_path, fel):
-    app = Matplan(tmp_path / "m.db", butiker=(_city(fel=fel), _ica()))
+    app = Matplan(tmp_path / "m.db", butiker=(_city(fel=fel), _willys()))
 
     resultat = app.refresh(nu=NU)
 
     assert "City Gross Ytterby" in resultat.fel
-    assert resultat.antal_produkter == {"ICA Maxi Kungälv": 1}
+    assert resultat.antal_produkter == {"Willys Kungälv": 1}
     assert _kyckling_kr_per_kg(app.plan(START)) == pytest.approx(79.0)
 
 
@@ -98,8 +98,8 @@ def test_varje_hamtning_sparas_i_historiken_och_senaste_galler(tmp_path):
 
 def test_butik_som_fallerar_behaller_sina_senaste_priser(tmp_path):
     db = tmp_path / "m.db"
-    Matplan(db, butiker=(_city(), _ica())).refresh(nu=NU)
-    app = Matplan(db, butiker=(_city(), _ica(fel=ButiksFel("nere"))))
+    Matplan(db, butiker=(_city(), _willys())).refresh(nu=NU)
+    app = Matplan(db, butiker=(_city(), _willys(fel=ButiksFel("nere"))))
 
     app.refresh(nu=datetime(2026, 10, 21, 9, 0))
     plan = app.plan(START)

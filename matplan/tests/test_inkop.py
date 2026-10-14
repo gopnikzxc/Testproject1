@@ -45,12 +45,12 @@ def test_maltidskostnad_ar_kr_per_kg_ganger_gram(tmp_path):
 
 
 def test_total_per_butik(tmp_path):
-    app = _app(tmp_path, hel_butik("City Gross Ytterby"), hel_butik("ICA Maxi Kungälv", faktor=1.2))
+    app = _app(tmp_path, hel_butik("City Gross Ytterby"), hel_butik("Willys Kungälv", faktor=1.2))
 
     lista = app.inkopslista(START)
 
     totaler = {t.butik: t for t in lista.butiker}
-    assert set(totaler) == {"City Gross Ytterby", "ICA Maxi Kungälv"}
+    assert set(totaler) == {"City Gross Ytterby", "Willys Kungälv"}
     for butik, total in totaler.items():
         assert total.kostnad == pytest.approx(sum(r.alternativ[butik].kostnad for r in lista.rader))
         assert total.saknas == ()
@@ -59,26 +59,26 @@ def test_total_per_butik(tmp_path):
 
 def test_uppdelat_valjer_billigaste_butik_per_vara_och_visar_besparing(tmp_path):
     city = hel_butik("City Gross Ytterby", undantag={"Kycklingfilé": 140})
-    ica = hel_butik("ICA Maxi Kungälv", faktor=1.1, undantag={"Kycklingfilé": 70})
-    app = _app(tmp_path, city, ica)
+    willys = hel_butik("Willys Kungälv", faktor=1.1, undantag={"Kycklingfilé": 70})
+    app = _app(tmp_path, city, willys)
 
     lista = app.inkopslista(START)
 
     kyckling = next(r for r in lista.rader if r.ingrediens == "Kycklingfilé")
-    assert kyckling.billigast[0] == "ICA Maxi Kungälv"
+    assert kyckling.billigast[0] == "Willys Kungälv"
     assert lista.delad_kostnad == pytest.approx(sum(min(k.kostnad for k in r.alternativ.values()) for r in lista.rader))
     assert lista.besparing == pytest.approx(lista.basta_butik.kostnad - lista.delad_kostnad)
     assert lista.besparing > 0
 
 
 def test_butik_som_saknar_varor_rankas_efter_kompletta(tmp_path):
-    planerat = sorted(_app(tmp_path / "a", hel_butik("ICA Maxi Kungälv")).plan(START).total_gram())[:2]
+    planerat = sorted(_app(tmp_path / "a", hel_butik("Willys Kungälv")).plan(START).total_gram())[:2]
     city = hel_butik("City Gross Ytterby", undantag={namn: None for namn in planerat})
-    app = _app(tmp_path / "b", city, hel_butik("ICA Maxi Kungälv"))
+    app = _app(tmp_path / "b", city, hel_butik("Willys Kungälv"))
 
     lista = app.inkopslista(START)
 
-    assert lista.basta_butik.butik == "ICA Maxi Kungälv"
+    assert lista.basta_butik.butik == "Willys Kungälv"
     city_total = next(t for t in lista.butiker if t.butik == "City Gross Ytterby")
     assert set(city_total.saknas) == set(planerat)
     assert city_total.kostnad < lista.basta_butik.kostnad  # billigare men ofullständig
@@ -93,7 +93,7 @@ def test_utan_butikspriser_listas_gram_med_platshallarpris(tmp_path):
 
 
 def test_markdown_export_innehaller_plan_och_lista(tmp_path):
-    app = _app(tmp_path, hel_butik("City Gross Ytterby"), hel_butik("ICA Maxi Kungälv", faktor=1.2))
+    app = _app(tmp_path, hel_butik("City Gross Ytterby"), hel_butik("Willys Kungälv", faktor=1.2))
 
     planfil, listfil = exportera(app.plan(START), app.inkopslista(START), tmp_path / "ut")
 
