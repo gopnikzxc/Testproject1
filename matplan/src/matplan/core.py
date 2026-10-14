@@ -6,8 +6,9 @@ CLI och (senare) Textual-GUI är tunna skal ovanpå den här klassen.
 from datetime import date
 from pathlib import Path
 
+from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
-from .planerare import Plan, PlaneringsFel, Profil, planera
+from .planerare import Plan, PlaneringsFel, Profil, Vikter, planera
 
 __all__ = ["Matplan", "PlaneringsFel", "PERSONER"]
 
@@ -16,8 +17,8 @@ PERSONER = ("jag", "fru")
 
 
 class Matplan:
-    def __init__(self, db_sokvag: Path):
-        self._lagring = Lagring(db_sokvag)
+    def __init__(self, db_sokvag: Path, katalog: tuple[Ingrediens, ...] = STARTKATALOG):
+        self._lagring = Lagring(db_sokvag, katalog)
 
     def plan(self, start: date | None = None) -> Plan:
         inst = self._lagring.installningar()
@@ -31,6 +32,7 @@ class Matplan:
             plandagar=int(inst["plandagar"]),
             frukost=bool(inst["frukost"]),
             antal_mellanmal=int(inst["antal_mellanmal"]),
+            vikter=Vikter(inst["vikt_protein"], inst["vikt_volym"], inst["vikt_kostnad"]),
         )
 
     def installningar(self) -> dict[str, float]:

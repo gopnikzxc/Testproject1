@@ -24,7 +24,8 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 | `frukost` | 1 | Breakfast on (1) or off (0) |
 | `antal_mellanmal` | 2 | Snacks per day |
 | `plandagar` | 7 | How many days ahead to plan |
+| `vikt_protein` / `vikt_volym` / `vikt_kostnad` | 1 / 1 / 1 | How much protein density (g/100 kcal), volume (g/kcal) and low cost (kr/g protein) count when picking meals |
 
 ## Status
 
-#2 and #3 are done. The catalog still has hand-entered nutrition values and placeholder prices, and meals are picked by cost alone until the scoring in #4.
+#2, #3 and #4 are done. The catalog still has hand-entered nutrition values and placeholder prices (#5, #6).

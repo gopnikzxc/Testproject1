@@ -13,6 +13,9 @@ STANDARDINSTALLNINGAR = {
     "frukost": 1,
     "antal_mellanmal": 2,
     "plandagar": 7,
+    "vikt_protein": 1,
+    "vikt_volym": 1,
+    "vikt_kostnad": 1,
 }
 
 # Katalogen ägs av koden tills Livsmedelsverket och butikspriser finns
@@ -34,7 +37,8 @@ CREATE TABLE ingredienser (
 
 
 class Lagring:
-    def __init__(self, sokvag: Path):
+    def __init__(self, sokvag: Path, katalog: tuple[Ingrediens, ...] = STARTKATALOG):
+        self._katalog = katalog
         sokvag = Path(sokvag)
         sokvag.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(sokvag)
@@ -56,7 +60,7 @@ class Lagring:
                 "INSERT INTO ingredienser VALUES (?, ?, ?, ?, ?)",
                 [
                     (i.namn, i.kategori, i.kcal_100g, i.protein_100g, i.kr_per_kg)
-                    for i in STARTKATALOG
+                    for i in self._katalog
                 ],
             )
 

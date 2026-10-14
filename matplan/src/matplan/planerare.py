@@ -3,8 +3,8 @@
 En dag är frukost, lunch, middag och mellanmål. Lunch och middag är samma
 batch under ett rullande tredagarsblock. Alla äter samma ingredienser, men
 varje person får egna gram som når personens kcal-tak och proteingolv.
-Frukost och mellanmål är likadana varje dag. Poängsättning kommer i #4;
-tills dess väljs den billigaste kombinationen.
+Frukost och mellanmål är likadana varje dag. Bland kombinationerna som når
+målen väljs den med bäst viktad poäng på proteintäthet, volym och kostnad.
 """
 
 import math
@@ -27,6 +27,15 @@ VIKT_MELLANMAL = 1
 
 class PlaneringsFel(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class Vikter:
+    """Hur mycket proteintäthet, volym och låg kostnad väger vid valet."""
+
+    protein: float = 1.0
+    volym: float = 1.0
+    kostnad: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -83,6 +92,21 @@ class Maltid:
     @property
     def kr(self) -> float:
         return sum(p.kr for p in self.portioner)
+
+    @property
+    def protein_tathet(self) -> float:
+        """Gram protein per 100 kcal, över alla portioner."""
+        return 100 * sum(p.protein for p in self.portioner) / sum(p.kcal for p in self.portioner)
+
+    @property
+    def volym(self) -> float:
+        """Gram mat per kcal, över alla portioner."""
+        gram = sum(r.gram for p in self.portioner for r in p.rader)
+        return gram / sum(p.kcal for p in self.portioner)
+
+    @property
+    def kr_per_g_protein(self) -> float:
+        return self.kr / sum(p.protein for p in self.portioner)
 
 
 @dataclass(frozen=True)
@@ -209,15 +233,37 @@ def _kategori(ingredienser: list[Ingrediens], *kategorier: str) -> list[Ingredie
     return sorted((i for i in ingredienser if i.kategori in kategorier), key=lambda i: i.namn)
 
 
+def _rangordna(kandidater: list[Maltid], vikter: Vikter) -> list[Maltid]:
+    """Bäst först. Varje mått normaliseras till 0..1 över kandidaterna och
+    vägs ihop; låg kostnad räknas som bra."""
+
+    def normalisera(varden: list[float]) -> list[float]:
+        lagst, hogst = min(varden), max(varden)
+        if hogst - lagst < 1e-12:
+            return [0.0] * len(varden)
+        return [(v - lagst) / (hogst - lagst) for v in varden]
+
+    tathet = normalisera([m.protein_tathet for m in kandidater])
+    volym = normalisera([m.volym for m in kandidater])
+    kostnad = normalisera([m.kr_per_g_protein for m in kandidater])
+    poang = [
+        vikter.protein * t + vikter.volym * v - vikter.kostnad * k
+        for t, v, k in zip(tathet, volym, kostnad)
+    ]
+    ordning = sorted(range(len(kandidater)), key=lambda i: (-round(poang[i], 9), kandidater[i].ingredienser))
+    return [kandidater[i] for i in ordning]
+
+
 def _valj(
     typ: str,
     kombinationer,
     profiler: tuple[Profil, ...],
     mal: dict[str, tuple[float, float]],
     dimensionera,
+    vikter: Vikter,
     undvik: tuple[str, ...] | None = None,
 ) -> Maltid | None:
-    """Billigaste kombinationen som går att dimensionera för alla personer."""
+    """Kombinationen med bäst poäng bland dem som går att dimensionera för alla."""
     kandidater = []
     for kombination in kombinationer:
         portioner = []
@@ -232,7 +278,7 @@ def _valj(
         kandidater = [m for m in kandidater if m.ingredienser != undvik]
     if not kandidater:
         return None
-    return min(kandidater, key=lambda m: (round(m.kr, 6), m.ingredienser))
+    return _rangordna(kandidater, vikter)[0]
 
 
 def _fel(maltid: str) -> PlaneringsFel:
@@ -248,6 +294,7 @@ def planera(
     plandagar: int = 7,
     frukost: bool = True,
     antal_mellanmal: int = 2,
+    vikter: Vikter = Vikter(),
 ) -> Plan:
     vikt_total = 2 * VIKT_HUVUDMAL + (VIKT_FRUKOST if frukost else 0) + antal_mellanmal * VIKT_MELLANMAL
 
@@ -263,20 +310,31 @@ def planera(
             profiler,
             {p.namn: andel(p, VIKT_FRUKOST) for p in profiler},
             lambda k, kcal, protein: _dimensionera(*k, BAR_GRAM, ("protein", "flingor", "bär"), kcal, protein),
+            vikter,
         )
         if frukost_maltid is None:
             raise _fel("frukost")
         fasta_maltider.append(frukost_maltid)
 
-    # Mellanmål: de mejerivaror som ger mest protein per kcal, en per mellanmål.
-    mejeri = sorted(_kategori(ingredienser, "mejeri"), key=lambda i: (-i.protein_100g / i.kcal_100g, i.namn))
+    # Mellanmål: en mejerivara var, i poängordning, dimensionerad till sin kcal-andel.
+    mellanmal = _rangordna(
+        [
+            Maltid(
+                "mellanmål",
+                tuple(
+                    Portion(
+                        profil.namn,
+                        (_rad(vara, "mellanmål", _avrunda_ned(andel(profil, VIKT_MELLANMAL)[0] / vara.kcal_100g * 100)),),
+                    )
+                    for profil in profiler
+                ),
+            )
+            for vara in _kategori(ingredienser, "mejeri")
+        ],
+        vikter,
+    ) if antal_mellanmal else []
     for nummer in range(antal_mellanmal):
-        vara = mejeri[nummer % len(mejeri)]
-        portioner = []
-        for profil in profiler:
-            kcal, _ = andel(profil, VIKT_MELLANMAL)
-            portioner.append(Portion(profil.namn, (_rad(vara, "mellanmål", _avrunda_ned(kcal / vara.kcal_100g * 100)),)))
-        fasta_maltider.append(Maltid(f"mellanmål {nummer + 1}", tuple(portioner)))
+        fasta_maltider.append(Maltid(f"mellanmål {nummer + 1}", mellanmal[nummer % len(mellanmal)].portioner))
 
     # Lunch och middag tar det som är kvar av dagens kcal, hälften var. Proteingolvet
     # är det som saknas till dagens mål, men minst måltidens egen andel, så att
@@ -290,7 +348,7 @@ def planera(
 
     huvudkombinationer = list(
         product(
-            _kategori(ingredienser, "protein", "mejeri"),
+            _kategori(ingredienser, "protein"),
             _kategori(ingredienser, "kolhydrater"),
             _kategori(ingredienser, "grönsaker"),
         )
@@ -304,6 +362,7 @@ def planera(
             profiler,
             huvudmal,
             lambda k, kcal, protein: _dimensionera(*k, GRONSAKER_GRAM, ("protein", "kolhydrater", "grönsaker"), kcal, protein),
+            vikter,
             undvik=foregaende,
         )
         if lunch is None:

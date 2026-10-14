@@ -47,6 +47,12 @@ def _maltidstabell(titel: str, maltid: Maltid, personer: tuple[str, ...], antal:
     extra = ["", ""] if antal else []
     tabell.add_row("kcal", *(f"{p.kcal:.0f}" for p in portioner), *extra, style="bold")
     tabell.add_row("Protein (g)", *(f"{p.protein:.1f}" for p in portioner), *extra, style="bold")
+    tabell.add_row("Pris (kr)", *(f"{p.kr:.2f}" for p in portioner), *extra, style="bold")
+    tabell.caption = (
+        f"Protein {maltid.protein_tathet:.1f} g/100 kcal · Volym {maltid.volym:.2f} g/kcal · "
+        f"{maltid.kr_per_g_protein:.2f} kr/g protein"
+    )
+    tabell.caption_justify = "left"
     return tabell
 
 
