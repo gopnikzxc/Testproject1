@@ -5,7 +5,7 @@ CLI och (senare) Textual-GUI är tunna skal ovanpå den här klassen.
 
 import dataclasses
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Callable
 
@@ -15,6 +15,7 @@ from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
 from .naring import Livsmedelsverket, NaringsFel, OpenFoodFacts
 from .planerare import Plan, PlaneringsFel, Profil, Vikter, planera
+from .rea import ar_rea
 
 __all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD"]
 
@@ -38,6 +39,7 @@ class _Priser:
     produkter: dict[str, list[Produkt]]  # efter produktlås
     hamtade: datetime | None
     varningar: tuple[str, ...]
+    rea: frozenset[tuple[str, str]] = frozenset()  # (butik, produkt_id) som är rea just nu
 
 
 class Matplan:
@@ -70,7 +72,9 @@ class Matplan:
     def _ny_plan(self, start: date | None) -> Plan:
         priser = self._priser()
         katalog = self._butikspriser(priser)
+        rea = self._rea_ingredienser(priser)
         lager = self._lagring.lager()
+        vantar, notiser = self._farska_rea_fore_lager(katalog, rea, lager)
 
         def med_lager(andel_att_kopa: dict[str, float]) -> tuple[Ingrediens, ...]:
             return tuple(
@@ -79,12 +83,14 @@ class Matplan:
 
         # Första varvet: allt i lager är gratis. Andra varvet: lagervaror kostar bara
         # för den del av behovet som lagret inte täcker.
-        plan = self._planera(med_lager({namn: 0.0 for namn in lager}), start)
+        # Lagervaror som får vänta på ett färskt erbjudande kostar sitt vanliga pris.
+        plan = self._planera(med_lager({namn: 0.0 for namn in lager if namn not in vantar}), start)
         if lager:
             behov = plan.total_gram()
             andel = {
                 namn: max(behov[namn] - gram, 0) / behov[namn] if behov.get(namn) else 0.0
                 for namn, gram in lager.items()
+                if namn not in vantar
             }
             plan = self._planera(med_lager(andel), start)
 
@@ -92,9 +98,44 @@ class Matplan:
         anvanda = plan.total_gram()
         kallor = tuple(sorted({n.kalla for namn, n in self._lagring.naring().items() if namn in anvanda}))
         return dataclasses.replace(
-            plan, priser_hamtade=priser.hamtade, utan_butikspris=utan_pris, varningar=priser.varningar,
-            naringskallor=kallor,
+            plan, priser_hamtade=priser.hamtade, utan_butikspris=utan_pris,
+            varningar=priser.varningar + notiser, naringskallor=kallor, rea=rea,
         )
+
+    def _farska_rea_fore_lager(
+        self, katalog: tuple[Ingrediens, ...], rea: tuple[str, ...], lager: dict[str, float]
+    ) -> tuple[set[str], tuple[str, ...]]:
+        """Frysta och torra proteinkällor i lager som får vänta, eftersom en färsk
+        proteinkälla på rea ger mer protein per krona än lagervaran till ordinarie
+        pris. De håller sig, det färska erbjudandet gör det inte."""
+
+        def protein_per_kr(i: Ingrediens) -> float:
+            return i.protein_100g * 10 / i.kr_per_kg if i.kr_per_kg > 0 else 0.0
+
+        per_namn = {i.namn: i for i in katalog}
+        farska = [
+            per_namn[namn] for namn in rea
+            if per_namn[namn].forvaring == "kyl" and per_namn[namn].kategori in ("protein", "mejeri")
+        ]
+        vantar, notiser = set(), []
+        for namn in lager:
+            lagrad = per_namn.get(namn)
+            if lagrad is None or lagrad.forvaring == "kyl" or lagrad.kategori not in ("protein", "mejeri"):
+                continue
+            battre = [f for f in farska if protein_per_kr(f) > protein_per_kr(lagrad)]
+            if battre:
+                vantar.add(namn)
+                notiser.append(f"{battre[0].namn} är på rea och går före {namn} i lagret, som håller sig.")
+        return vantar, tuple(notiser)
+
+    def _rea_ingredienser(self, priser: _Priser) -> tuple[str, ...]:
+        """Ingredienser vars billigaste produkt per kg är på rea."""
+        rea = []
+        for namn, produkter in sorted(priser.produkter.items()):
+            billigast = min(produkter, key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id))
+            if (billigast.butik, billigast.produkt_id) in priser.rea:
+                rea.append(namn)
+        return tuple(rea)
 
     def _planera(self, katalog: tuple[Ingrediens, ...], start: date | None) -> Plan:
         inst = self._lagring.installningar()
@@ -130,7 +171,8 @@ class Matplan:
             for namn, gram in plan.block[nummer - 1].batchmangd.items():
                 behov[namn] -= gram
         behov = {namn: max(gram - int(lager.get(namn, 0)), 0) for namn, gram in behov.items()}
-        return bygg_lista(behov, self._priser().produkter, {i.namn: i.kr_per_kg for i in self._katalog})
+        priser = self._priser()
+        return bygg_lista(behov, priser.produkter, {i.namn: i.kr_per_kg for i in self._katalog}, priser.rea)
 
     def kopt(self, start: date | None = None, butik: str | None = None) -> dict[str, float]:
         """Lägger in inköpslistan i lagret och gör planen aktiv, så att den inte
@@ -296,7 +338,23 @@ class Matplan:
                 )
                 continue
             produkter[ingrediens] = [p for p in produkter[ingrediens] if p.butik != butik] + last
-        return _Priser(produkter, hamtade, tuple(varningar))
+        return _Priser(produkter, hamtade, tuple(varningar), self._rea(produkter))
+
+    def _rea(self, produkter: dict[str, list[Produkt]]) -> frozenset[tuple[str, str]]:
+        """Produkter vars pris är minst rea_procent under medianen de senaste
+        rea_veckor veckorna; med för lite historik gäller butikens erbjudandeflagga."""
+        senaste = self._lagring.senaste_hamtning()
+        if senaste is None:
+            return frozenset()
+        inst = self._lagring.installningar()
+        historik = self._lagring.prishistorik(senaste - timedelta(weeks=inst["rea_veckor"]))
+        grans = inst["rea_procent"] / 100
+        return frozenset(
+            (p.butik, p.produkt_id)
+            for lista in produkter.values()
+            for p in lista
+            if ar_rea(historik.get((p.butik, p.produkt_id), []), p.kr_per_kg, p.erbjudande, grans)
+        )
 
     def _butikspriser(self, priser: _Priser) -> tuple[Ingrediens, ...]:
         """Katalogen med billigaste butikspris per kg; platshållarpris där butikspris saknas."""

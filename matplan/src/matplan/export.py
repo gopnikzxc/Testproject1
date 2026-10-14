@@ -8,14 +8,16 @@ from .planerare import Maltid, Plan
 from .text import datum, forpackning
 
 
-def _maltid(rubrik: str, maltid: Maltid, personer: tuple[str, ...], antal: int = 0) -> list[str]:
+def _maltid(
+    rubrik: str, maltid: Maltid, personer: tuple[str, ...], antal: int = 0, rea: tuple[str, ...] = ()
+) -> list[str]:
     huvud = ["Ingrediens", *(f"{p.capitalize()} (g)" for p in personer)]
     if antal:
         huvud += ["Batch (g)"]
     rader = [f"### {rubrik}", "", "| " + " | ".join(huvud) + " |", "|" + "---|" * len(huvud)]
     portioner = [maltid.portion(p) for p in personer]
     for i, namn in enumerate(maltid.ingredienser):
-        celler = [namn, *(str(p.rader[i].gram) for p in portioner)]
+        celler = [f"{namn} (rea)" if namn in rea else namn, *(str(p.rader[i].gram) for p in portioner)]
         if antal:
             celler.append(str(sum(p.rader[i].gram for p in portioner) * antal))
         rader.append("| " + " | ".join(celler) + " |")
@@ -33,11 +35,11 @@ def plan_markdown(plan: Plan) -> str:
     for nummer, block in enumerate(plan.block, start=1):
         dagar = len(block.dagar)
         rader += [f"## Block {nummer}: {datum(block.dagar[0].datum)} – {datum(block.dagar[-1].datum)}", ""]
-        rader += _maltid("Lunch och middag", block.batch, personer, antal=2 * dagar)
+        rader += _maltid("Lunch och middag", block.batch, personer, antal=2 * dagar, rea=plan.rea)
     rader += ["## Varje dag", ""]
     for maltid in plan.dagar[0].maltider:
         if maltid.typ not in ("lunch", "middag"):
-            rader += _maltid(maltid.typ.capitalize(), maltid, personer)
+            rader += _maltid(maltid.typ.capitalize(), maltid, personer, rea=plan.rea)
     rader.append(f"Planerad kostnad: {plan.kr:.0f} kr ({plan.kr_per_dag:.0f} kr/dag)")
     rader += ["", *(f"_{KALLHANVISNING[kalla]}_" for kalla in plan.naringskallor)]
     return "\n".join(rader) + "\n"
@@ -68,7 +70,8 @@ def lista_markdown(lista: Inkopslista) -> str:
 
 
 def _kopstext(ingrediens: str, kop) -> str:
-    return f"{ingrediens}: {forpackning(kop)} {kop.produkt.namn} ({kop.kostnad:.2f} kr, {kop.produkt.kr_per_kg:.2f} kr/kg)"
+    rea = " – rea" if kop.rea else ""
+    return f"{ingrediens}: {forpackning(kop)} {kop.produkt.namn} ({kop.kostnad:.2f} kr, {kop.produkt.kr_per_kg:.2f} kr/kg{rea})"
 
 
 def exportera(plan: Plan, lista: Inkopslista, katalog: Path) -> tuple[Path, Path]:

@@ -23,17 +23,20 @@ def produkt(butik, pid, namn, kr_per_kg, forpackning_g=1000.0, erbjudande=False)
     return Produkt(butik, pid, namn, "Märke", forpackning_g, pris, kr_per_kg, erbjudande)
 
 
-def hel_butik(namn, faktor=1.0, undantag=None, forpackning_g=1000.0):
+def hel_butik(namn, faktor=1.0, undantag=None, forpackning_g=1000.0, katalog=STARTKATALOG, erbjudande=()):
     """En butik med en 1 kg-produkt per katalogingrediens, prissatt som
     platshållarpriset gånger `faktor`. `undantag` ger egna kr/kg per ingrediens
-    (None = saknas i butiken)."""
+    (None = saknas i butiken). `erbjudande` är ingredienser vars produkt har
+    butikens erbjudandeflagga."""
     undantag = undantag or {}
     produkter = []
-    for i in STARTKATALOG:
+    for i in katalog:
         kr = undantag.get(i.namn, i.kr_per_kg * faktor)
         if kr is None:
             continue
-        produkter.append(produkt(namn, f"{namn[:3]}-{i.namn}", f"{i.sokord[0].capitalize()} {namn}", kr, forpackning_g))
+        produkter.append(
+            produkt(namn, f"{namn[:3]}-{i.namn}", f"{i.sokord[0].capitalize()} {namn}", kr, forpackning_g, i.namn in erbjudande)
+        )
     return FalskButik(namn, produkter)
 
 
