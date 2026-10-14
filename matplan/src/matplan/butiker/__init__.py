@@ -25,6 +25,8 @@ class Produkt:
     pris_kr: float
     kr_per_kg: float
     erbjudande: bool = False
+    kategori: str = ""  # butikens egen kategori, t.ex. "Fryst / Frysta bär & frukt"
+    beskrivning: str = ""  # t.ex. "500G 1,5% KESO"; används vid matchning men sparas inte
 
 
 class Butik(Protocol):
@@ -37,7 +39,24 @@ def _ord(text: str) -> set[str]:
     return set(re.findall(r"\w+", text.casefold()))
 
 
-def matchar(produktnamn: str, sokord: tuple[str, ...]) -> bool:
-    """Sant om alla ord i någon sökterm finns som hela ord i produktnamnet."""
+def matchar(produktnamn: str, sokord: tuple[str, ...], beskrivning: str = "") -> bool:
+    """Sant om någon sökterm passar: termens första ord finns som helt ord i
+    produktnamnet och alla dess ord finns i namnet eller beskrivningen (där
+    t.ex. fetthalten står). Kravet på första ordet i namnet hindrar att en
+    smoothie med "blåbär" i beskrivningen blir blåbär."""
     namnord = _ord(produktnamn)
-    return any(_ord(term) <= namnord for term in sokord)
+    allaord = namnord | _ord(beskrivning)
+    for term in sokord:
+        termord = re.findall(r"\w+", term.casefold())
+        if termord and termord[0] in namnord and set(termord) <= allaord:
+            return True
+    return False
+
+
+def ratt_kategori(produktkategori: str, butikskategori: tuple[str, ...]) -> bool:
+    """Sant om butikens kategori innehåller något av orden, eller om något av
+    dem saknas (butiken anger ingen kategori eller ingrediensen kräver ingen)."""
+    if not produktkategori or not butikskategori:
+        return True
+    kategori = produktkategori.casefold()
+    return any(ord in kategori for ord in butikskategori)

@@ -1,3 +1,5 @@
+import pytest
+
 from matplan.butiker import Produkt, matchar
 from matplan.katalog import STARTKATALOG
 
@@ -33,3 +35,12 @@ def hel_butik(namn, faktor=1.0, undantag=None, forpackning_g=1000.0):
             continue
         produkter.append(produkt(namn, f"{namn[:3]}-{i.namn}", f"{i.sokord[0].capitalize()} {namn}", kr, forpackning_g))
     return FalskButik(namn, produkter)
+
+
+@pytest.fixture(autouse=True)
+def inga_riktiga_butiker(monkeypatch):
+    """CLI-tester får aldrig anropa riktiga butiker; tester som vill ha butiker sätter egna."""
+    import matplan.cli
+
+    monkeypatch.setattr(matplan.cli, "_butiker", lambda: ())
+    monkeypatch.setattr(matplan.cli, "_naringskallor", lambda: (None, None))

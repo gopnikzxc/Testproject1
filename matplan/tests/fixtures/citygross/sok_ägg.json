@@ -1,0 +1,204 @@
+{
+ "searchResults": {
+  "products": [
+   {
+    "id": "101187348_ST",
+    "gtin": "7311041072226",
+    "name": "Ägg 24P Frigående Inomhus",
+    "subtitle": "24P MEDIUM GARANT",
+    "brand": "GARANT",
+    "superCategory": "Mejeri, ost & ägg",
+    "category": "Ägg",
+    "descriptiveSize": "24P",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 24000
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": true,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 59.95,
+       "unit": "PCE",
+       "comparativePrice": 2.5,
+       "comparativePriceUnit": "PCE"
+      },
+      "ordinaryPrice": {
+       "price": 59.95,
+       "unit": "PCE",
+       "comparativePrice": 2.5,
+       "comparativePriceUnit": "PCE"
+      },
+      "memberPrice": null,
+      "promotions": [
+       {
+        "id": "1656692,2500318677",
+        "type": "1",
+        "campaignTypeId": "0",
+        "name": "2500318677",
+        "couponId": null,
+        "effectType": "ItemsTotal",
+        "membersOnly": false,
+        "from": "2026-10-12T00:00:00+02:00",
+        "to": "2026-10-18T23:59:00+02:00",
+        "minAmount": null,
+        "minQuantity": 1,
+        "value": 51.95,
+        "maxAppliedPerReceipt": 0,
+        "displayLowestPriceLast30Days": false,
+        "priceDetails": {
+         "price": 51.95,
+         "unit": "PCE",
+         "comparativePrice": 2.16,
+         "comparativePriceUnit": "PCE"
+        }
+       }
+      ],
+      "activePromotion": {
+       "id": "1656692,2500318677",
+       "type": "1",
+       "campaignTypeId": "0",
+       "name": "2500318677",
+       "couponId": null,
+       "effectType": "ItemsTotal",
+       "membersOnly": false,
+       "from": "2026-10-12T00:00:00+02:00",
+       "to": "2026-10-18T23:59:00+02:00",
+       "minAmount": null,
+       "minQuantity": 1,
+       "value": 51.95,
+       "maxAppliedPerReceipt": 0,
+       "displayLowestPriceLast30Days": false,
+       "priceDetails": {
+        "price": 51.95,
+        "unit": "PCE",
+        "comparativePrice": 2.16,
+        "comparativePriceUnit": "PCE"
+       }
+      },
+      "hasDiscount": true,
+      "hasPromotion": true,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "101836357_ST",
+    "gtin": "7311043027781",
+    "name": "Ägg 15P Frigående Inne",
+    "subtitle": "15P MEDIUM/LARGE GARANT",
+    "brand": "GARANT",
+    "superCategory": "Mejeri, ost & ägg",
+    "category": "Ägg",
+    "descriptiveSize": "15P",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 15000
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 40.95,
+       "unit": "PCE",
+       "comparativePrice": 2.73,
+       "comparativePriceUnit": "PCE"
+      },
+      "ordinaryPrice": {
+       "price": 40.95,
+       "unit": "PCE",
+       "comparativePrice": 2.73,
+       "comparativePriceUnit": "PCE"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "101591614_ST",
+    "gtin": "7311043011742",
+    "name": "Ägg Frigående Inomhus",
+    "subtitle": "18-PACK MEDIUM / LARGE GARANT",
+    "brand": "GARANT",
+    "superCategory": "Mejeri, ost & ägg",
+    "category": "Ägg",
+    "descriptiveSize": "18P",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 18000
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 51.95,
+       "unit": "PCE",
+       "comparativePrice": 2.89,
+       "comparativePriceUnit": "PCE"
+      },
+      "ordinaryPrice": {
+       "price": 51.95,
+       "unit": "PCE",
+       "comparativePrice": 2.89,
+       "comparativePriceUnit": "PCE"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   }
+  ],
+  "cateredMeals": [],
+  "recipes": [],
+  "pages": [],
+  "categories": [],
+  "stores": [],
+  "facets": [],
+  "totalCount": 329,
+  "pageSize": 50,
+  "currentPage": 0,
+  "totalPages": 7
+ }
+}

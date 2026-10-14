@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .butiker import Produkt
+from .naring import Naring
 from .planerare import Plan
 
 STANDARDINSTALLNINGAR = {
@@ -58,6 +59,17 @@ CREATE TABLE IF NOT EXISTS las (
 CREATE TABLE IF NOT EXISTS lager (
     ingrediens TEXT PRIMARY KEY,
     gram REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS naring (
+    ingrediens TEXT PRIMARY KEY,
+    kalla TEXT NOT NULL,
+    kcal REAL NOT NULL,
+    protein REAL NOT NULL,
+    fett REAL,
+    kolhydrater REAL,
+    fiber REAL,
+    vatten REAL,
+    hamtad TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS aktiv_plan (
     id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -169,3 +181,19 @@ class Lagring:
     def rensa_aktiv_plan(self) -> None:
         with self._db:
             self._db.execute("DELETE FROM aktiv_plan")
+
+    def spara_naring(self, ingrediens: str, naring: Naring, tid: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO naring VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    ingrediens, naring.kalla, naring.kcal, naring.protein, naring.fett,
+                    naring.kolhydrater, naring.fiber, naring.vatten, tid.isoformat(),
+                ),
+            )
+
+    def naring(self) -> dict[str, Naring]:
+        rader = self._db.execute(
+            "SELECT ingrediens, kalla, kcal, protein, fett, kolhydrater, fiber, vatten FROM naring"
+        )
+        return {rad[0]: Naring(*rad[1:]) for rad in rader}

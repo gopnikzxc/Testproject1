@@ -1,0 +1,300 @@
+{
+ "searchResults": {
+  "products": [
+   {
+    "id": "101222270_ST",
+    "gtin": "7340083434716",
+    "name": "Kycklingfilé Svensk",
+    "subtitle": "1KG FRYST GARANT",
+    "brand": "GARANT",
+    "superCategory": "Fryst",
+    "category": "Fryst kött, fågel, burgare mm",
+    "descriptiveSize": "1KG",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 1000
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 89.95,
+       "unit": "PCE",
+       "comparativePrice": 89.95,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 89.95,
+       "unit": "PCE",
+       "comparativePrice": 89.95,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "101813806_KG",
+    "gtin": "2359778800007",
+    "name": "Kyckling Bröstfilé",
+    "subtitle": "CA900G GARANT",
+    "brand": "GARANT",
+    "superCategory": "Kött & fågel",
+    "category": "Kyckling & fågel",
+    "descriptiveSize": "CA900G",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 900
+    },
+    "sellingUnitOfMeasure": 2,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": true,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 122,
+       "unit": "KGM",
+       "comparativePrice": 122,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 122,
+       "unit": "KGM",
+       "comparativePrice": 122,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [
+       {
+        "id": "1656683,2500317727",
+        "type": "5",
+        "campaignTypeId": "0",
+        "name": "2500317727",
+        "couponId": null,
+        "effectType": "PriceChangeAll",
+        "membersOnly": false,
+        "from": "2026-10-12T00:00:00+02:00",
+        "to": "2026-10-18T23:59:00+02:00",
+        "minAmount": null,
+        "minQuantity": 1,
+        "value": 99.95,
+        "maxAppliedPerReceipt": 0,
+        "displayLowestPriceLast30Days": false,
+        "priceDetails": {
+         "price": 99.95,
+         "unit": "KGM",
+         "comparativePrice": 99.95,
+         "comparativePriceUnit": "KGM"
+        }
+       }
+      ],
+      "activePromotion": {
+       "id": "1656683,2500317727",
+       "type": "5",
+       "campaignTypeId": "0",
+       "name": "2500317727",
+       "couponId": null,
+       "effectType": "PriceChangeAll",
+       "membersOnly": false,
+       "from": "2026-10-12T00:00:00+02:00",
+       "to": "2026-10-18T23:59:00+02:00",
+       "minAmount": null,
+       "minQuantity": 1,
+       "value": 99.95,
+       "maxAppliedPerReceipt": 0,
+       "displayLowestPriceLast30Days": false,
+       "priceDetails": {
+        "price": 99.95,
+        "unit": "KGM",
+        "comparativePrice": 99.95,
+        "comparativePriceUnit": "KGM"
+       }
+      },
+      "hasDiscount": true,
+      "hasPromotion": true,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "101266948_ST",
+    "gtin": "7340083434976",
+    "name": "Kyckling Filé",
+    "subtitle": "2KG FRYST ELDORADO",
+    "brand": "ELDORADO",
+    "superCategory": "Fryst",
+    "category": "Fryst kött, fågel, burgare mm",
+    "descriptiveSize": "2KG",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 2000
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 139,
+       "unit": "PCE",
+       "comparativePrice": 69.5,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 139,
+       "unit": "PCE",
+       "comparativePrice": 69.5,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "101782553_ST",
+    "gtin": "7300322547003",
+    "name": "Kycklinglårfilè Kyckling",
+    "subtitle": "700G KRONFÅGEL",
+    "brand": "KRONFÅGEL",
+    "superCategory": "Fryst",
+    "category": "Fryst kött, fågel, burgare mm",
+    "descriptiveSize": "700G",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 700
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 71.95,
+       "unit": "PCE",
+       "comparativePrice": 102.79,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 71.95,
+       "unit": "PCE",
+       "comparativePrice": 102.79,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   },
+   {
+    "id": "101266950_ST",
+    "gtin": "7340083410956",
+    "name": "Kyckling Bröstfilé",
+    "subtitle": "900G FRYST ELDORADO",
+    "brand": "ELDORADO",
+    "superCategory": "Fryst",
+    "category": "Fryst kött, fågel, burgare mm",
+    "descriptiveSize": "900G",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 900
+    },
+    "sellingUnitOfMeasure": 1,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2026-10-14",
+     "p_availableto": "9999-12-30",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 69.95,
+       "unit": "PCE",
+       "comparativePrice": 77.72,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 69.95,
+       "unit": "PCE",
+       "comparativePrice": 77.72,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 1,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3240"
+    }
+   }
+  ],
+  "cateredMeals": [],
+  "recipes": [],
+  "pages": [],
+  "categories": [],
+  "stores": [],
+  "facets": [],
+  "totalCount": 67,
+  "pageSize": 50,
+  "currentPage": 0,
+  "totalPages": 2
+ }
+}
