@@ -9,7 +9,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Callable
 
-from .butiker import Butik, ButiksFel, Produkt, matchar, ratt_kategori
+from .butiker import Butik, ButiksFel, Produkt, matchar, ratt_kategori, utesluten
 from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
@@ -200,11 +200,12 @@ class Matplan:
                         framsteg(butik.namn, ingrediens.namn)
                     traffar = {}
                     for term in ingrediens.sokord:
-                        for produkt in butik.sok(term):
+                        for produkt in butik.sok(term, ingrediens.butikskategori):
                             if (
                                 produkt.kr_per_kg > 0
                                 and matchar(produkt.namn, ingrediens.sokord, produkt.beskrivning)
                                 and ratt_kategori(produkt.kategori, ingrediens.butikskategori)
+                                and not utesluten(produkt.namn, ingrediens.uteslut)
                             ):
                                 traffar[produkt.produkt_id] = produkt
                     fynd[ingrediens.namn] = list(traffar.values())

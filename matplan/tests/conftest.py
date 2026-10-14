@@ -12,7 +12,7 @@ class FalskButik:
         self._produkter = produkter
         self._fel = fel
 
-    def sok(self, sokord):
+    def sok(self, sokord, butikskategori=()):
         if self._fel:
             raise self._fel
         return [p for p in self._produkter if matchar(p.namn, (sokord,))]

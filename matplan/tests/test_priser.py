@@ -154,7 +154,7 @@ def test_butikskategori_sorterar_bort_fel_sorts_produkter(tmp_path):
 
     app.refresh(nu=NU)
 
-    assert [p.produkt_id for p in app.produkter("Nötfärs 10 %")] == ["farser"]
+    assert [p.produkt_id for p in app.produkter("Nötfärs 10–12 %")] == ["farser"]
     assert [p.produkt_id for p in app.produkter("Blåbär, frysta")] == ["frysta"]
 
 
@@ -183,3 +183,18 @@ def test_matchning_med_beskrivning():
     assert not matchar("Grekisk Yoghurt Naturell", ("grekisk yoghurt naturell 0",), "1KG 10% ARLA")
     # Första ordet måste stå i namnet, inte bara i beskrivningen.
     assert not matchar("Smoothie Jordgubb Banan", ("blåbär",), "750G JORDGUBB BANAN BLÅBÄR")
+
+
+def test_uteslutna_ord_sorterar_bort_blandprodukter(tmp_path):
+    butik = FalskButik(
+        "Willys Kungälv",
+        [
+            Produkt("Willys Kungälv", "smoothie", "Smoothie Jordgubb Banan Blåbär Fryst", "", 500, 27.9, 55.8, kategori="Frukt & Bär"),
+            Produkt("Willys Kungälv", "blabar", "Blåbär Odlade Fryst", "", 500, 34.9, 69.8, kategori="Frukt & Bär"),
+        ],
+    )
+    app = Matplan(tmp_path / "m.db", butiker=(butik,))
+
+    app.refresh(nu=NU)
+
+    assert [p.produkt_id for p in app.produkter("Blåbär, frysta")] == ["blabar"]

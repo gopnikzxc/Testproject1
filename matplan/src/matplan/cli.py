@@ -10,6 +10,7 @@ from rich.table import Table
 
 from .butiker import Butik
 from .butiker.citygross import CityGross
+from .butiker.willys import Willys
 from .core import DAGAR_PER_MANAD, Hamtningsresultat, Matplan, PlaneringsFel
 from .export import exportera
 from .http import HttpKlient
@@ -31,8 +32,8 @@ def _http() -> HttpKlient:
 
 
 def _butiker() -> tuple[Butik, ...]:
-    # Willys läggs till här när dess adapter finns (#12).
-    return (CityGross(_http()),)
+    http = _http()
+    return (CityGross(http), Willys(http))
 
 
 def _naringskallor() -> tuple[Livsmedelsverket | None, OpenFoodFacts | None]:

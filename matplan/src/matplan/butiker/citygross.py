@@ -23,7 +23,8 @@ class CityGross:
         self._butiksnummer = butiksnummer
         self.namn = namn
 
-    def sok(self, sokord: str) -> list[Produkt]:
+    def sok(self, sokord: str, butikskategori: tuple[str, ...] = ()) -> list[Produkt]:
+        # Sökträffarna har egen kategori; filtreringen sker i kärnan.
         try:
             svar = self._http.hamta_json(
                 f"{BAS}/Loop54/search",

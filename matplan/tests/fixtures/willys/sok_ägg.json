@@ -1,0 +1,454 @@
+{
+ "results": [
+  {
+   "potentialPromotions": [],
+   "inactivePotentialPromotions": [],
+   "isDrugProduct": false,
+   "comparePrice": "2,50 kr",
+   "averageWeight": null,
+   "depositPrice": "",
+   "comparePriceUnit": "st",
+   "solrSearchScore": null,
+   "energyDeclaration": null,
+   "ranking": null,
+   "image": {
+    "imageType": "PRIMARY",
+    "format": "product",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_200/07311043019120_C1L1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "newsSplashProduct": false,
+   "notAllowedAnonymous": false,
+   "notAllowedB2b": false,
+   "pickupProductLine2": "GARANT, 24p",
+   "priceNoUnit": "59,90",
+   "priceUnit": "kr/st",
+   "productLine2": "GARANT, 24p",
+   "googleAnalyticsCategory": "",
+   "gdprTrackingIncompliant": false,
+   "savingsAmount": null,
+   "hazards": [],
+   "nicotineMedicalProduct": false,
+   "precautionaryStatements": [],
+   "nonEkoProduct": false,
+   "showGoodPriceIcon": false,
+   "tobaccoFreeNicotineProduct": false,
+   "tobaccoProduct": false,
+   "price": "59,90 kr",
+   "priceValue": 59.9,
+   "labels": [
+    "swedish_flag",
+    "from_sweden"
+   ],
+   "incrementValue": 1.0,
+   "bargainProduct": false,
+   "productBasketType": {
+    "code": "ST",
+    "type": "ProductBasketTypeEnum"
+   },
+   "addToCartMessage": "",
+   "displayVolume": "24p",
+   "outOfStock": false,
+   "online": true,
+   "addToCartDisabled": false,
+   "code": "101718037_ST",
+   "maxOrderQuantity": null,
+   "thumbnail": {
+    "imageType": "PRIMARY",
+    "format": "thumbnail",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_100/07311043019120_C1L1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "manufacturer": "Garant",
+   "seoDescription": "",
+   "seoTitle": "",
+   "name": "Ägg 24p Frigående Inomhus Medium"
+  },
+  {
+   "potentialPromotions": [],
+   "inactivePotentialPromotions": [],
+   "isDrugProduct": false,
+   "comparePrice": "2,66 kr",
+   "averageWeight": null,
+   "depositPrice": "",
+   "comparePriceUnit": "st",
+   "solrSearchScore": null,
+   "energyDeclaration": null,
+   "ranking": null,
+   "image": {
+    "imageType": "PRIMARY",
+    "format": "product",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_200/07311043011742_C1L1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "newsSplashProduct": false,
+   "notAllowedAnonymous": false,
+   "notAllowedB2b": false,
+   "pickupProductLine2": "GARANT, 18p",
+   "priceNoUnit": "47,90",
+   "priceUnit": "kr/st",
+   "productLine2": "GARANT, 18p",
+   "googleAnalyticsCategory": "",
+   "gdprTrackingIncompliant": false,
+   "savingsAmount": null,
+   "hazards": [],
+   "nicotineMedicalProduct": false,
+   "precautionaryStatements": [],
+   "nonEkoProduct": false,
+   "showGoodPriceIcon": false,
+   "tobaccoFreeNicotineProduct": false,
+   "tobaccoProduct": false,
+   "price": "47,90 kr",
+   "priceValue": 47.9,
+   "labels": [
+    "swedish_flag",
+    "from_sweden"
+   ],
+   "incrementValue": 1.0,
+   "bargainProduct": false,
+   "productBasketType": {
+    "code": "ST",
+    "type": "ProductBasketTypeEnum"
+   },
+   "addToCartMessage": "",
+   "displayVolume": "18p",
+   "outOfStock": false,
+   "online": true,
+   "addToCartDisabled": false,
+   "code": "101591614_ST",
+   "maxOrderQuantity": null,
+   "thumbnail": {
+    "imageType": "PRIMARY",
+    "format": "thumbnail",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_100/07311043011742_C1L1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "manufacturer": "Garant",
+   "seoDescription": "",
+   "seoTitle": "",
+   "name": "Ägg 18p Frigående Inomhus Medium / Large"
+  },
+  {
+   "potentialPromotions": [],
+   "inactivePotentialPromotions": [],
+   "isDrugProduct": false,
+   "comparePrice": "3,79 kr",
+   "averageWeight": null,
+   "depositPrice": "",
+   "comparePriceUnit": "st",
+   "solrSearchScore": null,
+   "energyDeclaration": null,
+   "ranking": null,
+   "image": {
+    "imageType": "PRIMARY",
+    "format": "product",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_200/07340083434624_C1L1_s05",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "newsSplashProduct": false,
+   "notAllowedAnonymous": false,
+   "notAllowedB2b": false,
+   "pickupProductLine2": "GARANT, 10p",
+   "priceNoUnit": "37,90",
+   "priceUnit": "kr/st",
+   "productLine2": "GARANT, 10p",
+   "googleAnalyticsCategory": "",
+   "gdprTrackingIncompliant": false,
+   "savingsAmount": null,
+   "hazards": [],
+   "nicotineMedicalProduct": false,
+   "precautionaryStatements": [],
+   "nonEkoProduct": false,
+   "showGoodPriceIcon": false,
+   "tobaccoFreeNicotineProduct": false,
+   "tobaccoProduct": false,
+   "price": "37,90 kr",
+   "priceValue": 37.9,
+   "labels": [
+    "swedish_flag",
+    "from_sweden"
+   ],
+   "incrementValue": 1.0,
+   "bargainProduct": false,
+   "productBasketType": {
+    "code": "ST",
+    "type": "ProductBasketTypeEnum"
+   },
+   "addToCartMessage": "",
+   "displayVolume": "10p",
+   "outOfStock": false,
+   "online": true,
+   "addToCartDisabled": false,
+   "code": "101218667_ST",
+   "maxOrderQuantity": null,
+   "thumbnail": {
+    "imageType": "PRIMARY",
+    "format": "thumbnail",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_100/07340083434624_C1L1_s05",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "manufacturer": "Garant",
+   "seoDescription": "",
+   "seoTitle": "",
+   "name": "Ägg 10p Frigående Utomhus Medium/large"
+  }
+ ],
+ "sorts": [
+  {
+   "code": "relevance",
+   "name": "Relevans",
+   "selected": true
+  },
+  {
+   "code": "ranking_int:asc",
+   "name": "Populärast",
+   "selected": false
+  },
+  {
+   "code": "name_text_sv:asc",
+   "name": "A – Ö",
+   "selected": false
+  },
+  {
+   "code": "name_text_sv:desc",
+   "name": "Ö – A",
+   "selected": false
+  },
+  {
+   "code": "price:asc",
+   "name": "Pris (Billigast - Dyrast)",
+   "selected": false
+  },
+  {
+   "code": "price:desc",
+   "name": "Pris (Dyrast - Billigast)",
+   "selected": false
+  },
+  {
+   "code": "compareprice:asc",
+   "name": "Jämförpris (Billigast - Dyrast)",
+   "selected": false
+  },
+  {
+   "code": "compareprice:desc",
+   "name": "Jämförpris (Dyrast - Billigast)",
+   "selected": false
+  }
+ ],
+ "pagination": {
+  "pageSize": 100,
+  "currentPage": 0,
+  "sort": null,
+  "numberOfPages": 1,
+  "totalNumberOfResults": 36,
+  "allProductsInCategoriesCount": 0,
+  "allProductsInSearchCount": 36
+ },
+ "relatedResultsPagination": {
+  "pageSize": 100,
+  "currentPage": 0,
+  "sort": null,
+  "numberOfPages": 0,
+  "totalNumberOfResults": 0,
+  "allProductsInCategoriesCount": 0,
+  "allProductsInSearchCount": 0
+ },
+ "currentQuery": null,
+ "facets": [
+  {
+   "code": "category",
+   "name": "category",
+   "priority": 0,
+   "category": true,
+   "multiSelect": true,
+   "visible": true,
+   "topValues": null,
+   "values": [
+    {
+     "code": "Asien",
+     "name": "Asien",
+     "count": 2,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3AAsien",
+      "query": {
+       "value": "ägg:category:Asien",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Barntillbehör",
+     "name": "Barntillbehör",
+     "count": 1,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3ABarntillbeh%C3%B6r",
+      "query": {
+       "value": "ägg:category:Barntillbehör",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Disk & städ",
+     "name": "Disk & städ",
+     "count": 1,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3ADisk+%26+st%C3%A4d",
+      "query": {
+       "value": "ägg:category:Disk & städ",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Godis",
+     "name": "Godis",
+     "count": 2,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3AGodis",
+      "query": {
+       "value": "ägg:category:Godis",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Konserver & burkar",
+     "name": "Konserver & burkar",
+     "count": 1,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3AKonserver+%26+burkar",
+      "query": {
+       "value": "ägg:category:Konserver & burkar",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Köket",
+     "name": "Köket",
+     "count": 2,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3AK%C3%B6ket",
+      "query": {
+       "value": "ägg:category:Köket",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Kött",
+     "name": "Kött",
+     "count": 2,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3AK%C3%B6tt",
+      "query": {
+       "value": "ägg:category:Kött",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Pasta, ris & matgryn",
+     "name": "Pasta, ris & matgryn",
+     "count": 2,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3APasta%2C+ris+%26+matgryn",
+      "query": {
+       "value": "ägg:category:Pasta, ris & matgryn",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Portionsrätter & snabblagat",
+     "name": "Portionsrätter & snabblagat",
+     "count": 1,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3APortionsr%C3%A4tter+%26+snabblagat",
+      "query": {
+       "value": "ägg:category:Portionsrätter & snabblagat",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Pålägg",
+     "name": "Pålägg",
+     "count": 2,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3AP%C3%A5l%C3%A4gg",
+      "query": {
+       "value": "ägg:category:Pålägg",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Ägg",
+     "name": "Ägg",
+     "count": 20,
+     "query": {
+      "url": "/search?q=%C3%A4gg%3Acategory%3A%C3%84gg",
+      "query": {
+       "value": "ägg:category:Ägg",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    }
+   ]
+  }
+ ],
+ "freeTextSearch": "ägg",
+ "categoryCode": null,
+ "keywordRedirectUrl": null,
+ "spellingSuggestion": null,
+ "categoryName": null,
+ "customSuggestion": null,
+ "usedQuery": null
+}

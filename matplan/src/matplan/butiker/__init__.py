@@ -32,7 +32,11 @@ class Produkt:
 class Butik(Protocol):
     namn: str
 
-    def sok(self, sokord: str) -> list[Produkt]: ...
+    def sok(self, sokord: str, butikskategori: tuple[str, ...] = ()) -> list[Produkt]:
+        """Produkter som matchar söktermen. `butikskategori` är ingrediensens
+        kategoriord; en butik vars sökträffar saknar kategori kan använda dem
+        för att filtrera på sin sida (se Willys)."""
+        ...
 
 
 def _ord(text: str) -> set[str]:
@@ -51,6 +55,11 @@ def matchar(produktnamn: str, sokord: tuple[str, ...], beskrivning: str = "") ->
         if termord and termord[0] in namnord and set(termord) <= allaord:
             return True
     return False
+
+
+def utesluten(produktnamn: str, uteslut: tuple[str, ...]) -> bool:
+    """Sant om något av orden står som helt ord i produktnamnet."""
+    return bool(_ord(produktnamn) & {o.casefold() for o in uteslut})
 
 
 def ratt_kategori(produktkategori: str, butikskategori: tuple[str, ...]) -> bool:

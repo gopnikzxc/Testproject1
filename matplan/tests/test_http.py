@@ -69,3 +69,30 @@ def test_ogiltigt_svar_cachas_inte(tmp_path, klocka):
             klient.hamta_json("https://x.se/a")
 
     assert len(anrop) == 2
+
+
+def test_skicka_cachas_inte_men_pausas(tmp_path, klocka):
+    anrop = []
+
+    def transport(url, headers, metod="GET"):
+        anrop.append((metod, url))
+        return b'"ok"'
+
+    klient = HttpKlient(tmp_path / "cache", paus_s=2, transport=transport, sov=klocka.sov, klocka=klocka)
+
+    klient.skicka("https://x.se/token", metod="GET")
+    klient.skicka("https://x.se/token", metod="GET")
+    klient.skicka("https://x.se/valj", headers={"X": "1"})
+
+    assert anrop == [("GET", "https://x.se/token"), ("GET", "https://x.se/token"), ("POST", "https://x.se/valj")]
+    assert klocka.sovningar == [2, 2]
+
+
+def test_cachenyckel_skiljer_svar_for_samma_url(tmp_path, klocka):
+    klient, anrop = _klient(tmp_path, klocka, b"{}")
+
+    klient.hamta_json("https://x.se/sok", cachenyckel="butik-1")
+    klient.hamta_json("https://x.se/sok", cachenyckel="butik-2")
+    klient.hamta_json("https://x.se/sok", cachenyckel="butik-1")
+
+    assert len(anrop) == 2
