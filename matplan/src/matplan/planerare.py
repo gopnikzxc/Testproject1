@@ -154,10 +154,30 @@ class Plan:
     block: tuple[Block, ...]
     priser_hamtade: datetime | None = None
     utan_butikspris: tuple[str, ...] = ()
+    varningar: tuple[str, ...] = ()
+    aktiv: bool = False  # köpt plan som gäller tills en ny begärs
 
     @property
     def dagar(self) -> tuple[Dag, ...]:
         return tuple(dag for block in self.block for dag in block.dagar)
+
+    @property
+    def kr(self) -> float:
+        return sum(dag.kr for dag in self.dagar)
+
+    @property
+    def kr_per_dag(self) -> float:
+        return self.kr / len(self.dagar)
+
+    def total_gram(self) -> dict[str, int]:
+        """Gram per ingrediens för hela planen, alla måltider och personer."""
+        mangd: dict[str, int] = {}
+        for dag in self.dagar:
+            for maltid in dag.maltider:
+                for portion in maltid.portioner:
+                    for rad in portion.rader:
+                        mangd[rad.namn] = mangd.get(rad.namn, 0) + rad.gram
+        return mangd
 
 
 def _rad(ingrediens: Ingrediens, slot: str, gram: int) -> Rad:
@@ -264,8 +284,10 @@ def _valj(
     dimensionera,
     vikter: Vikter,
     undvik: tuple[str, ...] | None = None,
+    max_kr: float | None = None,
 ) -> Maltid | None:
-    """Kombinationen med bäst poäng bland dem som går att dimensionera för alla."""
+    """Kombinationen med bäst poäng bland dem som går att dimensionera för alla
+    och, om `max_kr` anges, inte kostar mer än så."""
     kandidater = []
     for kombination in kombinationer:
         portioner = []
@@ -276,6 +298,8 @@ def _valj(
             portioner.append(Portion(profil.namn, rader))
         else:
             kandidater.append(Maltid(typ, tuple(portioner)))
+    if max_kr is not None:
+        kandidater = [m for m in kandidater if m.kr <= max_kr + 1e-9]
     if undvik is not None and any(m.ingredienser != undvik for m in kandidater):
         kandidater = [m for m in kandidater if m.ingredienser != undvik]
     if not kandidater:
@@ -297,6 +321,41 @@ def planera(
     frukost: bool = True,
     antal_mellanmal: int = 2,
     vikter: Vikter = Vikter(),
+    dagsbudget: float | None = None,
+) -> Plan:
+    """Planerar `plandagar` dagar. Med `dagsbudget` får ingen dag kosta mer än så;
+    räcker inte budgeten med poängvalda frukostar och mellanmål görs ett nytt
+    försök där de väljs efter lägst kostnad."""
+    try:
+        return _planera(ingredienser, profiler, start, plandagar, frukost, antal_mellanmal, vikter, vikter, dagsbudget)
+    except _BudgetFel:
+        pass
+    try:
+        return _planera(
+            ingredienser, profiler, start, plandagar, frukost, antal_mellanmal, Vikter(0, 0, 1), vikter, dagsbudget
+        )
+    except _BudgetFel as fel:
+        raise PlaneringsFel(
+            f"Budgeten räcker inte: {dagsbudget:.0f} kr/dag, men billigaste möjliga dag "
+            f"som når allas mål kostar {fel.billigaste_dag:.0f} kr."
+        ) from None
+
+
+class _BudgetFel(Exception):
+    def __init__(self, billigaste_dag: float):
+        self.billigaste_dag = billigaste_dag
+
+
+def _planera(
+    ingredienser: list[Ingrediens],
+    profiler: tuple[Profil, ...],
+    start: date,
+    plandagar: int,
+    frukost: bool,
+    antal_mellanmal: int,
+    vikter_fasta: Vikter,
+    vikter_huvudmal: Vikter,
+    dagsbudget: float | None,
 ) -> Plan:
     vikt_total = 2 * VIKT_HUVUDMAL + (VIKT_FRUKOST if frukost else 0) + antal_mellanmal * VIKT_MELLANMAL
 
@@ -312,7 +371,7 @@ def planera(
             profiler,
             {p.namn: andel(p, VIKT_FRUKOST) for p in profiler},
             lambda k, kcal, protein: _dimensionera(*k, BAR_GRAM, ("protein", "flingor", "bär"), kcal, protein),
-            vikter,
+            vikter_fasta,
         )
         if frukost_maltid is None:
             raise _fel("frukost")
@@ -333,7 +392,7 @@ def planera(
             )
             for vara in _kategori(ingredienser, "mejeri")
         ],
-        vikter,
+        vikter_fasta,
     ) if antal_mellanmal else []
     for nummer in range(antal_mellanmal):
         fasta_maltider.append(Maltid(f"mellanmål {nummer + 1}", mellanmal[nummer % len(mellanmal)].portioner))
@@ -355,20 +414,25 @@ def planera(
             _kategori(ingredienser, "grönsaker"),
         )
     )
+
+    def dimensionera_huvudmal(k, kcal, protein):
+        return _dimensionera(*k, GRONSAKER_GRAM, ("protein", "kolhydrater", "grönsaker"), kcal, protein)
+
+    fasta_kr = sum(m.kr for m in fasta_maltider)
+    max_kr = None if dagsbudget is None else (dagsbudget - fasta_kr) / 2
+
     block = []
     foregaende = None
     for blockstart in range(0, plandagar, BLOCKDAGAR):
         lunch = _valj(
-            "lunch",
-            huvudkombinationer,
-            profiler,
-            huvudmal,
-            lambda k, kcal, protein: _dimensionera(*k, GRONSAKER_GRAM, ("protein", "kolhydrater", "grönsaker"), kcal, protein),
-            vikter,
-            undvik=foregaende,
+            "lunch", huvudkombinationer, profiler, huvudmal, dimensionera_huvudmal, vikter_huvudmal,
+            undvik=foregaende, max_kr=max_kr,
         )
         if lunch is None:
-            raise _fel("lunch och middag")
+            billigast = _billigaste_kr(huvudkombinationer, profiler, huvudmal, dimensionera_huvudmal)
+            if billigast is None:
+                raise _fel("lunch och middag")
+            raise _BudgetFel(fasta_kr + 2 * billigast)
         middag = Maltid("middag", lunch.portioner)
         foregaende = lunch.ingredienser
 
@@ -379,3 +443,13 @@ def planera(
         block.append(Block(tuple(dagar)))
 
     return Plan(profiler=profiler, block=tuple(block))
+
+
+def _billigaste_kr(kombinationer, profiler, mal, dimensionera) -> float | None:
+    """Lägsta kostnad för en måltid som når allas mål, eller None om ingen gör det."""
+    priser = []
+    for kombination in kombinationer:
+        portioner = [dimensionera(kombination, *mal[p.namn]) for p in profiler]
+        if all(r is not None for r in portioner):
+            priser.append(sum(r.kr for rader in portioner for r in rader))
+    return min(priser, default=None)

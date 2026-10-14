@@ -1,13 +1,15 @@
-"""SQLite-lagring för inställningar och prishistorik.
+"""SQLite-lagring för inställningar, prishistorik, produktlås och lager.
 
 Ingredienskatalogen ägs av koden tills Livsmedelsverket kopplas in (#5).
 """
 
+import pickle
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
 from .butiker import Produkt
+from .planerare import Plan
 
 STANDARDINSTALLNINGAR = {
     "jag.kcal_mal": 2000,
@@ -20,6 +22,8 @@ STANDARDINSTALLNINGAR = {
     "vikt_protein": 1,
     "vikt_volym": 1,
     "vikt_kostnad": 1,
+    "veckobudget": 1250,
+    "manadsbudget": 5000,
 }
 
 _SCHEMA = """
@@ -45,6 +49,20 @@ CREATE TABLE IF NOT EXISTS priser (
     erbjudande INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS priser_butik ON priser (butik, hamtning);
+CREATE TABLE IF NOT EXISTS las (
+    ingrediens TEXT NOT NULL,
+    butik TEXT NOT NULL,
+    produkt_id TEXT NOT NULL,
+    PRIMARY KEY (ingrediens, butik)
+);
+CREATE TABLE IF NOT EXISTS lager (
+    ingrediens TEXT PRIMARY KEY,
+    gram REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS aktiv_plan (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    plan BLOB NOT NULL
+);
 """
 
 
@@ -112,3 +130,42 @@ class Lagring:
 
     def antal_hamtningar(self) -> int:
         return self._db.execute("SELECT COUNT(*) FROM hamtningar").fetchone()[0]
+
+    def las(self, ingrediens: str, butik: str, produkt_id: str) -> None:
+        with self._db:
+            self._db.execute("INSERT OR REPLACE INTO las VALUES (?, ?, ?)", (ingrediens, butik, produkt_id))
+
+    def ta_bort_las(self, ingrediens: str, butik: str) -> bool:
+        with self._db:
+            return self._db.execute(
+                "DELETE FROM las WHERE ingrediens = ? AND butik = ?", (ingrediens, butik)
+            ).rowcount > 0
+
+    def lasningar(self) -> dict[tuple[str, str], str]:
+        rader = self._db.execute("SELECT ingrediens, butik, produkt_id FROM las ORDER BY ingrediens, butik")
+        return {(ingrediens, butik): pid for ingrediens, butik, pid in rader}
+
+    def lager(self) -> dict[str, float]:
+        rader = self._db.execute("SELECT ingrediens, gram FROM lager WHERE gram > 0 ORDER BY ingrediens")
+        return dict(rader.fetchall())
+
+    def satt_lager(self, ingrediens: str, gram: float) -> None:
+        with self._db:
+            self._db.execute("INSERT OR REPLACE INTO lager VALUES (?, ?)", (ingrediens, max(gram, 0.0)))
+
+    def spara_aktiv_plan(self, plan: Plan) -> None:
+        with self._db:
+            self._db.execute("INSERT OR REPLACE INTO aktiv_plan VALUES (1, ?)", (pickle.dumps(plan),))
+
+    def aktiv_plan(self) -> Plan | None:
+        rad = self._db.execute("SELECT plan FROM aktiv_plan WHERE id = 1").fetchone()
+        if rad is None:
+            return None
+        try:
+            return pickle.loads(rad[0])
+        except Exception:  # sparad med en äldre version av koden
+            return None
+
+    def rensa_aktiv_plan(self) -> None:
+        with self._db:
+            self._db.execute("DELETE FROM aktiv_plan")

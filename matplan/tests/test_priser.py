@@ -2,26 +2,14 @@ from datetime import date, datetime
 
 import pytest
 
+from conftest import FalskButik
+
 from matplan.butiker import ButiksFel, Produkt, matchar
 from matplan.cli import main
 from matplan.core import Matplan
 
 START = date(2026, 10, 15)
 NU = datetime(2026, 10, 14, 9, 30)
-
-
-class FalskButik:
-    def __init__(self, namn, produkter, fel=None):
-        self.namn = namn
-        self._produkter = produkter
-        self._fel = fel
-        self.sokningar = []
-
-    def sok(self, sokord):
-        self.sokningar.append(sokord)
-        if self._fel:
-            raise self._fel
-        return [p for p in self._produkter if matchar(p.namn, (sokord,))]
 
 
 def _p(butik, pid, namn, kr_per_kg, erbjudande=False):

@@ -21,8 +21,16 @@ FALSK_KATALOG = (
 )
 
 
+def _app(sokvag):
+    """Den falska katalogens priser är medvetet höga, så budgeten lyfts ur vägen."""
+    app = Matplan(sokvag, katalog=FALSK_KATALOG)
+    app.satt_installning("veckobudget", 100_000)
+    app.satt_installning("manadsbudget", 400_000)
+    return app
+
+
 def _lunch(tmp_path, namn, **vikter):
-    app = Matplan(tmp_path / f"{namn}.db", katalog=FALSK_KATALOG)
+    app = _app(tmp_path / f"{namn}.db")
     for nyckel in ("vikt_protein", "vikt_volym", "vikt_kostnad"):
         app.satt_installning(nyckel, vikter.get(nyckel, 0))
     return app.plan(START).block[0].batch
@@ -63,7 +71,7 @@ def test_vikt_pa_kostnad_ger_billigast_protein(tmp_path):
 
 @pytest.mark.parametrize("person", ["jag", "fru"])
 def test_malen_haller_oavsett_vikter(tmp_path, person):
-    app = Matplan(tmp_path / "m.db", katalog=FALSK_KATALOG)
+    app = _app(tmp_path / "m.db")
     app.satt_installning("vikt_volym", 5)
     inst = app.installningar()
 
