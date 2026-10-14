@@ -30,6 +30,9 @@ STANDARDINSTALLNINGAR = {
     "rea_veckor": 8,
     "frys_kg": 10,
     "torr_kg": 2,
+    # Vilka butiker som hämtas och planeras mot (1 = på, 0 = av).
+    "butik_citygross": 1,
+    "butik_willys": 0,
 }
 
 _SCHEMA = """
