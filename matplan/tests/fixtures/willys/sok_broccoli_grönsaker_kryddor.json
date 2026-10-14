@@ -1,0 +1,364 @@
+{
+ "results": [
+  {
+   "potentialPromotions": [],
+   "inactivePotentialPromotions": [],
+   "isDrugProduct": false,
+   "comparePrice": "25,90 kr",
+   "averageWeight": null,
+   "depositPrice": "",
+   "comparePriceUnit": "kg",
+   "solrSearchScore": null,
+   "energyDeclaration": null,
+   "ranking": null,
+   "image": {
+    "imageType": "PRIMARY",
+    "format": "product",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_200/07340083462443_C1N1_s02",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "newsSplashProduct": false,
+   "notAllowedAnonymous": false,
+   "notAllowedB2b": false,
+   "pickupProductLine2": "ELDORADO, 1kg",
+   "priceNoUnit": "25,90",
+   "priceUnit": "kr/st",
+   "productLine2": "ELDORADO, 1kg",
+   "googleAnalyticsCategory": "",
+   "gdprTrackingIncompliant": false,
+   "savingsAmount": null,
+   "hazards": [],
+   "nicotineMedicalProduct": false,
+   "precautionaryStatements": [],
+   "nonEkoProduct": false,
+   "showGoodPriceIcon": false,
+   "tobaccoFreeNicotineProduct": false,
+   "tobaccoProduct": false,
+   "price": "25,90 kr",
+   "priceValue": 25.9,
+   "labels": [
+    "keyhole",
+    "frozen"
+   ],
+   "incrementValue": 1.0,
+   "bargainProduct": false,
+   "productBasketType": {
+    "code": "ST",
+    "type": "ProductBasketTypeEnum"
+   },
+   "addToCartMessage": "",
+   "displayVolume": "1kg",
+   "outOfStock": false,
+   "online": true,
+   "addToCartDisabled": false,
+   "code": "101273514_ST",
+   "maxOrderQuantity": null,
+   "thumbnail": {
+    "imageType": "PRIMARY",
+    "format": "thumbnail",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_100/07340083462443_C1N1_s02",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "manufacturer": "Eldorado",
+   "seoDescription": "",
+   "seoTitle": "",
+   "name": "Broccoli Buketter Frysta"
+  },
+  {
+   "potentialPromotions": [],
+   "inactivePotentialPromotions": [],
+   "isDrugProduct": false,
+   "comparePrice": "37,38 kr",
+   "averageWeight": null,
+   "depositPrice": "",
+   "comparePriceUnit": "kg",
+   "solrSearchScore": null,
+   "energyDeclaration": null,
+   "ranking": null,
+   "image": {
+    "imageType": "PRIMARY",
+    "format": "product",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_200/07311043014118_C1N1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "newsSplashProduct": false,
+   "notAllowedAnonymous": false,
+   "notAllowedB2b": false,
+   "pickupProductLine2": "GARANT, 800g",
+   "priceNoUnit": "29,90",
+   "priceUnit": "kr/st",
+   "productLine2": "GARANT, 800g",
+   "googleAnalyticsCategory": "",
+   "gdprTrackingIncompliant": false,
+   "savingsAmount": null,
+   "hazards": [],
+   "nicotineMedicalProduct": false,
+   "precautionaryStatements": [],
+   "nonEkoProduct": false,
+   "showGoodPriceIcon": false,
+   "tobaccoFreeNicotineProduct": false,
+   "tobaccoProduct": false,
+   "price": "29,90 kr",
+   "priceValue": 29.9,
+   "labels": [
+    "keyhole",
+    "frozen"
+   ],
+   "incrementValue": 1.0,
+   "bargainProduct": false,
+   "productBasketType": {
+    "code": "ST",
+    "type": "ProductBasketTypeEnum"
+   },
+   "addToCartMessage": "",
+   "displayVolume": "800g",
+   "outOfStock": false,
+   "online": true,
+   "addToCartDisabled": false,
+   "code": "101646312_ST",
+   "maxOrderQuantity": null,
+   "thumbnail": {
+    "imageType": "PRIMARY",
+    "format": "thumbnail",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_100/07311043014118_C1N1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "manufacturer": "Garant",
+   "seoDescription": "",
+   "seoTitle": "",
+   "name": "Broccoli Buketter Fryst"
+  },
+  {
+   "potentialPromotions": [],
+   "inactivePotentialPromotions": [],
+   "isDrugProduct": false,
+   "comparePrice": "17,90 kr",
+   "averageWeight": null,
+   "depositPrice": "",
+   "comparePriceUnit": "kg",
+   "solrSearchScore": null,
+   "energyDeclaration": null,
+   "ranking": null,
+   "image": {
+    "imageType": "PRIMARY",
+    "format": "product",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_200/07340083478352_C1N1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "newsSplashProduct": false,
+   "notAllowedAnonymous": false,
+   "notAllowedB2b": false,
+   "pickupProductLine2": "ELDORADO, 1kg",
+   "priceNoUnit": "17,90",
+   "priceUnit": "kr/st",
+   "productLine2": "ELDORADO, 1kg",
+   "googleAnalyticsCategory": "",
+   "gdprTrackingIncompliant": false,
+   "savingsAmount": null,
+   "hazards": [],
+   "nicotineMedicalProduct": false,
+   "precautionaryStatements": [],
+   "nonEkoProduct": false,
+   "showGoodPriceIcon": false,
+   "tobaccoFreeNicotineProduct": false,
+   "tobaccoProduct": false,
+   "price": "17,90 kr",
+   "priceValue": 17.9,
+   "labels": [
+    "keyhole",
+    "frozen"
+   ],
+   "incrementValue": 1.0,
+   "bargainProduct": false,
+   "productBasketType": {
+    "code": "ST",
+    "type": "ProductBasketTypeEnum"
+   },
+   "addToCartMessage": "",
+   "displayVolume": "1kg",
+   "outOfStock": false,
+   "online": true,
+   "addToCartDisabled": false,
+   "code": "101302330_ST",
+   "maxOrderQuantity": null,
+   "thumbnail": {
+    "imageType": "PRIMARY",
+    "format": "thumbnail",
+    "url": "https://assets.axfood.se/image/upload/f_auto,t_100/07340083478352_C1N1_s01",
+    "altText": null,
+    "galleryIndex": null,
+    "width": null
+   },
+   "manufacturer": "Eldorado",
+   "seoDescription": "",
+   "seoTitle": "",
+   "name": "Broccolimix Fryst"
+  }
+ ],
+ "sorts": [
+  {
+   "code": "relevance",
+   "name": "Relevans",
+   "selected": true
+  },
+  {
+   "code": "ranking_int:asc",
+   "name": "Populärast",
+   "selected": false
+  },
+  {
+   "code": "name_text_sv:asc",
+   "name": "A – Ö",
+   "selected": false
+  },
+  {
+   "code": "name_text_sv:desc",
+   "name": "Ö – A",
+   "selected": false
+  },
+  {
+   "code": "price:asc",
+   "name": "Pris (Billigast - Dyrast)",
+   "selected": false
+  },
+  {
+   "code": "price:desc",
+   "name": "Pris (Dyrast - Billigast)",
+   "selected": false
+  },
+  {
+   "code": "compareprice:asc",
+   "name": "Jämförpris (Billigast - Dyrast)",
+   "selected": false
+  },
+  {
+   "code": "compareprice:desc",
+   "name": "Jämförpris (Dyrast - Billigast)",
+   "selected": false
+  }
+ ],
+ "pagination": {
+  "pageSize": 100,
+  "currentPage": 0,
+  "sort": null,
+  "numberOfPages": 1,
+  "totalNumberOfResults": 3,
+  "allProductsInCategoriesCount": 0,
+  "allProductsInSearchCount": 12
+ },
+ "relatedResultsPagination": {
+  "pageSize": 100,
+  "currentPage": 0,
+  "sort": null,
+  "numberOfPages": 1,
+  "totalNumberOfResults": 35,
+  "allProductsInCategoriesCount": 0,
+  "allProductsInSearchCount": 0
+ },
+ "currentQuery": null,
+ "facets": [
+  {
+   "code": "category",
+   "name": "category",
+   "priority": 0,
+   "category": true,
+   "multiSelect": true,
+   "visible": true,
+   "topValues": null,
+   "values": [
+    {
+     "code": "Färdigmat",
+     "name": "Färdigmat",
+     "count": 1,
+     "query": {
+      "url": "/search?q=broccoli%3Acategory%3AGr%C3%B6nsaker+%26+kryddor%3Acategory%3AF%C3%A4rdigmat",
+      "query": {
+       "value": "broccoli:category:Grönsaker & kryddor:category:Färdigmat",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Grönsaker",
+     "name": "Grönsaker",
+     "count": 2,
+     "query": {
+      "url": "/search?q=broccoli%3Acategory%3AGr%C3%B6nsaker+%26+kryddor%3Acategory%3AGr%C3%B6nsaker",
+      "query": {
+       "value": "broccoli:category:Grönsaker & kryddor:category:Grönsaker",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Grönsaker & kryddor",
+     "name": "Grönsaker & kryddor",
+     "count": 3,
+     "query": {
+      "url": "/search?q=broccoli",
+      "query": {
+       "value": "broccoli",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": true
+    },
+    {
+     "code": "Pizza, Paj & Piroger mm",
+     "name": "Pizza, Paj & Piroger mm",
+     "count": 3,
+     "query": {
+      "url": "/search?q=broccoli%3Acategory%3AGr%C3%B6nsaker+%26+kryddor%3Acategory%3APizza%2C+Paj+%26+Piroger+mm",
+      "query": {
+       "value": "broccoli:category:Grönsaker & kryddor:category:Pizza, Paj & Piroger mm",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    },
+    {
+     "code": "Soppor & krämer",
+     "name": "Soppor & krämer",
+     "count": 3,
+     "query": {
+      "url": "/search?q=broccoli%3Acategory%3AGr%C3%B6nsaker+%26+kryddor%3Acategory%3ASoppor+%26+kr%C3%A4mer",
+      "query": {
+       "value": "broccoli:category:Grönsaker & kryddor:category:Soppor & krämer",
+       "filterQueries": null,
+       "searchQueryContext": null,
+       "searchType": null
+      }
+     },
+     "selected": false
+    }
+   ]
+  }
+ ],
+ "freeTextSearch": "broccoli",
+ "categoryCode": null,
+ "keywordRedirectUrl": null,
+ "spellingSuggestion": null,
+ "categoryName": null,
+ "customSuggestion": null,
+ "usedQuery": null
+}
