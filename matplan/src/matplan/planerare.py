@@ -5,6 +5,10 @@ batch under ett rullande tredagarsblock. Alla äter samma ingredienser, men
 varje person får egna gram som når personens kcal-tak och proteingolv.
 Frukost och mellanmål är likadana varje dag. Bland kombinationerna som når
 målen väljs den med bäst viktad poäng på proteintäthet, volym och kostnad.
+
+En kombinationsvara (t.ex. fiskpinnar, bönor, färdigrätt) kan fylla lunchens
+och middagens proteinslot. Dess kolhydrater räknas in i måltidens kcal, så
+kolhydratkällan krymper eller utgår helt; kcal-taket och proteingolvet gäller.
 """
 
 import math
@@ -160,6 +164,8 @@ class Plan:
     lagade_block: tuple[int, ...] = ()  # blocknummer (från 1) som redan dragits från lagret
     naringskallor: tuple[str, ...] = ()  # varifrån näringsvärdena kommer, för källhänvisning
     rea: tuple[str, ...] = ()  # ingredienser vars billigaste produkt är på rea
+    # (ingrediens, varifrån produktens näringsvärden kommer): "butik", "livsmedelsverket", …
+    produktkallor: tuple[tuple[str, str], ...] = ()
 
     @property
     def dagar(self) -> tuple[Dag, ...]:
@@ -205,7 +211,7 @@ def _avrunda_ned(gram: float) -> int:
 
 def _dimensionera(
     p: Ingrediens,
-    k: Ingrediens,
+    k: Ingrediens | None,
     fast: Ingrediens,
     fast_gram: int,
     slotar: tuple[str, str, str],
@@ -213,9 +219,18 @@ def _dimensionera(
     protein_golv: float,
 ) -> tuple[Rad, ...] | None:
     """Gram för protein- och kolhydratkällan så att portionen når proteingolvet
-    och fyller upp till kcal-taket. Den fasta ingrediensen ger volym."""
+    och fyller upp till kcal-taket. Den fasta ingrediensen ger volym. Utan
+    kolhydratkälla (för en kombinationsvara) räcker det att nå proteingolvet
+    inom kcal-taket."""
     kvar_kcal = kcal_tak - fast.kcal_100g * fast_gram / 100
     kvar_protein = protein_golv - fast.protein_100g * fast_gram / 100
+
+    if k is None:
+        protein_gram = _avrunda_upp(max(kvar_protein, 0.0) / p.protein_100g * 100) if p.protein_100g else 0
+        rader = (_rad(p, slotar[0], protein_gram), _rad(fast, slotar[2], fast_gram))
+        if protein_gram == 0 or sum(r.kcal for r in rader) > kcal_tak:
+            return None
+        return rader
 
     # Lös  kcal: kp*xp + kk*xk = kvar_kcal,  protein: pp*xp + pk*xk = kvar_protein
     # med x i hektogram.
@@ -415,13 +430,11 @@ def _planera(
         _, protein_andel = andel(profil, VIKT_HUVUDMAL)
         huvudmal[profil.namn] = (kcal / 2, max(protein / 2, protein_andel))
 
-    huvudkombinationer = list(
-        product(
-            _kategori(ingredienser, "protein"),
-            _kategori(ingredienser, "kolhydrater"),
-            _kategori(ingredienser, "grönsaker"),
-        )
-    )
+    proteinkallor = _kategori(ingredienser, "protein", "kombination")
+    gronsaker = _kategori(ingredienser, "grönsaker")
+    huvudkombinationer = list(product(proteinkallor, _kategori(ingredienser, "kolhydrater"), gronsaker))
+    # En kombinationsvara kan också stå utan kolhydratkälla.
+    huvudkombinationer += [(p, None, g) for p in proteinkallor if p.kategori == "kombination" for g in gronsaker]
 
     def dimensionera_huvudmal(k, kcal, protein):
         return _dimensionera(*k, GRONSAKER_GRAM, ("protein", "kolhydrater", "grönsaker"), kcal, protein)
@@ -434,7 +447,8 @@ def _planera(
     for nummer, blockstart in enumerate(range(0, plandagar, BLOCKDAGAR), start=1):
         valda = {slot: namn for (b, slot), namn in val.items() if b == nummer}
         kombinationer = [
-            k for k in huvudkombinationer if all(k[HUVUDSLOTAR.index(slot)].namn == namn for slot, namn in valda.items())
+            k for k in huvudkombinationer
+            if all(getattr(k[HUVUDSLOTAR.index(slot)], "namn", None) == namn for slot, namn in valda.items())
         ]
         lunch = _valj(
             "lunch", kombinationer, profiler, huvudmal, dimensionera_huvudmal, vikter_huvudmal,

@@ -3,7 +3,7 @@
 from datetime import date, datetime, timedelta
 
 import pytest
-from conftest import SortimentButik, katalogvara
+from conftest import SortimentButik, katalogvara, standardsortiment
 
 from matplan.core import Matplan
 from matplan.katalog import STARTKATALOG
@@ -12,20 +12,7 @@ START = date(2026, 10, 15)
 NU = datetime(2026, 10, 15, 9, 0)
 
 
-def _sortiment():
-    """En vara per inbyggd grupp, med katalogens pris och näring."""
-    return [
-        katalogvara(
-            f"id-{i.namn}", f"{i.sokord[0].capitalize()} Vara", kr=i.kr_per_kg, kcal=i.kcal_100g,
-            protein=i.protein_100g, kategori=_kategori_for(i),
-        )
-        for i in STARTKATALOG
-    ]
-
-
-def _kategori_for(i):
-    """En butikskategori som uppfyller gruppens kategoriord."""
-    return f"Mat / {i.butikskategori[0]}" if i.butikskategori else "Mat / Övrigt"
+_sortiment = standardsortiment
 
 
 def test_inbyggda_grupper_laggs_in_forsta_gangen(tmp_path):

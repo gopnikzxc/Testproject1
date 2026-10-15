@@ -12,14 +12,15 @@ from .butiker import Butik, ButiksFel, Butiksregister, ValdButik
 from .bunkra import Bunkring
 from .butiker.citygross import CityGross, CityGrossButiker
 from .butiker.willys import Willys
-from .core import DAGAR_PER_MANAD, Butiksrad, Hamtningsresultat, Matplan, PlaneringsFel
+from .core import DAGAR_PER_MANAD, Butiksrad, Familj, Hamtningsresultat, Matplan, PlaneringsFel
 from .export import exportera
 from .http import HttpKlient
 from .inkop import Inkopslista
-from .naring import KALLHANVISNING, Livsmedelsverket, OpenFoodFacts
+from .naring import KALLHANVISNING, KALLNAMN, Livsmedelsverket, OpenFoodFacts
 from .planerare import Maltid, Plan
 from .text import datum as _datum
-from .text import forpackning, kr, mangd, produkttext
+from .slot import SLOTAR
+from .text import forpackning, kr, mangd, naringstext, produkttext
 
 
 def _db_sokvag() -> Path:
@@ -91,6 +92,8 @@ def _visa_prisstatus(konsol: Console, plan: Plan) -> None:
 
 
 def _visa_kallor(konsol: Console, plan: Plan) -> None:
+    if plan.produktkallor:
+        konsol.print("[dim]Näring per vara: " + naringstext(plan.produktkallor) + "[/dim]")
     if not plan.naringskallor:
         konsol.print("[dim]Näringsvärden: handinmatade ungefärliga värden – kör `matplan refresh`.[/dim]")
     for kalla in plan.naringskallor:
@@ -123,6 +126,26 @@ def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
         konsol.print(f"Näringsvärden hämtade för {resultat.naring_hamtad} ingredienser")
     for ingrediens, fel in resultat.naring_fel.items():
         konsol.print(f"[yellow]{ingrediens}: {fel}[/yellow]")
+
+
+def _visa_familjer(konsol: Console, familjer: list[Familj]) -> None:
+    if not familjer:
+        konsol.print("Alla planerbara produkter har butikens egna näringsvärden.")
+        return
+    tabell = Table(title="Näring för produkter utan butikens värden", title_justify="left")
+    for rubrik in ("Familj", "Produkter", "Livsmedelsverket"):
+        tabell.add_column(rubrik)
+    for f in familjer:
+        if f.bekraftad:
+            match = f"{f.bekraftad[1]} ({f.bekraftad[0]})"
+        elif f.forslag:
+            match = f"[yellow]förslag: {f.forslag[1]} ({f.forslag[0]})[/yellow]"
+        else:
+            match = "[red]inget förslag – Open Food Facts eller planeras inte[/red]"
+        produkter = ", ".join(f.produkter[:3]) + (f" … (+{len(f.produkter) - 3})" if len(f.produkter) > 3 else "")
+        tabell.add_row(f.familj, produkter, match)
+    konsol.print(tabell)
+    konsol.print('Bekräfta med `matplan näring --bekräfta "<familj>"` eller välj annat med `--lmv <nummer>`.')
 
 
 def _visa_butiker(konsol: Console, rader: list[Butiksrad]) -> None:
@@ -259,14 +282,19 @@ def _visa_sok(konsol: Console, traffar: list) -> None:
         return
     tabell = Table(title=f"Sökträffar ({len(traffar)})", title_justify="left")
     for rubrik, just in (("Märke", "left"), ("Produkt", "left"), ("Förpackning", "left"), ("Pris", "right"),
-                         ("kr/kg", "right"), ("kcal", "right"), ("Protein", "right")):
+                         ("kr/kg", "right"), ("kcal", "right"), ("Protein", "right"), ("Näring", "left"),
+                         ("Slot", "left")):
         tabell.add_column(rubrik, justify=just)
     for p in traffar[:50]:
+        slot = p.slot or "–"
+        if p.naringskalla is None or p.slot == "utesluten":
+            slot += " [dim](planeras inte)[/dim]"
         tabell.add_row(
             p.varumarke, p.namn, p.beskrivning, f"{p.pris_kr:.2f}",
             f"{p.kr_per_kg:.2f}" if p.kr_per_kg > 0 else "–",
             f"{p.kcal:.0f}" if p.kcal is not None else "–",
             f"{p.protein:.1f} g" if p.protein is not None else "–",
+            KALLNAMN.get(p.naringskalla, "saknas"), slot,
         )
     konsol.print(tabell)
     if len(traffar) > 50:
@@ -325,6 +353,15 @@ def main(argv: list[str] | None = None) -> int:
     butik.add_argument("postnummer", nargs="?", help="Lista butiker närmast först")
     butik.add_argument("--sök", "--sok", dest="sok", metavar="TEXT", help="Sök butik på namn eller ort")
     butik.add_argument("--välj", "--valj", dest="valj", metavar="BUTIK", help="Välj butik, t.ex. \"City Gross Borås\"")
+    naring = kommandon.add_parser("näring", aliases=["naring"], help="Näringskällor per produktfamilj")
+    naring.add_argument("--bekräfta", "--bekrafta", dest="bekrafta", metavar="FAMILJ",
+                        help="Bekräfta förslaget (eller --lmv) för en grupp eller ett produktnamn")
+    naring.add_argument("--lmv", type=int, metavar="NUMMER", help="Livsmedelsverkets nummer att använda i stället")
+    naring.add_argument("--sök", "--sok", dest="sok", metavar="TEXT", help="Sök i Livsmedelsverkets livsmedel")
+    slot = kommandon.add_parser("slot", help="Visa eller sätt slot för en grupp eller produkt")
+    slot.add_argument("mal", nargs="?", metavar="GRUPP_ELLER_PRODUKT_ID")
+    slot.add_argument("slot", nargs="?", choices=SLOTAR)
+    slot.add_argument("--ta-bort", action="store_true", help="Ta bort det handvalda valet")
     inst = kommandon.add_parser("installningar", help="Visa eller ändra inställningar")
     inst.add_argument("nyckel", nargs="?")
     inst.add_argument("varde", nargs="?", type=float)
@@ -344,7 +381,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
-    kommando = {"las": "lås", "kopt": "köpt", "sok": "sök"}.get(args.kommando, args.kommando)
+    kommando = {"las": "lås", "kopt": "köpt", "sok": "sök", "naring": "näring"}.get(args.kommando, args.kommando)
 
     if kommando == "gui":
         from .tui import MatplanApp
@@ -403,6 +440,22 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
         for varning in app.lagat(block=args.block):
             konsol.print(f"[yellow]{varning}[/yellow]")
         konsol.print(f"Block {args.block} draget från lagret.")
+    elif kommando == "näring":
+        if args.sok:
+            for nummer, namn in app.sok_livsmedel(args.sok)[:30]:
+                konsol.print(f"{nummer:>6}  {namn}")
+        elif args.bekrafta:
+            familj = app.bekrafta_familj(args.bekrafta, args.lmv)
+            konsol.print(f"{familj.familj}: {familj.bekraftad[1]} (Livsmedelsverket {familj.bekraftad[0]}).")
+        else:
+            _visa_familjer(konsol, app.naringsfamiljer())
+    elif kommando == "slot":
+        if args.mal and (args.slot or args.ta_bort):
+            andrad = app.satt_slot(args.mal, None if args.ta_bort else args.slot)
+            konsol.print(f"{andrad}: {'slot borttagen' if args.ta_bort else args.slot}.")
+        else:
+            for nyckel, varde in sorted(app.slotval().items()):
+                konsol.print(f"{nyckel.split(':', 1)[1]}: {varde}")
     elif kommando == "butik":
         if args.valj:
             vald = app.valj_butik(args.valj)

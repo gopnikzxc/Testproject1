@@ -4,6 +4,7 @@ from datetime import date
 
 from .butiker import Produkt
 from .inkop import Kop
+from .naring import KALLNAMN
 
 VECKODAGAR = ("mån", "tis", "ons", "tor", "fre", "lör", "sön")
 MANADER = ("jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec")
@@ -52,3 +53,8 @@ def listrad(produkt: Produkt, antal: int | None, gram: float, kostnad: float) ->
 
 def forpackning(kop: Kop, gram: float) -> str:
     return mangd(kop.antal, kop.produkt.forpackning_g, gram)
+
+
+def naringstext(produktkallor: tuple[tuple[str, str], ...]) -> str:
+    """"Kycklingfilé: butiken · Vitkål: Livsmedelsverket"."""
+    return " · ".join(f"{namn}: {KALLNAMN.get(kalla, kalla)}" for namn, kalla in produktkallor)

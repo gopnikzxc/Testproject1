@@ -5,7 +5,7 @@ from pathlib import Path
 from .inkop import Inkopslista
 from .naring import KALLHANVISNING
 from .planerare import Maltid, Plan
-from .text import datum, kr, listrad
+from .text import datum, kr, listrad, naringstext
 
 
 def _maltid(
@@ -41,6 +41,8 @@ def plan_markdown(plan: Plan) -> str:
         if maltid.typ not in ("lunch", "middag"):
             rader += _maltid(maltid.typ.capitalize(), maltid, personer, rea=plan.rea)
     rader.append(f"Planerad kostnad: {plan.kr:.0f} kr ({plan.kr_per_dag:.0f} kr/dag)")
+    if plan.produktkallor:
+        rader += ["", f"Näring per vara: {naringstext(plan.produktkallor)}"]
     rader += ["", *(f"_{KALLHANVISNING[kalla]}_" for kalla in plan.naringskallor)]
     return "\n".join(rader) + "\n"
 

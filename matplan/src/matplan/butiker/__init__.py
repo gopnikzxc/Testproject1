@@ -72,6 +72,10 @@ class Produkt:
     fett: float | None = None
     kolhydrater: float | None = None
     fiber: float | None = None
+    # Sätts av kärnan: varifrån näringsvärdena kommer ("butik", "livsmedelsverket",
+    # "openfoodfacts" eller "katalog"; None = inga värden) och produktens slot.
+    naringskalla: str | None = None
+    slot: str | None = None
 
 
 class Butik(Protocol):

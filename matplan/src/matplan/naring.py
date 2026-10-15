@@ -5,8 +5,13 @@ reserv för märkesvaror.
   källa): `/livsmedel/api/v1/livsmedel/{nummer}/naringsvarden`.
 - Open Food Facts (ODbL): `/api/v2/product/{ean}.json`, för varor som saknas
   hos Livsmedelsverket, t.ex. keso 1,5 % och grekisk yoghurt 0 %.
+
+Livsmedelsverkets hela lista (`/livsmedel?limit=…`, drygt 2600 livsmedel)
+hämtas en gång och används för att föreslå närmaste livsmedel för produkter
+som saknar butikens näringsvärden ("Vitkål Sverige" -> "Vitkål").
 """
 
+import re
 import urllib.error
 from dataclasses import dataclass
 
@@ -20,9 +25,62 @@ KALLHANVISNING = {
     "openfoodfacts": "Näringsvärden för märkesvaror: Open Food Facts (ODbL)",
 }
 
+# Hur produktens näringsvärden visas.
+KALLNAMN = {
+    "butik": "butiken",
+    "livsmedelsverket": "Livsmedelsverket",
+    "openfoodfacts": "Open Food Facts",
+    "katalog": "katalogen (inte hämtad än)",
+}
+LISTSTORLEK = 3000
+
+
+def _ord(text: str) -> list[str]:
+    return [o for o in re.findall(r"[^\W\d_]+", text.casefold()) if len(o) > 1 or o in ("i", "m")]
+
+
+def _likhet(ord_: str, produktord: list[str], svans: bool = True) -> int:
+    """2 för samma ord, 1 för ett produktord som börjar med ordet ("sejfilé" ~
+    "sej") eller, med `svans`, slutar likadant på minst fyra bokstäver
+    ("kycklingfilé" ~ "bröstfilé"), annars 0."""
+    basta = 0
+    for p in produktord:
+        if p == ord_:
+            return 2
+        if len(ord_) >= 3 and p.startswith(ord_):
+            basta = 1
+        elif svans and len(ord_) >= 4 and len(p) >= 4 and ord_[-4:] == p[-4:]:
+            basta = 1
+    return basta
+
+
+def foresla(namn: str, lista: list[tuple[int, str]]) -> tuple[int, str] | None:
+    """Närmaste livsmedel i Livsmedelsverkets lista för ett produktnamn: mest
+    gemensamma ord (se `_likhet`), sedan färst extra ord hos livsmedlet, sedan
+    kortast namn. Livsmedlets första ord måste vara ett produktord eller början
+    på ett. Lika slut räknas bara för produktord som inte redan finns som ord."""
+    produktord = _ord(namn)
+    if not produktord:
+        return None
+    basta, basta_poang = None, None
+    for nummer, lmv_namn in lista:
+        lmv_ord = list(dict.fromkeys(_ord(lmv_namn)))
+        if not lmv_ord or not _likhet(lmv_ord[0], produktord, svans=False):
+            continue
+        lediga = [p for p in produktord if p not in lmv_ord]
+        likheter = [2 if o in produktord else _likhet(o, lediga) for o in lmv_ord]
+        poang = (sum(likheter), -sum(1 for v in likheter if not v), -len(lmv_namn), -nummer)
+        if basta_poang is None or poang > basta_poang:
+            basta, basta_poang = (nummer, lmv_namn), poang
+    return basta
+
 
 class NaringsFel(Exception):
     pass
+
+
+class NaringsNatverksFel(NaringsFel):
+    """Källan gick inte att nå; försök igen vid nästa hämtning."""
 
 
 @dataclass(frozen=True)
@@ -40,7 +98,7 @@ def _hamta(http: HttpKlient, url: str, kalla: str):
     try:
         return http.hamta_json(url)
     except (urllib.error.URLError, TimeoutError) as fel:
-        raise NaringsFel(f"Kunde inte nå {kalla}: {fel}") from fel
+        raise NaringsNatverksFel(f"Kunde inte nå {kalla}: {fel}") from fel
     except ValueError as fel:
         raise NaringsFel(f"Oväntat svar från {kalla}: {fel}") from fel
 
@@ -48,6 +106,14 @@ def _hamta(http: HttpKlient, url: str, kalla: str):
 class Livsmedelsverket:
     def __init__(self, http: HttpKlient):
         self._http = http
+
+    def lista(self) -> list[tuple[int, str]]:
+        """Alla livsmedel: (nummer, namn)."""
+        svar = _hamta(self._http, f"{LIVSMEDELSVERKET}/livsmedel?offset=0&limit={LISTSTORLEK}&sprak=1", "Livsmedelsverket")
+        try:
+            return [(int(rad["nummer"]), str(rad["namn"]).strip()) for rad in svar["livsmedel"]]
+        except (KeyError, TypeError, ValueError) as fel:
+            raise NaringsFel(f"Oväntad livsmedelslista från Livsmedelsverket ({fel})") from fel
 
     def hamta(self, nummer: int) -> Naring:
         rader = _hamta(self._http, f"{LIVSMEDELSVERKET}/livsmedel/{nummer}/naringsvarden?sprak=1", "Livsmedelsverket")

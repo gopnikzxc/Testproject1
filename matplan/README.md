@@ -13,7 +13,10 @@ python3 -m venv .venv
 .venv/bin/matplan butik "442 50"                    # City Gross stores, nearest first (or --sök Borås)
 .venv/bin/matplan butik --välj "City Gross Borås"   # choose the store to plan against
 .venv/bin/matplan refresh                           # sync the store's whole food range + current prices
-.venv/bin/matplan sök tonfisk                       # search the synced range (brand, pack, price, kcal, protein)
+.venv/bin/matplan sök tonfisk                       # search the synced range (price, kcal, protein, nutrition source, slot)
+.venv/bin/matplan näring                            # nutrition matches for products without the store's values
+.venv/bin/matplan näring --bekräfta "Spetskål"      # confirm the suggested match (or --lmv <number>); --sök <text> searches
+.venv/bin/matplan slot "Keso 1,5 %" protein         # set a group's or product id's slot by hand (--ta-bort clears it)
 .venv/bin/matplan lista                             # shopping list: whole packages, kr/kg, single store vs split
 .venv/bin/matplan export [folder]                   # save plan.md and inkopslista.md for your phone
 .venv/bin/matplan produkter Kycklingfilé            # fetched products with ids
@@ -98,14 +101,36 @@ Eggs are compared per egg and converted to kr/kg at 60 g per egg. Products sold 
 
 ## Nutrition values
 
-`refresh` also fetches nutrition values for ingredients that don't have any stored yet:
-- **Livsmedelsverket's food database** (CC BY 4.0), by food number.
-- **Open Food Facts** (ODbL), by barcode, for branded products Livsmedelsverket doesn't have: Keso 1.5% and Arla Greek yoghurt 0%.
+Each product's nutrition per 100 g comes from the first of these that has it:
+1. **The store's own values.**
+2. **The product family's Livsmedelsverket match** (CC BY 4.0). A family is the product's group, or for a product outside the groups its normalised name. A built-in group's own Livsmedelsverket number is its confirmed match. For other families, `matplan näring` suggests the closest food from Livsmedelsverket's full list, downloaded once and kept in the database (for example "Vitkål Sverige" → "Vitkål"). Confirm it once with `--bekräfta`, or pick another with `--lmv <number>`. The match then applies to every product in the family, including new ones from later syncs.
+3. **Open Food Facts** (ODbL), by the product's barcode. `refresh` asks once per barcode, and only for the groups' products that have nothing better.
 
-Once fetched, values are kept in the database, and the plan names its sources. Until then, the catalog's hand-entered values are used.
+Products with no nutrition after that stay searchable but aren't planned. A group where no product has nutrition is skipped by the planner, with a note. Search and the plan show each product's source, and the plan keeps the source credits.
+
+`refresh` also fetches Livsmedelsverket values for the groups' own numbers and confirmed matches, and Open Food Facts values for Keso 1.5 % and Arla Greek yoghurt 0 %. Until fetched, a group uses the catalog's hand-entered values.
+
+## Slots
+
+Every product gets a slot from its nutrition and store category:
+
+| Slot | Rule |
+|---|---|
+| utesluten | juice, soft drinks, squash, sports and energy drinks, beer, cider: never planned |
+| mejeri | milk, plant drinks, protein drinks, and high-protein yoghurt, kvarg and cottage cheese |
+| bär | the store's berry categories |
+| grönsaker | at most 60 kcal/100 g in a fruit-and-veg or frozen-veg category |
+| protein | at least 10 g protein per 100 kcal |
+| kombination | at least 4 g protein per 100 kcal and at least 20 % of kcal from carbs (nuggets, fish fingers, beans, ready meals) |
+| flingor | cereals and oats (breakfast carbs) |
+| kolhydrater | carbs give the largest share of kcal |
+
+If no rule fits (cheese, eggs, oil), the product has no slot. The built-in groups have hand-set slots. A group without a slot takes the slot of the product the plan buys. `matplan slot` sets any group's or product's slot by hand, and that wins over the classifier.
+
+A combination item can fill the lunch/dinner protein slot. Its carbs count toward the meal's kcal, so the carb portion shrinks or is left out, and kcal ceilings and protein floors still hold. To meet 180 g protein within 2000 kcal, a combination item needs roughly 9–10 g protein per 100 kcal. Fish fingers and beans are well below that, so they rarely fit.
 
 ## Status
 
-Done: #2–#7 and #9–#15, which is the whole spec in #1. From the second spec (#23): #24–#27.
+Done: #2–#7 and #9–#15, which is the whole spec in #1. From the second spec (#23): #24–#29.
 
 ICA Maxi (#8) is shelved because ICA blocks automated access.

@@ -122,7 +122,7 @@ def test_cli_markerar_rea(tmp_path, monkeypatch, capsys):
 
 FARSK = dataclasses.replace(
     next(i for i in STARTKATALOG if i.namn == "Kycklingfilé"),
-    namn="Kycklingfilé, färsk", sokord=("färsk kycklingfilé",), forvaring="kyl", livsmedelsverket=None,
+    namn="Kycklingfilé, färsk", sokord=("färsk kycklingfilé",), forvaring="kyl",
 )
 # Den frysta får inte matcha den färska produkten.
 KATALOG = tuple(

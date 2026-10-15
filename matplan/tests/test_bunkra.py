@@ -61,7 +61,7 @@ def test_frysutrymmet_kan_andras(tmp_path):
     assert app.bunkra() == []
 
 
-TONFISK = Ingrediens("Tonfisk i vatten", "protein", 116, 26.0, 80, ("tonfisk",), "torrvara", ("konserv",))
+TONFISK = Ingrediens("Tonfisk i vatten", "protein", 116, 26.0, 80, ("tonfisk",), "torrvara", ("konserv",), livsmedelsverket=1278)
 
 
 def test_torrvaror_begransas_av_torrutrymmet(tmp_path):
