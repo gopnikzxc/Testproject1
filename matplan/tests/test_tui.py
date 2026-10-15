@@ -129,3 +129,70 @@ def test_hamta_priser_i_bakgrunden(tmp_path):
         assert all(p.butik == "City Gross Ytterby" for p in karna.produkter("Kycklingfilé"))
 
     _kor(tui, scenario)
+
+
+def _upptack_karna(tmp_path):
+    from conftest import SortimentButik, standardsortiment
+    from test_forslag import _varor
+
+    karna = Matplan(tmp_path / "u.db", butiker=(SortimentButik(standardsortiment() + _varor()),))
+    karna.satt_installning("veckobudget", 5000)
+    karna.satt_installning("manadsbudget", 20000)
+    karna.refresh()
+    return karna
+
+
+def _rader(tabell):
+    return [tabell.coordinate_to_cell_key((r, 0)).row_key.value for r in range(tabell.row_count)]
+
+
+def test_upptack_soker_godkanner_och_avfardar(tmp_path):
+    karna = _upptack_karna(tmp_path)
+    tui = MatplanApp(karna, exportmapp=tmp_path / "ut")
+
+    async def scenario(pilot):
+        tui.query_one("#flikar").active = "upptack"
+        await pilot.pause()
+        tabell = tui.query_one("#upptacktabell")
+        assert _rader(tabell)[0] == "tf-1"  # förslagen visas direkt
+        priser_fore = tui.query_one("#pristabell").row_count
+
+        # Sök i sortimentet.
+        tui.query_one("#upptacksok").focus()
+        await pilot.press(*"tonfisk", "enter")
+        await pilot.pause()
+        assert _rader(tabell) == ["tf-1"]
+
+        # Godkänn den valda produkten med en tangent.
+        tabell.focus()
+        await pilot.press("g")
+        await pilot.pause()
+        assert "Tonfisk vatten" in {g.namn for g, _ in karna.grupper()}
+        assert tui.query_one("#pristabell").row_count == priser_fore + 1  # planen och priserna uppdaterade
+
+        # Tom sökning ger förslagen igen; avfärda den översta.
+        tui.query_one("#upptacksok").focus()
+        await pilot.press("enter")
+        await pilot.pause()
+        overst = _rader(tabell)[0]
+        assert overst != "tf-1"
+        tabell.focus()
+        await pilot.press("x")
+        await pilot.pause()
+        assert overst not in _rader(tabell)
+        assert overst not in [p.produkt_id for p in karna.forslag()]
+
+    _kor(tui, scenario)
+
+
+def test_godkann_utanfor_upptack_gor_inget(tmp_path):
+    karna = _upptack_karna(tmp_path)
+    tui = MatplanApp(karna, exportmapp=tmp_path / "ut")
+    grupper_fore = len(karna.grupper())
+
+    async def scenario(pilot):
+        await pilot.press("g")
+        await pilot.pause()
+        assert len(karna.grupper()) == grupper_fore
+
+    _kor(tui, scenario)

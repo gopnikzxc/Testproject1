@@ -315,11 +315,11 @@ def _visa_bunkringsforslag(konsol: Console, forslag: list[Bunkring]) -> None:
     konsol.print("Lägg på inköpslistan med `matplan bunkra --ta <vara>`.")
 
 
-def _visa_sok(konsol: Console, traffar: list) -> None:
+def _visa_sok(konsol: Console, traffar: list, titel: str = "Sökträffar") -> None:
     if not traffar:
         konsol.print("Inga träffar i sortimentet. Har du kört `matplan refresh`?")
         return
-    tabell = Table(title=f"Sökträffar ({len(traffar)})", title_justify="left")
+    tabell = Table(title=f"{titel} ({len(traffar)})", title_justify="left")
     for rubrik, just in (("Id", "left"), ("Märke", "left"), ("Produkt", "left"), ("Förpackning", "left"), ("Pris", "right"),
                          ("kr/kg", "right"), ("kcal", "right"), ("Protein", "right"), ("Näring", "left"),
                          ("Slot", "left")):
@@ -365,7 +365,10 @@ def main(argv: list[str] | None = None) -> int:
     export.add_argument("mapp", nargs="?", default="matplan-export")
     kommandon.add_parser("refresh", help="Hämta aktuella priser från butikerna")
     sok = kommandon.add_parser("sök", aliases=["sok"], help="Sök i butikens sortiment")
-    sok.add_argument("text", nargs="+")
+    sok.add_argument("text", nargs="*")
+    sok.add_argument("--förslag", "--forslag", dest="forslag", action="store_true",
+                     help="Förslag: planerbara produkter som inte hör till någon grupp, bäst protein först")
+    sok.add_argument("--avfärda", "--avfarda", dest="avfarda", metavar="PRODUKT_ID", help="Föreslå inte produkten igen")
     produkter = kommandon.add_parser("produkter", help="Visa hämtade produkter för en ingrediens")
     produkter.add_argument("ingrediens")
     las = kommandon.add_parser("lås", aliases=["las"], help="Lås en ingrediens till en produkt i en butik")
@@ -456,7 +459,16 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
         _visa_hamtning(konsol, resultat)
         return 1 if resultat.fel and not resultat.antal_produkter else 0
     elif kommando == "sök":
-        _visa_sok(konsol, app.sok(" ".join(args.text)))
+        if args.avfarda:
+            app.avfarda_forslag(args.avfarda)
+            konsol.print(f"{args.avfarda} föreslås inte igen.")
+        elif args.forslag:
+            _visa_sok(konsol, app.forslag(), titel="Förslag")
+        elif args.text:
+            _visa_sok(konsol, app.sok(" ".join(args.text)))
+        else:
+            konsol.print("Ange sökord, eller --förslag.")
+            return 1
     elif kommando == "produkter":
         _visa_produkter(konsol, app, args.ingrediens)
     elif kommando == "lås":

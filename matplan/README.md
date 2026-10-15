@@ -18,6 +18,8 @@ python3 -m venv .venv
 .venv/bin/matplan näring --bekräfta "Spetskål"      # confirm the suggested match (or --lmv <number>); --sök <text> searches
 .venv/bin/matplan slot "Keso 1,5 %" protein         # set a group's or product id's slot by hand (--ta-bort clears it)
 .venv/bin/matplan proteintyp [mål typ]              # show protein types and factors, or set one by hand
+.venv/bin/matplan sök --förslag                     # suggested products not in any group, best protein first
+.venv/bin/matplan sök --avfärda 101357675_ST        # stop suggesting a product
 .venv/bin/matplan godkänn 101458683_ST              # turn a product (id from `sök`) into a new ingredient group
 .venv/bin/matplan grupp ["Tonfisk vatten"]          # list groups, or show one; --byt-namn, --sökord, --uteslut, --inkludera, --ta-bort
 .venv/bin/matplan lista                             # shopping list: whole packages, kr/kg, single store vs split
@@ -38,7 +40,7 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 
 ## Terminal GUI
 
-`matplan gui` opens a Textual app with tabs for Plan, Inköpslista, Lager, Bunkring, Priser, Butik and Inställningar. Everything comes from the same commands as the CLI. The bottom line shows cost against the budget, each person's kcal and protein, the chosen store and the cheapest store.
+`matplan gui` opens a Textual app with tabs for Plan, Inköpslista, Lager, Bunkring, Priser, Upptäck, Butik and Inställningar. Everything comes from the same commands as the CLI. The bottom line shows cost against the budget, each person's kcal and protein, the chosen store and the cheapest store.
 
 | Key | Does |
 |---|---|
@@ -49,7 +51,11 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 | `r` | Refreshes prices in the background |
 | `e` | Exports plan.md and inkopslista.md |
 | `n` | New plan, dropping the bought plan and any swaps |
+| `g` | Approves the selected product into a new group (Upptäck tab); the plan and totals update right away |
+| `x` | Dismisses the selected suggestion (Upptäck tab) |
 | `q` | Quit |
+
+The Upptäck tab shows suggestions. Type in its search box and press Enter to search the whole range; an empty search brings the suggestions back.
 
 In the Butik tab, type a postcode (nearest first) or a name/town in the input box, then press Enter on a store to choose it. Press `r` afterwards to sync its range.
 
@@ -148,6 +154,8 @@ Other products that fit join automatically, so the Eldorado tin brings in Garant
 - exclude or include a single product (`--uteslut <id>` / `--inkludera <id>`)
 - remove the group from planning (`--ta-bort`)
 
+`matplan sök --förslag` lists products worth adding. These are plannable, active products in your store that aren't in any group and haven't been dismissed. Protein per kcal and protein per krona are each turned into a percentile rank, and the score is the better of the two plus a quarter of the other. That way both dense protein (sej, turkey) and cheap protein (lentils, black beans) rank high. The same brand and name is listed once, at its lowest kr/kg. `--avfärda <id>` stops a product from being suggested; it can still be searched.
+
 With many groups the planner first keeps the ten best candidates per slot. It also keeps the cheapest ones, the grain carbs and any swapped-in group. A plan with about 100 groups still takes well under a second.
 
 ## Protein quality
@@ -170,6 +178,6 @@ Weighting makes the same targets need more real protein than before, so plans co
 
 ## Status
 
-Done: #2–#7 and #9–#15, which is the whole spec in #1. From the second spec (#23): #24–#31.
+Done: #2–#7 and #9–#15, which is the whole spec in #1. From the second spec (#23): #24–#32, which is the whole spec.
 
 ICA Maxi (#8) is shelved because ICA blocks automated access.

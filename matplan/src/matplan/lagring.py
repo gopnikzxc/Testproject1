@@ -160,6 +160,9 @@ CREATE TABLE IF NOT EXISTS slotval (
     nyckel TEXT PRIMARY KEY,
     slot TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS avfardade (
+    produkt_id TEXT PRIMARY KEY
+);
 CREATE TABLE IF NOT EXISTS proteintypval (
     nyckel TEXT PRIMARY KEY,
     typ TEXT NOT NULL
@@ -401,6 +404,14 @@ class Lagring:
                 self._db.execute("DELETE FROM slotval WHERE nyckel = ?", (nyckel,))
             else:
                 self._db.execute("INSERT OR REPLACE INTO slotval VALUES (?, ?)", (nyckel, slot))
+
+    def avfardade(self) -> set[str]:
+        """Produkter som inte ska föreslås igen (#32)."""
+        return {pid for (pid,) in self._db.execute("SELECT produkt_id FROM avfardade")}
+
+    def avfarda(self, produkt_id: str) -> None:
+        with self._db:
+            self._db.execute("INSERT OR IGNORE INTO avfardade VALUES (?)", (produkt_id,))
 
     def proteintypval(self) -> dict[str, str]:
         """Handvalda proteintyper: "grupp:<namn>" eller "produkt:<id>" -> typ."""
