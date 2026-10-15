@@ -82,3 +82,50 @@ def test_installning_kan_andras_i_granssnittet(tmp_path):
         assert len(karna.plan(date.today()).dagar) == 3
 
     _kor(tui, scenario)
+
+
+def test_butik_valjs_i_butikslistan(tmp_path):
+    from test_butiksval import FalsktRegister
+
+    karna = Matplan(tmp_path / "m.db", butiker=(hel_butik("City Gross Ytterby"),), butiksregister=(FalsktRegister(),))
+    tui = MatplanApp(karna, exportmapp=tmp_path / "ut")
+
+    async def scenario(pilot):
+        tui.query_one("#flikar").active = "butik"
+        await pilot.pause()
+        await tui.workers.wait_for_complete()
+        await pilot.pause()
+        tabell = tui.query_one("#butikstabell")
+        assert tabell.row_count == 7
+
+        inmatning = tui.query_one("#butiksinmatning")
+        inmatning.focus()
+        await pilot.press(*"50463", "enter")  # Borås postnummer: Borås hamnar först
+        await tui.workers.wait_for_complete()
+        await pilot.pause()
+        assert tabell.coordinate_to_cell_key((0, 0)).row_key.value == "City Gross Borås"
+
+        tabell.focus()
+        tabell.move_cursor(row=0)
+        await pilot.press("enter")
+        await tui.workers.wait_for_complete()
+        await pilot.pause()
+
+        assert karna.vald_butik().namn == "City Gross Borås"
+        assert "Butik: City Gross Borås" in tui.summa_text
+
+    _kor(tui, scenario)
+
+
+def test_hamta_priser_i_bakgrunden(tmp_path):
+    karna = _karna(tmp_path)
+    tui = MatplanApp(karna, exportmapp=tmp_path / "ut")
+
+    async def scenario(pilot):
+        await pilot.press("r")
+        await tui.workers.wait_for_complete()
+        await pilot.pause()
+        assert tui.query_one("#pristabell").row_count > 0
+        assert all(p.butik == "City Gross Ytterby" for p in karna.produkter("Kycklingfilé"))
+
+    _kor(tui, scenario)

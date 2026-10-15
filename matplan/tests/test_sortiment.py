@@ -13,6 +13,8 @@ from pathlib import Path
 import pytest
 
 import matplan.butiker.citygross as citygross
+from conftest import SortimentButik, katalogvara
+
 from matplan.butiker import ButiksFel, Produkt
 from matplan.butiker.citygross import CityGross
 from matplan.cli import main
@@ -114,26 +116,7 @@ def test_trasigt_svar_ger_butiksfel(tmp_path, svar):
 # --- Kärnan ----------------------------------------------------------------------
 
 
-def _vara(pid, namn, marke="GARANT", besk="", kr=50.0, kcal=100.0, protein=20.0):
-    return Produkt("City Gross Ytterby", pid, namn, marke, 400, kr * 0.4, kr, False, "Skafferiet / Konserver",
-                   besk, "", kcal, protein)
-
-
-class SortimentButik:
-    nyckel = "citygross"
-    namn = "City Gross Ytterby"
-
-    def __init__(self, produkter=None, fel=None):
-        self.produkter = produkter or []
-        self.fel = fel
-
-    def sortiment(self, framsteg=None):
-        if self.fel:
-            raise self.fel
-        return list(self.produkter)
-
-    def sok(self, sokord, butikskategori=()):
-        return []
+_vara = katalogvara
 
 
 def test_refresh_synkar_och_rapporterar(tmp_path):
@@ -204,7 +187,7 @@ def test_cli_sok(tmp_path, monkeypatch, capsys):
     import matplan.cli as cli
 
     monkeypatch.setenv("MATPLAN_DB", str(tmp_path / "cli.db"))
-    monkeypatch.setattr(cli, "_butiker", lambda: (SortimentButik([_vara("1", "Tonfisk Vatten", besk="3X170G")]),))
+    monkeypatch.setattr(cli, "_butiker", lambda vald: (SortimentButik([_vara("1", "Tonfisk Vatten", besk="3X170G")]),))
 
     assert main(["refresh"]) == 0
     assert main(["sök", "tonfisk"]) == 0

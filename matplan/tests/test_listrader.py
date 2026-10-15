@@ -68,7 +68,7 @@ def test_cli_listan_har_det_nya_formatet(tmp_path, monkeypatch, capsys):
     from conftest import hel_butik
 
     monkeypatch.setenv("MATPLAN_DB", str(tmp_path / "cli.db"))
-    monkeypatch.setattr(cli, "_butiker", lambda: (hel_butik(CITY),))
+    monkeypatch.setattr(cli, "_butiker", lambda vald: (hel_butik(CITY),))
 
     assert cli.main(["refresh"]) == 0
     assert cli.main(["lista"]) == 0

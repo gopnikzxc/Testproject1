@@ -19,8 +19,10 @@ Transport = Callable[..., bytes]
 def _urllib_transport() -> Transport:
     oppnare = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
-    def transport(url: str, headers: dict[str, str], metod: str = "GET") -> bytes:
-        forfragan = urllib.request.Request(url, headers={"User-Agent": ANVANDARAGENT, **headers}, method=metod)
+    def transport(url: str, headers: dict[str, str], metod: str = "GET", data: bytes | None = None) -> bytes:
+        forfragan = urllib.request.Request(
+            url, data=data, headers={"User-Agent": ANVANDARAGENT, **headers}, method=metod
+        )
         with oppnare.open(forfragan, timeout=30) as svar:
             return svar.read()
 
@@ -67,16 +69,21 @@ class HttpKlient:
         fil.write_text(json.dumps({"tid": self._klocka(), "data": data}))
         return data
 
-    def skicka(self, url: str, headers: dict[str, str] | None = None, metod: str = "POST") -> bytes:
-        """Anrop utan cache, t.ex. för att hämta en CSRF-token eller välja butik."""
-        return self._anropa(url, headers or {}, metod)
+    def skicka(
+        self, url: str, headers: dict[str, str] | None = None, metod: str = "POST", data: bytes | None = None
+    ) -> bytes:
+        """Anrop utan cache, t.ex. för att hämta en CSRF-token, välja butik eller
+        fråga webbutikens GraphQL (`data` är anropets kropp)."""
+        return self._anropa(url, headers or {}, metod, data)
 
-    def _anropa(self, url: str, headers: dict[str, str], metod: str = "GET") -> bytes:
+    def _anropa(self, url: str, headers: dict[str, str], metod: str = "GET", data: bytes | None = None) -> bytes:
         if self._senaste_anrop is not None:
             vanta = self._paus_s - (self._klocka() - self._senaste_anrop)
             if vanta > 0:
                 self._sov(vanta)
         self._senaste_anrop = self._klocka()
+        if data is not None:
+            return self._transport(url, headers, metod, data=data)
         if metod == "GET":
             return self._transport(url, headers)
         return self._transport(url, headers, metod)

@@ -1,0 +1,723 @@
+[
+ {
+  "data": {
+   "id": 3094,
+   "type": "StorePage",
+   "name": "Borås",
+   "storeName": "Borås",
+   "siteId": 21,
+   "storeLocation": {
+    "coordinates": "57.7141742,12.866981900000042",
+    "googlePlaceId": "ChIJ7baRgdYJUEYRlRWPiwEiF5M"
+   },
+   "address": {
+    "streetAddress": "Göteborgsvägen 181",
+    "zipCode": "504 63 ",
+    "city": "Borås"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 5108,
+   "type": "StorePage",
+   "name": "Eskilstuna",
+   "storeName": "Eskilstuna",
+   "siteId": 46,
+   "storeLocation": {
+    "coordinates": "59.3722841161024,16.473200030749886",
+    "googlePlaceId": "ChIJfQ6NvduNXkYRYwbg95Uk68M"
+   },
+   "address": {
+    "streetAddress": "Albertina Nyströms väg 8",
+    "zipCode": "632 22 ",
+    "city": "Eskilstuna"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3128,
+   "type": "StorePage",
+   "name": "Falun",
+   "storeName": "Falun",
+   "siteId": 34,
+   "storeLocation": {
+    "coordinates": "60.57697100000001,15.608302099999946",
+    "googlePlaceId": "ChIJYf0dPO16Z0YRwvwAvXXn8Es"
+   },
+   "address": {
+    "streetAddress": "Stortallsvägen 3",
+    "zipCode": "791 55 ",
+    "city": "Falun"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3136,
+   "type": "StorePage",
+   "name": "Gävle",
+   "storeName": "Gävle",
+   "siteId": 35,
+   "storeLocation": {
+    "coordinates": "60.6417822776662,17.143215076046168",
+    "googlePlaceId": "ChIJIU3dKgHHYEYRHR0xrE9dKLw"
+   },
+   "address": {
+    "streetAddress": "Ingenjörsgatan 15",
+    "zipCode": "802 93 ",
+    "city": "Gävle"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3110,
+   "type": "StorePage",
+   "name": "Halmstad",
+   "storeName": "Halmstad",
+   "siteId": 22,
+   "storeLocation": {
+    "coordinates": "56.666824906586704,12.906337003149044",
+    "googlePlaceId": "ChIJhcPDxqijUUYRBhx0nH9nXTo"
+   },
+   "address": {
+    "streetAddress": "Stormgatan 14",
+    "zipCode": "302 63 ",
+    "city": "Halmstad"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 2844,
+   "type": "StorePage",
+   "name": "Helsingborg Ättekulla",
+   "storeName": "Helsingborg Ättekulla",
+   "siteId": 6,
+   "storeLocation": {
+    "coordinates": "56.0162998,12.753191000000015",
+    "googlePlaceId": "ChIJmQEEsT8zUkYRzSe69o1GvZA"
+   },
+   "address": {
+    "streetAddress": "Rusthållsgatan 43 ",
+    "zipCode": "253 61 ",
+    "city": "Helsingborg"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3111,
+   "type": "StorePage",
+   "name": "Häggvik",
+   "storeName": "Häggvik",
+   "siteId": 14,
+   "storeLocation": {
+    "coordinates": "59.4367055,17.9283547",
+    "googlePlaceId": "ChIJPYhFOiqfX0YRAsUIx2qLQ90"
+   },
+   "address": {
+    "streetAddress": "Bagarbyvägen 61",
+    "zipCode": "191 62 ",
+    "city": "Sollentuna"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 1763,
+   "type": "StorePage",
+   "name": "Hässleholm",
+   "storeName": "Hässleholm",
+   "siteId": 12,
+   "storeLocation": {
+    "coordinates": "56.1549448,13.75636069999996",
+    "googlePlaceId": "ChIJ_UR9YypWUUYRZAdqZkGPStc"
+   },
+   "address": {
+    "streetAddress": "Hovdalavägen 3",
+    "zipCode": "281 33 ",
+    "city": "Hässleholm"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3129,
+   "type": "StorePage",
+   "name": "Höganäs",
+   "storeName": "Höganäs",
+   "siteId": 8,
+   "storeLocation": {
+    "coordinates": "56.202117897628625,12.568009228194649",
+    "googlePlaceId": "ChIJBY3ETA0mUkYRN1FKABlJ0LA"
+   },
+   "address": {
+    "streetAddress": "Midgårdsgatan 8",
+    "zipCode": "263 37 ",
+    "city": "Höganäs"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 2867,
+   "type": "StorePage",
+   "name": "Höör",
+   "storeName": "Höör",
+   "siteId": 16,
+   "storeLocation": {
+    "coordinates": "55.9509432050171,13.563887454482545",
+    "googlePlaceId": "ChIJ2VxaCNPvU0YRfnv8zxrOB7o"
+   },
+   "address": {
+    "streetAddress": "Marknadsvägen 2",
+    "zipCode": "243 21 ",
+    "city": "Höör"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3112,
+   "type": "StorePage",
+   "name": "Jönköping",
+   "storeName": "Jönköping",
+   "siteId": 23,
+   "storeLocation": {
+    "coordinates": "57.76585137546453,14.20214150789044",
+    "googlePlaceId": "ChIJhZLGanhtWkYREigoPS5OOhU"
+   },
+   "address": {
+    "streetAddress": "Batterigatan 2",
+    "zipCode": "553 05 ",
+    "city": "Jönköping"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3121,
+   "type": "StorePage",
+   "name": "Kalmar",
+   "storeName": "Kalmar",
+   "siteId": 18,
+   "storeLocation": {
+    "coordinates": "56.683554571742455,16.315970055726755",
+    "googlePlaceId": "ChIJG9H1FZXRV0YRWshL8jc9fv4"
+   },
+   "address": {
+    "streetAddress": "Bilbyggarvägen 3",
+    "zipCode": "393 56 ",
+    "city": "Kalmar"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3130,
+   "type": "StorePage",
+   "name": "Karlshamn",
+   "storeName": "Karlshamn",
+   "siteId": 19,
+   "storeLocation": {
+    "coordinates": "56.178225795485375,14.855648728198476",
+    "googlePlaceId": "ChIJjV9zCxaFVkYRwA8ekOxKbwI"
+   },
+   "address": {
+    "streetAddress": "Erik Dahlbergsv 101",
+    "zipCode": "374 38 ",
+    "city": "Karlshamn"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3138,
+   "type": "StorePage",
+   "name": "Karlskrona",
+   "storeName": "Karlskrona",
+   "siteId": 20,
+   "storeLocation": {
+    "coordinates": "56.19673500701555,15.612983498180334",
+    "googlePlaceId": "ChIJ33tOWIdsVkYR8klYroJ2CnA"
+   },
+   "address": {
+    "streetAddress": "Lyckebyvägen 1",
+    "zipCode": "371 45 ",
+    "city": "Karlskrona"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 2853,
+   "type": "StorePage",
+   "name": "Kristianstad",
+   "storeName": "Kristianstad ",
+   "siteId": 37,
+   "storeLocation": {
+    "coordinates": "56.0241227,14.200430299999994",
+    "googlePlaceId": "ChIJM8gYS6McVEYRMe6ajnG3y8Y"
+   },
+   "address": {
+    "streetAddress": "Fundationsvägen 9 ",
+    "zipCode": "291 28",
+    "city": "Kristianstad"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 2860,
+   "type": "StorePage",
+   "name": "Landskrona",
+   "storeName": "Landskrona",
+   "siteId": 9,
+   "storeLocation": {
+    "coordinates": "55.8688385,12.831235600000014",
+    "googlePlaceId": "ChIJh2TjrcK1U0YRq3G4ARw-Zhw"
+   },
+   "address": {
+    "streetAddress": "Drottninggatan 31",
+    "zipCode": "261 31 ",
+    "city": "Landskrona"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3139,
+   "type": "StorePage",
+   "name": "Linköping Djurgården",
+   "storeName": "Linköping Djurgården",
+   "siteId": 44,
+   "storeLocation": {
+    "coordinates": "58.3867585199632,15.588617894445411",
+    "googlePlaceId": "ChIJT8xDAQtvWUYRwDEZ29TpJHo"
+   },
+   "address": {
+    "streetAddress": "Åsmestadsgatan 8",
+    "zipCode": "583 38 ",
+    "city": "Linköping"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 9097,
+   "type": "StorePage",
+   "name": "Linköping Tornby",
+   "storeName": "Linköping Tornby",
+   "siteId": 168,
+   "storeLocation": {
+    "coordinates": "58.38665159999999,15.588129299999991",
+    "googlePlaceId": "ChIJawTkPKxoWUYRL31ZXbxkLbU"
+   },
+   "address": {
+    "streetAddress": "Norra Svedengatan 9 ",
+    "zipCode": "58273 ",
+    "city": "Linköping"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3113,
+   "type": "StorePage",
+   "name": "Ljungby",
+   "storeName": "Ljungby",
+   "siteId": 5,
+   "storeLocation": {
+    "coordinates": "56.815147050158494,13.906651300474605",
+    "googlePlaceId": "ChIJjTS04NAmUUYRNQYfBBJ1wAQ"
+   },
+   "address": {
+    "streetAddress": "Ringvägen 3 A",
+    "zipCode": "341 32 ",
+    "city": "Ljungby"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 13481,
+   "type": "StorePage",
+   "name": "Malmö Hyllie",
+   "storeName": "Malmö Hyllie",
+   "siteId": 169,
+   "storeLocation": {
+    "coordinates": "55.5613941,12.9827731",
+    "googlePlaceId": "ChIJobtsZMyhU0YRW_0rcN2HP5Y"
+   },
+   "address": {
+    "streetAddress": "Hyllie Allé 3 C",
+    "zipCode": "215 34",
+    "city": "Malmö"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 2666,
+   "type": "StorePage",
+   "name": "Malmö Stora Bernstorp",
+   "storeName": "Malmö Stora Bernstorp",
+   "siteId": 59,
+   "storeLocation": {
+    "coordinates": "55.6117886,13.10106380000002",
+    "googlePlaceId": "ChIJH6pzohSiU0YRLKkQJrXjHJI"
+   },
+   "address": {
+    "streetAddress": "Vassvägen 20",
+    "zipCode": "232 61 ",
+    "city": "Arlöv"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3836,
+   "type": "StorePage",
+   "name": "Mantorp",
+   "storeName": "Mantorp",
+   "siteId": 26,
+   "storeLocation": {
+    "coordinates": "58.3661954,15.29473859999996"
+   },
+   "address": {
+    "streetAddress": "Runvägen 2 ",
+    "zipCode": "595 58",
+    "city": "Mantorp"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3132,
+   "type": "StorePage",
+   "name": "Norrköping",
+   "storeName": "Norrköping",
+   "siteId": 27,
+   "storeLocation": {
+    "coordinates": "58.616388449447676,16.174504629406027",
+    "googlePlaceId": "ChIJNbknJRg6WUYRLqZnUvQaV1E"
+   },
+   "address": {
+    "streetAddress": "Malmgatan 41",
+    "zipCode": "601 14 ",
+    "city": "Norrköping"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 25027,
+   "type": "StorePage",
+   "name": "Norrtälje",
+   "storeName": "Norrtälje",
+   "siteId": 1010,
+   "storeLocation": {
+    "coordinates": "59.765388392012994,18.692970904315697",
+    "googlePlaceId": "ChIJFS1RUsH3X0YR0S7dxJGnBSE"
+   },
+   "address": {
+    "streetAddress": "Estunavägen 22",
+    "zipCode": "76150",
+    "city": "Norrtälje"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3141,
+   "type": "StorePage",
+   "name": "Nyköping",
+   "storeName": "Nyköping",
+   "siteId": 28,
+   "storeLocation": {
+    "coordinates": "58.77194632559544,17.016658892822026",
+    "googlePlaceId": "ChIJO1AArJktX0YRid8bmapVFGY"
+   },
+   "address": {
+    "streetAddress": "Stenbocksvägen 30",
+    "zipCode": "611 67 ",
+    "city": "Nyköping"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3115,
+   "type": "StorePage",
+   "name": "Skara",
+   "storeName": "Skara",
+   "siteId": 30,
+   "storeLocation": {
+    "coordinates": "58.3916456894167,13.458477753355114",
+    "googlePlaceId": "ChIJEyxi4Q7gWkYRojZvE7DqCEc"
+   },
+   "address": {
+    "streetAddress": "Skaraborgsgatan 49",
+    "zipCode": "532 24 ",
+    "city": "Skara"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3123,
+   "type": "StorePage",
+   "name": "Staffanstorp",
+   "storeName": "Staffanstorp",
+   "siteId": 11,
+   "storeLocation": {
+    "coordinates": "55.63980905967864,13.215996079808598",
+    "googlePlaceId": "ChIJuzgzpLOZU0YRJcyEK5GF4dE"
+   },
+   "address": {
+    "streetAddress": "Klågerupsvägen 1",
+    "zipCode": "245 44 ",
+    "city": "Staffanstorp"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3133,
+   "type": "StorePage",
+   "name": "Sundsvall",
+   "storeName": "Sundsvall",
+   "siteId": 36,
+   "storeLocation": {
+    "coordinates": "62.41390138062737,17.339241795436994",
+    "googlePlaceId": "ChIJiZ0avqthZEYRW0GWuruLDls"
+   },
+   "address": {
+    "streetAddress": "Norra vägen 10",
+    "zipCode": "850 09 ",
+    "city": "Sundsvall"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3142,
+   "type": "StorePage",
+   "name": "Trelleborg",
+   "storeName": "Trelleborg",
+   "siteId": 15,
+   "storeLocation": {
+    "coordinates": "55.374185617814625,13.189799173810162",
+    "googlePlaceId": "ChIJq6qqtviiU0YRiJK3aTt6ZnQ"
+   },
+   "address": {
+    "streetAddress": "Engelbrektsgatan 113",
+    "zipCode": "231 34 ",
+    "city": "Trelleborg"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 4222,
+   "type": "StorePage",
+   "name": "Trollhättan",
+   "storeName": "Trollhättan",
+   "siteId": 1006,
+   "storeLocation": {
+    "coordinates": "58.314879717502976,12.301629339124345",
+    "googlePlaceId": "ChIJM-VAa909RUYRWemT0tbPg-E"
+   },
+   "address": {
+    "streetAddress": "Överbyvägen 25",
+    "zipCode": "461 70 ",
+    "city": "Trollhättan"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3116,
+   "type": "StorePage",
+   "name": "Uddevalla",
+   "storeName": "Uddevalla",
+   "siteId": 57,
+   "storeLocation": {
+    "coordinates": "58.3531442,11.824416299999939",
+    "googlePlaceId": "ChIJh5RJFUAPRUYRsJ1Ida4GJDA"
+   },
+   "address": {
+    "streetAddress": "Östra torpvägen 2",
+    "zipCode": "451 76 ",
+    "city": "Uddevalla"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3124,
+   "type": "StorePage",
+   "name": "Uppsala Boländerna",
+   "storeName": "Uppsala Boländerna",
+   "siteId": 17,
+   "storeLocation": {
+    "coordinates": "59.84730043412198,17.686339392103058",
+    "googlePlaceId": "ChIJ9Rr2v0jJX0YRw0aJZy8xZ-s"
+   },
+   "address": {
+    "streetAddress": "Stångjärnsgatan 10",
+    "zipCode": "753 23 ",
+    "city": "Uppsala"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3134,
+   "type": "StorePage",
+   "name": "Uppsala Gränby",
+   "storeName": "Uppsala Gränby",
+   "siteId": 165,
+   "storeLocation": {
+    "coordinates": "59.88616824532267,17.6713480610516",
+    "googlePlaceId": "ChIJWWqjSyLMX0YRrywxySIxGKc"
+   },
+   "address": {
+    "streetAddress": "Takpannegatan 21",
+    "zipCode": "754 60",
+    "city": "Uppsala"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3117,
+   "type": "StorePage",
+   "name": "Värmdö",
+   "storeName": "Värmdö",
+   "siteId": 166,
+   "storeLocation": {
+    "coordinates": "59.31032045529617,18.383655135728514",
+    "googlePlaceId": "ChIJPb4A_GuAX0YRzXWtEyltQU8"
+   },
+   "address": {
+    "streetAddress": "Gustavsbergsvägen 34",
+    "zipCode": "134 39",
+    "city": "Gustavsberg"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3126,
+   "type": "StorePage",
+   "name": "Värnamo",
+   "storeName": "Värnamo",
+   "siteId": 29,
+   "storeLocation": {
+    "coordinates": "57.179263089596134,14.005538282080291",
+    "googlePlaceId": "ChIJS4fQLK3BUEYRaulaD35DjPk"
+   },
+   "address": {
+    "streetAddress": "Silkesvägen 34",
+    "zipCode": "331 53 ",
+    "city": "Värnamo"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3135,
+   "type": "StorePage",
+   "name": "Västerås",
+   "storeName": "Västerås",
+   "siteId": 1009,
+   "storeLocation": {
+    "coordinates": "59.619482570440674,16.45955823739474",
+    "googlePlaceId": "ChIJI9stwcBjXkYRuR0Mu0fboCw"
+   },
+   "address": {
+    "streetAddress": "Löpkranegatan 26",
+    "zipCode": "722 38 ",
+    "city": "Västerås"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3144,
+   "type": "StorePage",
+   "name": "Växjö",
+   "storeName": "Växjö",
+   "siteId": 2,
+   "storeLocation": {
+    "coordinates": "56.8782337,14.772620200000006",
+    "googlePlaceId": "ChIJHyariw0kV0YRfnP0Oh67wKg"
+   },
+   "address": {
+    "streetAddress": "Sambandsvägen 4 ",
+    "zipCode": "352 36 ",
+    "city": "Växjö"
+   },
+   "ispublished": true
+  }
+ },
+ {
+  "data": {
+   "id": 3118,
+   "type": "StorePage",
+   "name": "Ytterby",
+   "storeName": "Ytterby",
+   "siteId": 31,
+   "storeLocation": {
+    "coordinates": "57.859211508441945,11.91823417631288",
+    "googlePlaceId": "ChIJr6Mu1cNhRUYRYBSX54U3PKw"
+   },
+   "address": {
+    "streetAddress": "Torsbyvägen 12",
+    "zipCode": "442 50 ",
+    "city": "Ytterby"
+   },
+   "ispublished": true
+  }
+ }
+]

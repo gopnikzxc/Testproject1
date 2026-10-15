@@ -8,11 +8,11 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from .butiker import Butik
+from .butiker import Butik, ButiksFel, Butiksregister, ValdButik
 from .bunkra import Bunkring
-from .butiker.citygross import CityGross
+from .butiker.citygross import CityGross, CityGrossButiker
 from .butiker.willys import Willys
-from .core import DAGAR_PER_MANAD, Hamtningsresultat, Matplan, PlaneringsFel
+from .core import DAGAR_PER_MANAD, Butiksrad, Hamtningsresultat, Matplan, PlaneringsFel
 from .export import exportera
 from .http import HttpKlient
 from .inkop import Inkopslista
@@ -32,9 +32,15 @@ def _http() -> HttpKlient:
     return HttpKlient(Path.home() / ".cache" / "matplan" / "http")
 
 
-def _butiker() -> tuple[Butik, ...]:
-    http = _http()
-    return (CityGross(http), Willys(http))
+def _butiker(vald: ValdButik) -> tuple[Butik, ...]:
+    """Adaptern för den valda butiken."""
+    if vald.kedja == "willys":
+        return (Willys(_http(), str(vald.nummer), vald.namn),)
+    return (CityGross(_http(), vald.nummer, vald.namn),)
+
+
+def _butiksregister() -> tuple[Butiksregister, ...]:
+    return (CityGrossButiker(_http()),)
 
 
 def _naringskallor() -> tuple[Livsmedelsverket | None, OpenFoodFacts | None]:
@@ -105,7 +111,7 @@ def _visa_budget(konsol: Console, app: Matplan, plan: Plan) -> None:
 
 
 def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
-    if not resultat.antal_produkter and not resultat.fel:
+    if not resultat.antal_produkter and not resultat.sortiment and not resultat.fel:
         konsol.print("[yellow]Inga butiker är konfigurerade ännu.[/yellow]")
     for butik, (antal, nya, utgangna) in resultat.sortiment.items():
         konsol.print(f"{butik}: sortiment {antal} livsmedel ({nya} nya, {utgangna} utgångna)")
@@ -117,6 +123,26 @@ def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
         konsol.print(f"Näringsvärden hämtade för {resultat.naring_hamtad} ingredienser")
     for ingrediens, fel in resultat.naring_fel.items():
         konsol.print(f"[yellow]{ingrediens}: {fel}[/yellow]")
+
+
+def _visa_butiker(konsol: Console, rader: list[Butiksrad]) -> None:
+    if not rader:
+        konsol.print("Inga butiker hittades.")
+        return
+    tabell = Table()
+    tabell.add_column("")
+    tabell.add_column("Butik")
+    tabell.add_column("Adress")
+    if any(r.km is not None for r in rader):
+        tabell.add_column("Avstånd", justify="right")
+    for r in rader:
+        p = r.plats
+        celler = ["✓" if r.vald else "", p.namn, f"{p.adress}, {p.postnummer[:3]} {p.postnummer[3:]} {p.ort}"]
+        if len(tabell.columns) == 4:
+            celler.append("" if r.km is None else f"{r.km:.0f} km")
+        tabell.add_row(*celler)
+    konsol.print(tabell)
+    konsol.print("Välj med `matplan butik --välj \"<butik>\"`.")
 
 
 def _visa_plan(konsol: Console, app: Matplan, plan: Plan) -> None:
@@ -295,6 +321,10 @@ def main(argv: list[str] | None = None) -> int:
     lager = kommandon.add_parser("lager", help="Visa lagret eller sätt en varas mängd")
     lager.add_argument("ingrediens", nargs="?")
     lager.add_argument("gram", nargs="?", type=float)
+    butik = kommandon.add_parser("butik", help="Visa eller välj butik")
+    butik.add_argument("postnummer", nargs="?", help="Lista butiker närmast först")
+    butik.add_argument("--sök", "--sok", dest="sok", metavar="TEXT", help="Sök butik på namn eller ort")
+    butik.add_argument("--välj", "--valj", dest="valj", metavar="BUTIK", help="Välj butik, t.ex. \"City Gross Borås\"")
     inst = kommandon.add_parser("installningar", help="Visa eller ändra inställningar")
     inst.add_argument("nyckel", nargs="?")
     inst.add_argument("varde", nargs="?", type=float)
@@ -302,10 +332,13 @@ def main(argv: list[str] | None = None) -> int:
 
     konsol = Console()
     livsmedelsverket, openfoodfacts = _naringskallor()
-    app = Matplan(_db_sokvag(), butiker=_butiker(), livsmedelsverket=livsmedelsverket, openfoodfacts=openfoodfacts)
+    app = Matplan(
+        _db_sokvag(), butiker=_butiker, livsmedelsverket=livsmedelsverket, openfoodfacts=openfoodfacts,
+        butiksregister=_butiksregister(),
+    )
     try:
         return _kor(konsol, app, args)
-    except (PlaneringsFel, KeyError) as fel:
+    except (PlaneringsFel, KeyError, ValueError, ButiksFel) as fel:
         konsol.print(f"[red]{fel.args[0]}[/red]")
         return 1
 
@@ -370,6 +403,13 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
         for varning in app.lagat(block=args.block):
             konsol.print(f"[yellow]{varning}[/yellow]")
         konsol.print(f"Block {args.block} draget från lagret.")
+    elif kommando == "butik":
+        if args.valj:
+            vald = app.valj_butik(args.valj)
+            konsol.print(f"Vald butik: {vald.namn} (butiksnummer {vald.nummer}). Kör `matplan refresh` för dess sortiment.")
+        else:
+            konsol.print(f"Vald butik: {app.vald_butik().namn}")
+            _visa_butiker(konsol, app.butikslista(postnummer=args.postnummer, sok=args.sok))
     elif kommando == "lager":
         if args.gram is not None:
             app.satt_lager(args.ingrediens, args.gram)

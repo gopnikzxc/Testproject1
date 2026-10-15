@@ -3,13 +3,16 @@
 Ingredienskatalogen ägs av koden tills Livsmedelsverket kopplas in (#5).
 """
 
+import dataclasses
+import json
 import pickle
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
 from .bunkra import Bunkring
-from .butiker import Produkt
+from .butiker import WILLYS_KUNGALV, YTTERBY, Produkt, ValdButik
+from .katalog import Ingrediens
 from .naring import Naring
 from .planerare import Plan
 
@@ -30,9 +33,6 @@ STANDARDINSTALLNINGAR = {
     "rea_veckor": 8,
     "frys_kg": 10,
     "torr_kg": 2,
-    # Vilka butiker som hämtas och planeras mot (1 = på, 0 = av).
-    "butik_citygross": 1,
-    "butik_willys": 0,
 }
 
 _SCHEMA = """
@@ -120,6 +120,14 @@ CREATE TABLE IF NOT EXISTS katalogpriser (
     erbjudande INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS katalogpriser_produkt ON katalogpriser (butik, produkt_id, tid);
+CREATE TABLE IF NOT EXISTS grupper (
+    namn TEXT PRIMARY KEY,
+    data TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS meta (
+    nyckel TEXT PRIMARY KEY,
+    varde TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS aktiv_plan (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     plan BLOB NOT NULL
@@ -131,9 +139,33 @@ class Lagring:
     def __init__(self, sokvag: Path):
         sokvag = Path(sokvag)
         sokvag.parent.mkdir(parents=True, exist_ok=True)
-        self._db = sqlite3.connect(sokvag)
+        # GUI:t kör hämtningar och butiksval i en bakgrundstråd (en åt gången).
+        self._db = sqlite3.connect(sokvag, check_same_thread=False)
         self._db.executescript(_SCHEMA)
+        self._migrera_butiksval()
         self._seeda()
+
+    def _migrera_butiksval(self) -> None:
+        """Första gången: gör de gamla av/på-inställningarna butik_citygross och
+        butik_willys till ett butiksval. Ytterby är standard; Willys Kungälv blir
+        vald bara om den var den enda påslagna."""
+        if self._db.execute("SELECT 1 FROM meta WHERE nyckel = 'butik'").fetchone():
+            return
+        gamla = dict(self._db.execute(
+            "SELECT nyckel, varde FROM installningar WHERE nyckel IN ('butik_citygross', 'butik_willys')"
+        ))
+        vald = WILLYS_KUNGALV if gamla.get("butik_willys") and not gamla.get("butik_citygross", 1) else YTTERBY
+        self.spara_vald_butik(vald)
+
+    def vald_butik(self) -> ValdButik:
+        rad = self._db.execute("SELECT varde FROM meta WHERE nyckel = 'butik'").fetchone()
+        return ValdButik(**json.loads(rad[0])) if rad else YTTERBY
+
+    def spara_vald_butik(self, butik: ValdButik) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO meta VALUES ('butik', ?)", (json.dumps(dataclasses.asdict(butik)),)
+            )
 
     def _seeda(self) -> None:
         with self._db:
@@ -190,14 +222,16 @@ class Lagring:
         ]
 
     def prishistorik(self, fran: datetime) -> dict[tuple[str, str], list[tuple[datetime, float]]]:
-        """kr/kg per (butik, produkt) från hämtningar sedan `fran`."""
+        """kr/kg per (butik, produkt) sedan `fran`, från både sökhämtningar och sortimentssynkar."""
         rader = self._db.execute(
             """
             SELECT p.butik, p.produkt_id, h.tid, p.kr_per_kg
             FROM priser p JOIN hamtningar h ON h.id = p.hamtning
             WHERE h.tid >= ?
+            UNION ALL
+            SELECT butik, produkt_id, tid, kr_per_kg FROM katalogpriser WHERE tid >= ?
             """,
-            (fran.isoformat(),),
+            (fran.isoformat(), fran.isoformat()),
         )
         historik: dict[tuple[str, str], list[tuple[datetime, float]]] = {}
         for butik, produkt_id, tid, kr_per_kg in rader:
@@ -205,7 +239,9 @@ class Lagring:
         return historik
 
     def senaste_hamtning(self) -> datetime | None:
-        rad = self._db.execute("SELECT MAX(tid) FROM hamtningar").fetchone()
+        rad = self._db.execute(
+            "SELECT MAX(tid) FROM (SELECT tid FROM hamtningar UNION ALL SELECT tid FROM katalogpriser)"
+        ).fetchone()
         return datetime.fromisoformat(rad[0]) if rad[0] else None
 
     def antal_hamtningar(self) -> int:
@@ -360,3 +396,40 @@ class Lagring:
             (butik, produkt_id),
         )
         return [(datetime.fromisoformat(tid), kr) for tid, kr in rader]
+
+    def katalogtider(self) -> dict[str, datetime]:
+        """Senaste sortimentssynk per butik."""
+        rader = self._db.execute("SELECT butik, MAX(senast_sedd) FROM katalog GROUP BY butik")
+        return {butik: datetime.fromisoformat(tid) for butik, tid in rader}
+
+    # --- Ingrediensgrupper ------------------------------------------------
+
+    def seeda_grupper(self, grupper: tuple[Ingrediens, ...]) -> None:
+        """Lägger in de inbyggda grupperna första gången. En grupp som tagits
+        bort kommer inte tillbaka."""
+        if self._db.execute("SELECT 1 FROM meta WHERE nyckel = 'grupper_seedade'").fetchone():
+            return
+        with self._db:
+            for grupp in grupper:
+                self._db.execute(
+                    "INSERT OR IGNORE INTO grupper VALUES (?, ?)", (grupp.namn, json.dumps(dataclasses.asdict(grupp)))
+                )
+            self._db.execute("INSERT INTO meta VALUES ('grupper_seedade', '1')")
+
+    def grupper(self) -> list[Ingrediens]:
+        falt = {f.name for f in dataclasses.fields(Ingrediens)}
+        resultat = []
+        for (data,) in self._db.execute("SELECT data FROM grupper ORDER BY namn"):
+            varden = {k: tuple(v) if isinstance(v, list) else v for k, v in json.loads(data).items() if k in falt}
+            resultat.append(Ingrediens(**varden))
+        return resultat
+
+    def spara_grupp(self, grupp: Ingrediens) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO grupper VALUES (?, ?)", (grupp.namn, json.dumps(dataclasses.asdict(grupp)))
+            )
+
+    def ta_bort_grupp(self, namn: str) -> bool:
+        with self._db:
+            return self._db.execute("DELETE FROM grupper WHERE namn = ?", (namn,)).rowcount > 0

@@ -45,5 +45,32 @@ def inga_riktiga_butiker(monkeypatch):
     """CLI-tester får aldrig anropa riktiga butiker; tester som vill ha butiker sätter egna."""
     import matplan.cli
 
-    monkeypatch.setattr(matplan.cli, "_butiker", lambda: ())
+    monkeypatch.setattr(matplan.cli, "_butiker", lambda vald: ())
+    monkeypatch.setattr(matplan.cli, "_butiksregister", lambda: ())
     monkeypatch.setattr(matplan.cli, "_naringskallor", lambda: (None, None))
+
+
+def katalogvara(pid, namn, marke="GARANT", besk="", kr=50.0, kcal=100.0, protein=20.0,
+                kategori="Skafferiet / Konserver", butik="City Gross Ytterby", forpackning_g=400.0, erbjudande=False):
+    """En produkt i butikens synkade sortiment."""
+    return Produkt(butik, pid, namn, marke, forpackning_g, kr * forpackning_g / 1000 if forpackning_g else kr, kr,
+                   erbjudande, kategori, besk, "", kcal, protein)
+
+
+class SortimentButik:
+    """Butik som listar hela sortimentet (som City Gross). Sökning per term får inte användas."""
+
+    nyckel = "citygross"
+
+    def __init__(self, produkter=None, fel=None, namn="City Gross Ytterby"):
+        self.namn = namn
+        self.produkter = produkter or []
+        self.fel = fel
+
+    def sortiment(self, framsteg=None):
+        if self.fel:
+            raise self.fel
+        return list(self.produkter)
+
+    def sok(self, sokord, butikskategori=()):
+        raise AssertionError("butiker med synkat sortiment ska inte sökas per term")

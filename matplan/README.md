@@ -10,6 +10,8 @@ python3 -m venv .venv
 .venv/bin/matplan gui                               # interactive terminal GUI (see below)
 .venv/bin/matplan plan                              # plan the coming days in 3-day blocks
 .venv/bin/matplan byt 1 kolhydrater Potatis         # swap an ingredient in block 1 (without an ingredient: next in turn)
+.venv/bin/matplan butik "442 50"                    # City Gross stores, nearest first (or --sök Borås)
+.venv/bin/matplan butik --välj "City Gross Borås"   # choose the store to plan against
 .venv/bin/matplan refresh                           # sync the store's whole food range + current prices
 .venv/bin/matplan sök tonfisk                       # search the synced range (brand, pack, price, kcal, protein)
 .venv/bin/matplan lista                             # shopping list: whole packages, kr/kg, single store vs split
@@ -30,7 +32,7 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 
 ## Terminal GUI
 
-`matplan gui` opens a Textual app with tabs for Plan, Inköpslista, Lager, Bunkring, Priser and Inställningar. Everything comes from the same commands as the CLI. The bottom line shows cost against the budget, each person's kcal and protein, and the cheapest store.
+`matplan gui` opens a Textual app with tabs for Plan, Inköpslista, Lager, Bunkring, Priser, Butik and Inställningar. Everything comes from the same commands as the CLI. The bottom line shows cost against the budget, each person's kcal and protein, the chosen store and the cheapest store.
 
 | Key | Does |
 |---|---|
@@ -42,6 +44,8 @@ The database is stored at `~/.local/share/matplan/matplan.db`. Set `MATPLAN_DB` 
 | `e` | Exports plan.md and inkopslista.md |
 | `n` | New plan, dropping the bought plan and any swaps |
 | `q` | Quit |
+
+In the Butik tab, type a postcode (nearest first) or a name/town in the input box, then press Enter on a store to choose it. Press `r` afterwards to sync its range.
 
 Settings and inventory amounts are changed in the input box at the bottom of their tabs, for example `veckobudget 1300` or `Havregryn 750`.
 
@@ -58,7 +62,6 @@ Settings and inventory amounts are changed in the input box at the bottom of the
 | `veckobudget` / `manadsbudget` | 1250 / 5000 | Ceilings for planned food. A month counts as 4 weeks, and no day may cost more than the stricter of the two |
 | `rea_procent` / `rea_veckor` | 25 / 8 | A price is a deal when it is at least this many percent below the median of the last weeks |
 | `frys_kg` / `torr_kg` | 10 / 2 | Storage space for stock-up in the freezer and the dry store. What's already in stock counts against it |
-| `butik_citygross` / `butik_willys` | 1 / 0 | Which stores are fetched and planned against. A store that's off is skipped by `refresh`, and its saved prices are ignored |
 
 Planning uses inventory first: whatever is already at home costs 0 kr, and the shopping list only covers what's missing. Once you've run `köpt`, that plan stays in place until it ends or you run `plan --ny`.
 
@@ -78,12 +81,20 @@ A fresh protein deal (eggs, dairy, fresh meat) that gives more protein per krona
 
 ## Stores
 
+matplan plans against one store at a time. City Gross Ytterby is the default.
+
+`matplan butik <postcode>` lists all City Gross stores, nearest first. The list comes from the web shop's store pages, which give each store's address, postcode and coordinates. Your postcode's position is taken from the store whose postcode is most like yours: longest shared start, then smallest numeric difference. Swedish postcodes are ordered geographically, so this is good enough to sort by distance. Distances are as the crow flies. `--sök` matches name, town or postcode.
+
+`--välj` takes a store's name (`"City Gross Borås"`, or just `Borås`) and looks up its store number through the web shop's GraphQL (`lindbakstorenumber(siteId)`). The choice is saved as chain, store number and name. Prices and range are saved per store, so switching back to an earlier store brings back its range and deal history right away. Groups, inventory, locks and settings aren't affected by a switch. Databases from before the store picker get Ytterby, or Willys Kungälv if that was the only store turned on.
+
 | Store | Status | Notes |
 |---|---|---|
-| City Gross Ytterby | ✅ | Store number 3240, looked up from siteId 31 via the web shop's GraphQL. Search returns Ytterby's own range and prices |
-| Willys Kungälv | ✅ (off by default; `matplan installningar butik_willys 1` turns it on) | Store 2104 (Komarken). The store is selected in the session with a CSRF token and `store/activate`. Results have no category, so the module filters with the search's category facet |
+| City Gross (all 38 stores) | ✅ | Range sync and prices per store number. Ytterby is store 3240 (siteId 31) |
+| Willys Kungälv | ⏸ (kept, not selectable in the picker) | Store 2104 (Komarken). The store is selected in the session with a CSRF token and `store/activate`. Results have no category, so the module filters with the search's category facet |
 
-`refresh` searches with each ingredient's Swedish search terms. A product counts only if its name contains the search words as whole words and the store's category fits, which keeps out cat food, ready meals and pickled cucumber. Eggs are compared per egg and converted to kr/kg at 60 g per egg. Products sold by weight count as loose weight. Products can also be excluded by word, which drops for example a frozen smoothie listed among the berries. Responses are cached for 6 hours under `~/.cache/matplan/http`. A full refresh against both stores takes just over a minute, because requests are spaced out.
+The plan works with ingredient groups (Kycklingfilé, Potatis, Keso …). The built-in groups are stored in the database the first time matplan runs. For City Gross, `refresh` doesn't search per group: each group is matched against the synced range. A product counts only if its name contains the group's first search word as a whole word, the other search words appear in the name or description, the store's category fits, and no excluded word is in the name. That keeps out cat food, ready meals, pickled cucumber and chicken sausage. For each group the plan uses the cheapest product by kr/kg, with that product's own price and nutrition. If the product lacks nutrition, the group's values are used. Products that are no longer sold aren't used.
+
+Eggs are compared per egg and converted to kr/kg at 60 g per egg. Products sold by weight count as loose weight. Stores without range sync (Willys) are still searched per group with its Swedish search terms. Responses are cached for 6 hours under `~/.cache/matplan/http`.
 
 ## Nutrition values
 
@@ -95,6 +106,6 @@ Once fetched, values are kept in the database, and the plan names its sources. U
 
 ## Status
 
-Done: #2–#7 and #9–#15, which is the whole spec in #1
+Done: #2–#7 and #9–#15, which is the whole spec in #1. From the second spec (#23): #24–#27.
 
 ICA Maxi (#8) is shelved because ICA blocks automated access.

@@ -15,8 +15,42 @@ class ButiksFel(Exception):
     pass
 
 
-# Butiksnamn (som de sparas med priserna) -> nyckel i inställningen butik_<nyckel>.
-BUTIKSNYCKLAR = {"City Gross Ytterby": "citygross", "Willys Kungälv": "willys"}
+@dataclass(frozen=True)
+class ValdButik:
+    """Butiken som hämtas och planeras mot: kedja, kedjans butiksnummer och
+    namnet som priser och sortiment sparas under."""
+
+    kedja: str  # adapterns nyckel, t.ex. "citygross"
+    nummer: int
+    namn: str
+
+
+YTTERBY = ValdButik("citygross", 3240, "City Gross Ytterby")
+WILLYS_KUNGALV = ValdButik("willys", 2104, "Willys Kungälv")
+
+
+@dataclass(frozen=True)
+class Butiksplats:
+    """En butik i kedjans butikslista."""
+
+    kedja: str
+    id: str  # kedjans id för butikssidan (City Gross: siteId); inte butiksnumret
+    namn: str  # t.ex. "City Gross Ytterby"
+    ort: str
+    postnummer: str  # fem siffror, t.ex. "44250"
+    adress: str = ""
+    lat: float | None = None
+    lng: float | None = None
+
+
+class Butiksregister(Protocol):
+    """En kedjas butikslista."""
+
+    kedja: str
+
+    def butiker(self) -> list[Butiksplats]: ...
+
+    def butiksnummer(self, plats: Butiksplats) -> int: ...
 
 
 @dataclass(frozen=True)
@@ -42,7 +76,7 @@ class Produkt:
 
 class Butik(Protocol):
     namn: str
-    nyckel: str  # kort namn för inställningen butik_<nyckel>, t.ex. "citygross"
+    nyckel: str  # kedjan, som i ValdButik.kedja, t.ex. "citygross"
 
     def sok(self, sokord: str, butikskategori: tuple[str, ...] = ()) -> list[Produkt]:
         """Produkter som matchar söktermen. `butikskategori` är ingrediensens
