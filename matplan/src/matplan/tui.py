@@ -92,7 +92,8 @@ class MatplanApp(App):
             f"Matkostnad {plan.kr_per_dag * 7:.0f} kr/vecka av {inst['veckobudget']:.0f} · "
             f"{plan.kr_per_dag * DAGAR_PER_MANAD:.0f} kr/månad av {inst['manadsbudget']:.0f}",
             " · ".join(
-                f"{p.namn.capitalize()} {plan.dagar[0].kcal(p.namn):.0f} kcal / {plan.dagar[0].protein(p.namn):.0f} g protein"
+                f"{p.namn.capitalize()} {plan.dagar[0].kcal(p.namn):.0f} kcal / {plan.dagar[0].protein(p.namn):.0f} g protein "
+                f"({plan.dagar[0].viktat_protein(p.namn):.0f} viktat)"
                 for p in plan.profiler
             ),
         ]

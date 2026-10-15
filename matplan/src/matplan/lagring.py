@@ -15,6 +15,7 @@ from .butiker import WILLYS_KUNGALV, YTTERBY, Produkt, ValdButik
 from .katalog import Ingrediens
 from .naring import Naring
 from .planerare import Plan
+from .protein import STANDARDKVALITET
 
 STANDARDINSTALLNINGAR = {
     "jag.kcal_mal": 2000,
@@ -33,6 +34,8 @@ STANDARDINSTALLNINGAR = {
     "rea_veckor": 8,
     "frys_kg": 10,
     "torr_kg": 2,
+    # Proteinkvalitet per proteintyp (ungefär PDCAAS), #30.
+    **{f"kvalitet_{typ}": faktor for typ, faktor in STANDARDKVALITET.items()},
 }
 
 _SCHEMA = """
@@ -156,6 +159,10 @@ CREATE TABLE IF NOT EXISTS off_varden (
 CREATE TABLE IF NOT EXISTS slotval (
     nyckel TEXT PRIMARY KEY,
     slot TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS proteintypval (
+    nyckel TEXT PRIMARY KEY,
+    typ TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS meta (
     nyckel TEXT PRIMARY KEY,
@@ -395,6 +402,17 @@ class Lagring:
             else:
                 self._db.execute("INSERT OR REPLACE INTO slotval VALUES (?, ?)", (nyckel, slot))
 
+    def proteintypval(self) -> dict[str, str]:
+        """Handvalda proteintyper: "grupp:<namn>" eller "produkt:<id>" -> typ."""
+        return dict(self._db.execute("SELECT nyckel, typ FROM proteintypval"))
+
+    def satt_proteintypval(self, nyckel: str, typ: str | None) -> None:
+        with self._db:
+            if typ is None:
+                self._db.execute("DELETE FROM proteintypval WHERE nyckel = ?", (nyckel,))
+            else:
+                self._db.execute("INSERT OR REPLACE INTO proteintypval VALUES (?, ?)", (nyckel, typ))
+
     def spara_bunkring(self, bunkring: Bunkring) -> None:
         with self._db:
             self._db.execute("INSERT OR REPLACE INTO bunkring VALUES (?, ?)", (bunkring.ingrediens, pickle.dumps(bunkring)))
@@ -522,6 +540,26 @@ class Lagring:
             self._db.execute(
                 "INSERT OR REPLACE INTO grupper VALUES (?, ?)", (grupp.namn, json.dumps(dataclasses.asdict(grupp)))
             )
+
+    def byt_gruppnamn(self, grupp: Ingrediens, gammalt: str) -> None:
+        """Sparar gruppen under sitt nya namn och flyttar det som hör till det gamla:
+        lås, lager, näring, familjematchning, handval, byten och bunkring."""
+        nytt = grupp.namn
+        with self._db:
+            self._db.execute("DELETE FROM grupper WHERE namn = ?", (gammalt,))
+            self._db.execute(
+                "INSERT OR REPLACE INTO grupper VALUES (?, ?)", (nytt, json.dumps(dataclasses.asdict(grupp)))
+            )
+            for tabell, kolumn in (("las", "ingrediens"), ("lager", "ingrediens"), ("naring", "ingrediens"),
+                                   ("familjer", "familj"), ("plan_val", "ingrediens")):
+                self._db.execute(f"UPDATE {tabell} SET {kolumn} = ? WHERE {kolumn} = ?", (nytt, gammalt))
+            for tabell in ("slotval", "proteintypval"):
+                self._db.execute(f"UPDATE {tabell} SET nyckel = ? WHERE nyckel = ?", (f"grupp:{nytt}", f"grupp:{gammalt}"))
+            rad = self._db.execute("SELECT data FROM bunkring WHERE ingrediens = ?", (gammalt,)).fetchone()
+            if rad:
+                bunkring = dataclasses.replace(pickle.loads(rad[0]), ingrediens=nytt)
+                self._db.execute("DELETE FROM bunkring WHERE ingrediens = ?", (gammalt,))
+                self._db.execute("INSERT OR REPLACE INTO bunkring VALUES (?, ?)", (nytt, pickle.dumps(bunkring)))
 
     def ta_bort_grupp(self, namn: str) -> bool:
         with self._db:

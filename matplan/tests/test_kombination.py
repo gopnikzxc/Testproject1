@@ -26,9 +26,13 @@ JUICE_VARA = katalogvara(
 
 
 def _app(db, katalog=STARTKATALOG + (GRYTA,), extra=(GRYTA_VARA,)):
+    """Lägre proteinmål än standard: en kombinationsvara når sällan 180 g på 2000 kcal
+    när grönsakernas protein räknas med sin kvalitetsfaktor."""
     app = Matplan(db, katalog=katalog, butiker=(SortimentButik(standardsortiment() + list(extra)),))
     app.satt_installning("veckobudget", 5000)
     app.satt_installning("manadsbudget", 20000)
+    app.satt_installning("jag.protein_mal", 150)
+    app.satt_installning("fru.protein_mal", 100)
     app.refresh(nu=NU)
     return app
 
@@ -41,7 +45,7 @@ def _mal_nadda(plan):
     for dag in plan.dagar:
         for p in plan.profiler:
             assert dag.kcal(p.namn) <= p.kcal_mal + 1e-6
-            assert dag.protein(p.namn) >= p.protein_mal - 1e-6
+            assert dag.viktat_protein(p.namn) >= p.protein_mal - 1e-6
 
 
 def test_gruppens_slot_klassas_ur_produkten(tmp_path):

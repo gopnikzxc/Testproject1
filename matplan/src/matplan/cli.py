@@ -19,6 +19,7 @@ from .inkop import Inkopslista
 from .naring import KALLHANVISNING, KALLNAMN, Livsmedelsverket, OpenFoodFacts
 from .planerare import Maltid, Plan
 from .text import datum as _datum
+from .protein import PROTEINTYPER
 from .slot import SLOTAR
 from .text import forpackning, kr, mangd, naringstext, produkttext
 
@@ -72,10 +73,11 @@ def _maltidstabell(
     extra = ["", ""] if antal else []
     tabell.add_row("kcal", *(f"{p.kcal:.0f}" for p in portioner), *extra, style="bold")
     tabell.add_row("Protein (g)", *(f"{p.protein:.1f}" for p in portioner), *extra, style="bold")
+    tabell.add_row("Protein, viktat (g)", *(f"{p.viktat_protein:.1f}" for p in portioner), *extra, style="bold")
     tabell.add_row("Pris (kr)", *(f"{p.kr:.2f}" for p in portioner), *extra, style="bold")
     tabell.caption = (
-        f"Protein {maltid.protein_tathet:.1f} g/100 kcal · Volym {maltid.volym:.2f} g/kcal · "
-        f"{maltid.kr_per_g_protein:.2f} kr/g protein"
+        f"Viktat protein {maltid.protein_tathet:.1f} g/100 kcal · Volym {maltid.volym:.2f} g/kcal · "
+        f"{maltid.kr_per_g_protein:.2f} kr/g protein (viktat)"
     )
     tabell.caption_justify = "left"
     return tabell
@@ -126,6 +128,43 @@ def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
         konsol.print(f"Näringsvärden hämtade för {resultat.naring_hamtad} ingredienser")
     for ingrediens, fel in resultat.naring_fel.items():
         konsol.print(f"[yellow]{ingrediens}: {fel}[/yellow]")
+
+
+def _grupp(konsol: Console, app: Matplan, args: argparse.Namespace) -> None:
+    if not args.namn:
+        tabell = Table(title="Ingrediensgrupper", title_justify="left")
+        for rubrik in ("Grupp", "Slot", "Söktermer", "Produkter"):
+            tabell.add_column(rubrik)
+        for g, antal in app.grupper():
+            tabell.add_row(g.namn, g.kategori or "(ur produkten)", ", ".join(g.sokord), str(antal))
+        konsol.print(tabell)
+        return
+    namn = args.namn
+    if args.ta_bort:
+        app.ta_bort_grupp(namn)
+        konsol.print(f"{namn} är borttagen ur planeringen.")
+        return
+    if args.byt_namn:
+        namn = app.byt_gruppnamn(namn, args.byt_namn).namn
+        konsol.print(f"Gruppen heter nu {namn}.")
+    if args.sokord:
+        g = app.satt_sokord(namn, tuple(args.sokord.split(",")))
+        konsol.print(f"{g.namn}: söktermer {', '.join(g.sokord)}.")
+    if args.uteslut:
+        app.uteslut_produkt(namn, args.uteslut)
+        konsol.print(f"{args.uteslut} är utesluten ur {namn}.")
+    if args.inkludera:
+        app.inkludera_produkt(namn, args.inkludera)
+        konsol.print(f"{args.inkludera} är med i {namn}.")
+    if not (args.byt_namn or args.sokord or args.uteslut or args.inkludera):
+        g = next((g for g, _ in app.grupper() if g.namn.casefold() == namn.casefold()), None)
+        if g is None:
+            raise KeyError(f"Okänd grupp: {namn}")
+        konsol.print(f"{g.namn}: slot {g.kategori or '(ur produkten)'} · söktermer {', '.join(g.sokord)}"
+                     f" · kategori {', '.join(g.butikskategori) or '–'}")
+        if g.undantag:
+            konsol.print(f"Uteslutna: {', '.join(g.undantag)}")
+        _visa_produkter(konsol, app, g.namn)
 
 
 def _visa_familjer(konsol: Console, familjer: list[Familj]) -> None:
@@ -191,12 +230,12 @@ def _visa_plan(konsol: Console, app: Matplan, plan: Plan) -> None:
     summor.add_column("Dag")
     for person in personer:
         summor.add_column(f"{person.capitalize()} kcal", justify="right")
-        summor.add_column(f"{person.capitalize()} protein (g)", justify="right")
+        summor.add_column(f"{person.capitalize()} protein / viktat (g)", justify="right")
     summor.add_column("Pris (kr)", justify="right")
     for dag in plan.dagar:
         celler = [_datum(dag.datum)]
         for person in personer:
-            celler += [f"{dag.kcal(person):.0f}", f"{dag.protein(person):.1f}"]
+            celler += [f"{dag.kcal(person):.0f}", f"{dag.protein(person):.1f} / {dag.viktat_protein(person):.1f}"]
         summor.add_row(*celler, f"{dag.kr:.2f}")
     konsol.print(summor)
     _visa_budget(konsol, app, plan)
@@ -281,7 +320,7 @@ def _visa_sok(konsol: Console, traffar: list) -> None:
         konsol.print("Inga träffar i sortimentet. Har du kört `matplan refresh`?")
         return
     tabell = Table(title=f"Sökträffar ({len(traffar)})", title_justify="left")
-    for rubrik, just in (("Märke", "left"), ("Produkt", "left"), ("Förpackning", "left"), ("Pris", "right"),
+    for rubrik, just in (("Id", "left"), ("Märke", "left"), ("Produkt", "left"), ("Förpackning", "left"), ("Pris", "right"),
                          ("kr/kg", "right"), ("kcal", "right"), ("Protein", "right"), ("Näring", "left"),
                          ("Slot", "left")):
         tabell.add_column(rubrik, justify=just)
@@ -290,7 +329,7 @@ def _visa_sok(konsol: Console, traffar: list) -> None:
         if p.naringskalla is None or p.slot == "utesluten":
             slot += " [dim](planeras inte)[/dim]"
         tabell.add_row(
-            p.varumarke, p.namn, p.beskrivning, f"{p.pris_kr:.2f}",
+            p.produkt_id, p.varumarke, p.namn, p.beskrivning, f"{p.pris_kr:.2f}",
             f"{p.kr_per_kg:.2f}" if p.kr_per_kg > 0 else "–",
             f"{p.kcal:.0f}" if p.kcal is not None else "–",
             f"{p.protein:.1f} g" if p.protein is not None else "–",
@@ -299,6 +338,7 @@ def _visa_sok(konsol: Console, traffar: list) -> None:
     konsol.print(tabell)
     if len(traffar) > 50:
         konsol.print(f"… och {len(traffar) - 50} till. Förfina sökningen.")
+    konsol.print("Gör en produkt till en ingrediensgrupp med `matplan godkänn <id>`.")
 
 
 def _visa_produkter(konsol: Console, app: Matplan, ingrediens: str) -> None:
@@ -358,6 +398,20 @@ def main(argv: list[str] | None = None) -> int:
                         help="Bekräfta förslaget (eller --lmv) för en grupp eller ett produktnamn")
     naring.add_argument("--lmv", type=int, metavar="NUMMER", help="Livsmedelsverkets nummer att använda i stället")
     naring.add_argument("--sök", "--sok", dest="sok", metavar="TEXT", help="Sök i Livsmedelsverkets livsmedel")
+    godkann = kommandon.add_parser("godkänn", aliases=["godkann"], help="Gör en produkt till en ny ingrediensgrupp")
+    godkann.add_argument("produkt_id", help="Produktens id, se `matplan sök`")
+    grupp = kommandon.add_parser("grupp", help="Visa och ändra ingrediensgrupper")
+    grupp.add_argument("namn", nargs="?", help="Gruppen att visa eller ändra")
+    grupp.add_argument("--byt-namn", metavar="NYTT", help="Byt gruppens namn")
+    grupp.add_argument("--sökord", "--sokord", dest="sokord", metavar="TERMER",
+                       help='Nya söktermer, kommaseparerade, t.ex. "tonfisk vatten, tonfisk naturell"')
+    grupp.add_argument("--uteslut", metavar="PRODUKT_ID", help="Ta bort en enskild produkt ur gruppen")
+    grupp.add_argument("--inkludera", metavar="PRODUKT_ID", help="Ta med en enskild produkt i gruppen")
+    grupp.add_argument("--ta-bort", action="store_true", help="Ta bort gruppen ur planeringen")
+    ptyp = kommandon.add_parser("proteintyp", help="Visa eller sätt proteintyp för en grupp eller produkt")
+    ptyp.add_argument("mal", nargs="?", metavar="GRUPP_ELLER_PRODUKT_ID")
+    ptyp.add_argument("typ", nargs="?", choices=PROTEINTYPER)
+    ptyp.add_argument("--ta-bort", action="store_true", help="Ta bort det handvalda valet")
     slot = kommandon.add_parser("slot", help="Visa eller sätt slot för en grupp eller produkt")
     slot.add_argument("mal", nargs="?", metavar="GRUPP_ELLER_PRODUKT_ID")
     slot.add_argument("slot", nargs="?", choices=SLOTAR)
@@ -381,7 +435,9 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
-    kommando = {"las": "lås", "kopt": "köpt", "sok": "sök", "naring": "näring"}.get(args.kommando, args.kommando)
+    kommando = {"las": "lås", "kopt": "köpt", "sok": "sök", "naring": "näring", "godkann": "godkänn"}.get(
+        args.kommando, args.kommando
+    )
 
     if kommando == "gui":
         from .tui import MatplanApp
@@ -449,6 +505,28 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
             konsol.print(f"{familj.familj}: {familj.bekraftad[1]} (Livsmedelsverket {familj.bekraftad[0]}).")
         else:
             _visa_familjer(konsol, app.naringsfamiljer())
+    elif kommando == "godkänn":
+        g = app.godkann(args.produkt_id)
+        if not g.ny:
+            konsol.print(f"Produkten hör redan till gruppen {g.grupp.namn} ({g.produkter} produkter).")
+        else:
+            konsol.print(
+                f"Ny grupp {g.grupp.namn}: slot {g.grupp.kategori or 'saknas – sätt med `matplan slot`'}, "
+                f"söktermer {', '.join(g.grupp.sokord)}, kategori {', '.join(g.grupp.butikskategori) or '–'}, "
+                f"{g.produkter} produkter."
+            )
+    elif kommando == "grupp":
+        _grupp(konsol, app, args)
+    elif kommando == "proteintyp":
+        if args.mal and (args.typ or args.ta_bort):
+            andrad = app.satt_proteintyp(args.mal, None if args.ta_bort else args.typ)
+            konsol.print(f"{andrad}: {'proteintyp borttagen' if args.ta_bort else args.typ}.")
+        else:
+            inst = app.installningar()
+            for namn, typ in sorted(app.proteintyper().items()):
+                konsol.print(f"{namn}: {typ} (faktor {inst[f'kvalitet_{typ}']:g})")
+            for nyckel, typ in sorted(app.proteintypval().items()):
+                konsol.print(f"[dim]handvalt: {nyckel.split(':', 1)[1]} = {typ}[/dim]")
     elif kommando == "slot":
         if args.mal and (args.slot or args.ta_bort):
             andrad = app.satt_slot(args.mal, None if args.ta_bort else args.slot)

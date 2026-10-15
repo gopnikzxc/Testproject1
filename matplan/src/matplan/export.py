@@ -22,8 +22,8 @@ def _maltid(
             celler.append(str(sum(p.rader[i].gram for p in portioner) * antal))
         rader.append("| " + " | ".join(celler) + " |")
     rader.append(
-        "| **kcal / protein** | "
-        + " | ".join(f"{p.kcal:.0f} / {p.protein:.0f} g" for p in portioner)
+        "| **kcal / protein (viktat)** | "
+        + " | ".join(f"{p.kcal:.0f} / {p.protein:.0f} g ({p.viktat_protein:.0f} g)" for p in portioner)
         + (" | |" if antal else " |")
     )
     return rader + [""]

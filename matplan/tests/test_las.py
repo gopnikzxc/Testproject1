@@ -36,6 +36,8 @@ def _lista_produkt(app):
 
 def test_last_produkt_anvands_trots_billigare_alternativ(tmp_path):
     app = Matplan(tmp_path / "m.db", butiker=(_butik(BILLIG, KRONFAGEL),))
+    app.satt_installning("veckobudget", 5000)  # den låsta dyrare produkten ska inte spräcka budgeten
+    app.satt_installning("manadsbudget", 20000)
     app.refresh(nu=NU)
 
     app.las("Kycklingfilé", CITY, "kronfagel")

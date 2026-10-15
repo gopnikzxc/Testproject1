@@ -21,9 +21,13 @@ from .lagring import Lagring
 from .naring import Livsmedelsverket, Naring, NaringsFel, NaringsNatverksFel, OpenFoodFacts, foresla
 from .planerare import HUVUDSLOTAR, Plan, PlaneringsFel, Profil, Vikter, planera
 from .rea import ar_rea
+from .protein import PROTEINTYPER, proteintyp
 from .slot import SLOTAR, klassificera
 
-__all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD", "Butiksrad", "Familj"]
+__all__ = [
+    "Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD", "Butiksrad", "Familj",
+    "Godkannande",
+]
 
 # Barnet planeras inte (se spec #1).
 PERSONER = ("jag", "fru")
@@ -97,6 +101,37 @@ class _Naringsdata:
     off: dict[str, Naring | None]
     gruppnaring: dict[str, Naring]
     slotval: dict[str, str]
+    proteintypval: dict[str, str]
+
+
+@dataclass(frozen=True)
+class Godkannande:
+    grupp: Ingrediens
+    ny: bool  # False: produkten fanns redan i en grupp
+    produkter: int  # produkter i gruppen
+
+
+# Ord som inte blir söktermer och tecken på förpackningsstorlek i produktnamn.
+_STOPPORD = {"i", "med", "m", "och", "&", "utan", "på", "till", "av"}
+_ENHETER = {"g", "kg", "st", "p", "pack", "l", "dl", "cl", "ml", "x", "pk", "port", "portioner"}
+
+
+def _namnord(produkt: Produkt) -> list[str]:
+    """Produktnamnets ord utan märke och förpackningsstorlek."""
+    marke = set(re.findall(r"\w+", produkt.varumarke.casefold()))
+    ord_ = re.findall(r"[^\W_]+(?:-[^\W_]+)?", produkt.namn)
+    return [o for o in ord_ if not any(c.isdigit() for c in o) and o.casefold() not in _ENHETER | marke]
+
+
+def foreslaget_gruppnamn(produkt: Produkt) -> str:
+    """"Tonfisk i Vatten 3x170g" -> "Tonfisk i vatten"."""
+    text = " ".join(_namnord(produkt)).lower()
+    return text[:1].upper() + text[1:]
+
+
+def foreslagen_sokterm(produkt: Produkt) -> str:
+    """"Tonfisk i Vatten" -> "tonfisk vatten"; även "Tonfisk Vatten" från ett annat märke matchar."""
+    return " ".join(o.casefold() for o in _namnord(produkt) if o.casefold() not in _STOPPORD)
 
 
 def familjenamn(produktnamn: str) -> str:
@@ -629,17 +664,26 @@ class Matplan:
         bort valet. Returnerar vad som ändrades."""
         if slot is not None and slot not in SLOTAR:
             raise KeyError(f"Okänd slot: {slot}. Välj bland {', '.join(SLOTAR)}.")
+        nyckel, andrad = self._mal(mal)
+        self._lagring.satt_slotval(nyckel, slot)
+        return andrad
+
+    def _produkt(self, produkt_id: str) -> Produkt | None:
+        """En produkt i sortimentet eller senaste sökhämtningen, efter id."""
+        produkt = next((p for p in self._lagring.katalog() if p.produkt_id == produkt_id), None)
+        if produkt is None:
+            produkt = next((p for _, p, _ in self._lagring.senaste_priser() if p.produkt_id == produkt_id), None)
+        return produkt
+
+    def _mal(self, mal: str) -> tuple[str, str]:
+        """("grupp:<namn>" eller "produkt:<id>", beskrivning) för en grupp eller produkt."""
         grupp = next((g.namn for g in self._grundkatalog if g.namn.casefold() == mal.strip().casefold()), None)
         if grupp is not None:
-            self._lagring.satt_slotval(f"grupp:{grupp}", slot)
-            return grupp
-        produkt = next((p for p in self._lagring.katalog() if p.produkt_id == mal), None)
-        if produkt is None:
-            produkt = next((p for _, p, _ in self._lagring.senaste_priser() if p.produkt_id == mal), None)
+            return f"grupp:{grupp}", grupp
+        produkt = self._produkt(mal)
         if produkt is None:
             raise KeyError(f"Hittar ingen grupp eller produkt {mal!r}.")
-        self._lagring.satt_slotval(f"produkt:{mal}", slot)
-        return f"{produkt.namn} ({mal})"
+        return f"produkt:{mal}", f"{produkt.namn} ({mal})"
 
     def slotval(self) -> dict[str, str]:
         return self._lagring.slotval()
@@ -661,7 +705,7 @@ class Matplan:
     def _naringsdata(self) -> _Naringsdata:
         return _Naringsdata(
             self._lagring.familjer(), self._lagring.lmv_varden(), self._lagring.off_varden(),
-            self._lagring.naring(), self._lagring.slotval(),
+            self._lagring.naring(), self._lagring.slotval(), self._lagring.proteintypval(),
         )
 
     def _gruppvarden(self, grupp: Ingrediens, data: _Naringsdata) -> Naring | None:
@@ -700,7 +744,18 @@ class Matplan:
         slot = data.slotval.get(f"produkt:{produkt.produkt_id}") or klassificera(
             produkt.kcal, produkt.protein, produkt.kolhydrater, produkt.fett, produkt.kategori, produkt.namn
         )
-        return dataclasses.replace(produkt, naringskalla=kalla, slot=slot)
+        typ = data.proteintypval.get(f"produkt:{produkt.produkt_id}") or proteintyp(produkt.kategori, produkt.namn)
+        return dataclasses.replace(produkt, naringskalla=kalla, slot=slot, proteintyp=typ)
+
+    @staticmethod
+    def _gruppens_proteintyp(grupp: Ingrediens, vald: Produkt | None, data: _Naringsdata) -> str:
+        """Handvald typ, annars gruppens egen, annars den köpta produktens, annars ur gruppens namn."""
+        return (
+            data.proteintypval.get(f"grupp:{grupp.namn}")
+            or grupp.proteintyp
+            or (vald.proteintyp if vald is not None else None)
+            or proteintyp(" ".join(grupp.butikskategori), grupp.namn)
+        )
 
     @staticmethod
     def _planerbar(produkt: Produkt) -> bool:
@@ -808,9 +863,12 @@ class Matplan:
         med = self._medraknade_butiker()
         katalogtider = {b: t for b, t in self._lagring.katalogtider().items() if b in med}
         tider = list(katalogtider.values())
+        grupper = {g.namn: g for g in self._grundkatalog}
 
         for ingrediens, produkt, tid in self._lagring.senaste_priser():
             if produkt.butik not in med or produkt.butik in katalogtider:
+                continue
+            if ingrediens in grupper and produkt.produkt_id in grupper[ingrediens].undantag:
                 continue
             produkter.setdefault(ingrediens, []).append(produkt)
             tider.append(tid)
@@ -823,18 +881,19 @@ class Matplan:
             for p in katalog:
                 namnord = set(re.findall(r"\w+", p.namn.casefold()))
                 ordlista.append((p, namnord, namnord | set(re.findall(r"\w+", p.beskrivning.casefold()))))
-            for grupp in self._grundkatalog:
+            for grupp in grupper.values():
                 termer = [re.findall(r"\w+", t.casefold()) for t in grupp.sokord]
                 uteslut = {o.casefold() for o in grupp.uteslut}
                 for p, namnord, ord_ in ordlista:
-                    if (
+                    if p.produkt_id in grupp.undantag:
+                        continue
+                    if p.produkt_id in grupp.med or (
                         any(t and t[0] in namnord and set(t) <= ord_ for t in termer)
                         and ratt_kategori(p.kategori, grupp.butikskategori)
                         and not (namnord & uteslut)
                     ):
                         produkter.setdefault(grupp.namn, []).append(p)
         data = self._naringsdata()
-        grupper = {g.namn: g for g in self._grundkatalog}
         produkter = {
             namn: [self._med_naring(p, grupper.get(namn), data) for p in lista] for namn, lista in produkter.items()
         }
@@ -887,18 +946,22 @@ class Matplan:
         return tuple(i for i, _ in self._planpool(priser).values())
 
     def _planpool(self, priser: _Priser) -> dict[str, tuple[Ingrediens, str]]:
-        """Grupp -> (gruppen som planen ser den, näringskälla)."""
+        """Grupp -> (gruppen som planen ser den, näringskälla). Varje grupp får
+        proteintyp och kvalitetsfaktor (#30)."""
         data = self._naringsdata()
+        inst = self._lagring.installningar()
         pool: dict[str, tuple[Ingrediens, str]] = {}
         for i in self._katalog:
             if i.namn in priser.ej_planerbara:
                 continue
             kandidater = priser.produkter.get(i.namn)
-            if not kandidater:
+            vald = min(kandidater, key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id)) if kandidater else None
+            typ = self._gruppens_proteintyp(i, vald, data)
+            i = dataclasses.replace(i, proteintyp=typ, proteinkvalitet=inst.get(f"kvalitet_{typ}", 1.0))
+            if vald is None:
                 varden = self._gruppvarden(i, data)
                 pool[i.namn] = (i, varden.kalla if varden else "katalog")
                 continue
-            vald = min(kandidater, key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id))
             slot = i.kategori or vald.slot
             if slot not in SLOTAR or slot == "utesluten":
                 continue
@@ -907,6 +970,126 @@ class Matplan:
                 vald.naringskalla,
             )
         return pool
+
+    # --- Grupper (#31) ----------------------------------------------------
+
+    def _andringsbar_grupp(self, namn: str) -> Ingrediens:
+        if self._fast_katalog is not None:
+            raise ValueError("Grupperna är fasta i den här körningen och kan inte ändras.")
+        grupp = next((g for g in self._lagring.grupper() if g.namn.casefold() == namn.strip().casefold()), None)
+        if grupp is None:
+            raise KeyError(f"Okänd grupp: {namn}")
+        return grupp
+
+    def godkann(self, produkt_id: str) -> Godkannande:
+        """Gör en produkt i sortimentet till en ny ingrediensgrupp med föreslaget
+        namn, sökterm, butikskategori och slot. Liknande produkter (t.ex. andra
+        märkens tonfisk i vatten) kommer med automatiskt. Matchar produkten redan
+        en grupp returneras den i stället."""
+        if self._fast_katalog is not None:
+            raise ValueError("Grupperna är fasta i den här körningen och kan inte ändras.")
+        produkt = self._produkt(produkt_id)
+        if produkt is None:
+            raise KeyError(f"Hittar ingen produkt {produkt_id!r} i sortimentet. Sök med `matplan sök`.")
+        matchade, _ = self._matchade()
+        befintlig = next((namn for namn, lista in matchade.items() if any(p.produkt_id == produkt_id for p in lista)), None)
+        if befintlig is not None:
+            grupp = next(g for g in self._grundkatalog if g.namn == befintlig)
+            return Godkannande(grupp, False, len(matchade[befintlig]))
+
+        produkt = self._med_naring(produkt, None, self._naringsdata())
+        if produkt.slot == "utesluten":
+            raise ValueError(f"{produkt.namn} planeras aldrig (juice, läsk o.d.).")
+        namn = foreslaget_gruppnamn(produkt) or produkt.namn
+        if any(g.namn.casefold() == namn.casefold() for g in self._grundkatalog):
+            namn = f"{namn} ({produkt.varumarke.title() or produkt_id})"
+            if any(g.namn.casefold() == namn.casefold() for g in self._grundkatalog):
+                raise ValueError(f"Det finns redan en grupp som heter {namn}.")
+        kategori = produkt.kategori.casefold()
+        underkategori = kategori.rsplit("/", 1)[-1].strip()
+        grupp = Ingrediens(
+            namn=namn,
+            kategori=produkt.slot or "",
+            kcal_100g=produkt.kcal or 0.0,
+            protein_100g=produkt.protein or 0.0,
+            kr_per_kg=produkt.kr_per_kg,
+            sokord=(foreslagen_sokterm(produkt) or produkt.namn.casefold(),),
+            forvaring="fryst" if "fryst" in kategori else "torrvara" if "skafferi" in kategori else "kyl",
+            butikskategori=(underkategori,) if underkategori else (),
+        )
+        if not (matchar(produkt.namn, grupp.sokord, produkt.beskrivning) and ratt_kategori(produkt.kategori, grupp.butikskategori)):
+            grupp = dataclasses.replace(grupp, med=(produkt_id,))
+        self._lagring.spara_grupp(grupp)
+        return Godkannande(grupp, True, len(self._matchade()[0].get(grupp.namn, [])))
+
+    def grupper(self) -> list[tuple[Ingrediens, int]]:
+        """Alla grupper och hur många produkter i sortimentet som hör till var."""
+        matchade, _ = self._matchade()
+        return [(g, len(matchade.get(g.namn, []))) for g in self._grundkatalog]
+
+    def byt_gruppnamn(self, namn: str, nytt: str) -> Ingrediens:
+        grupp = self._andringsbar_grupp(namn)
+        nytt = nytt.strip()
+        if not nytt:
+            raise ValueError("Gruppen behöver ett namn.")
+        if any(g.namn.casefold() == nytt.casefold() and g.namn != grupp.namn for g in self._lagring.grupper()):
+            raise ValueError(f"Det finns redan en grupp som heter {nytt}.")
+        aktiv = self._lagring.aktiv_plan()
+        if aktiv is not None and grupp.namn in aktiv.total_gram():
+            raise ValueError(f"{grupp.namn} ingår i den köpta planen. Kör `matplan plan --ny` först.")
+        ny_grupp = dataclasses.replace(grupp, namn=nytt)
+        self._lagring.byt_gruppnamn(ny_grupp, grupp.namn)
+        return ny_grupp
+
+    def satt_sokord(self, namn: str, sokord: tuple[str, ...]) -> Ingrediens:
+        grupp = self._andringsbar_grupp(namn)
+        sokord = tuple(t.strip().casefold() for t in sokord if t.strip())
+        if not sokord:
+            raise ValueError("Gruppen behöver minst en sökterm.")
+        grupp = dataclasses.replace(grupp, sokord=sokord)
+        self._lagring.spara_grupp(grupp)
+        return grupp
+
+    def uteslut_produkt(self, namn: str, produkt_id: str) -> Ingrediens:
+        """Tar bort en enskild produkt ur gruppen, även om den matchar söktermerna."""
+        grupp = self._andringsbar_grupp(namn)
+        grupp = dataclasses.replace(
+            grupp, undantag=tuple(sorted({*grupp.undantag, produkt_id})), med=tuple(m for m in grupp.med if m != produkt_id)
+        )
+        self._lagring.spara_grupp(grupp)
+        return grupp
+
+    def inkludera_produkt(self, namn: str, produkt_id: str) -> Ingrediens:
+        """Tar med en enskild produkt i gruppen: tar bort ett undantag, och lägger
+        till den för hand om den inte matchar söktermerna."""
+        grupp = self._andringsbar_grupp(namn)
+        if self._produkt(produkt_id) is None:
+            raise KeyError(f"Hittar ingen produkt {produkt_id!r}.")
+        grupp = dataclasses.replace(grupp, undantag=tuple(u for u in grupp.undantag if u != produkt_id))
+        if not any(p.produkt_id == produkt_id for p in self._matchade()[0].get(grupp.namn, [])):
+            grupp = dataclasses.replace(grupp, med=tuple(sorted({*grupp.med, produkt_id})))
+        self._lagring.spara_grupp(grupp)
+        return grupp
+
+    def ta_bort_grupp(self, namn: str) -> None:
+        """Tar bort gruppen ur planeringen. Lager och lås för den ligger kvar."""
+        grupp = self._andringsbar_grupp(namn)
+        self._lagring.ta_bort_grupp(grupp.namn)
+
+    def satt_proteintyp(self, mal: str, typ: str | None) -> str:
+        """Handvald proteintyp för en grupp (namn) eller produkt (produkt-id); None tar bort valet."""
+        if typ is not None and typ not in PROTEINTYPER:
+            raise KeyError(f"Okänd proteintyp: {typ}. Välj bland {', '.join(PROTEINTYPER)}.")
+        nyckel, andrad = self._mal(mal)
+        self._lagring.satt_proteintypval(nyckel, typ)
+        return andrad
+
+    def proteintypval(self) -> dict[str, str]:
+        return self._lagring.proteintypval()
+
+    def proteintyper(self) -> dict[str, str]:
+        """Varje grupps proteintyp som planen räknar med."""
+        return {namn: i.proteintyp for namn, (i, _) in self._planpool(self._priser()).items()}
 
     # --- Inställningar ---------------------------------------------------
 

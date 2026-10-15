@@ -66,7 +66,7 @@ def test_varje_persons_dag_nar_sina_mal(app, person):
 
     for dag in app.plan(START).dagar:
         assert dag.kcal(person) <= kcal_mal
-        assert dag.protein(person) >= protein_mal
+        assert dag.viktat_protein(person) >= protein_mal
 
 
 def test_alla_ater_samma_ingredienser_i_egna_portioner(app):
@@ -87,12 +87,14 @@ def test_batchmangd_ar_summan_av_portionerna(app):
 
 
 def test_fruns_mal_kan_andras(app):
+    app.satt_installning("veckobudget", 5000)  # högre proteinmål kostar mer än standardbudgeten
+    app.satt_installning("manadsbudget", 20000)
     app.satt_installning("fru.kcal_mal", 1500)
     app.satt_installning("fru.protein_mal", 130)
 
     for dag in app.plan(START).dagar:
         assert dag.kcal("fru") <= 1500
-        assert dag.protein("fru") >= 130
+        assert dag.viktat_protein("fru") >= 130
 
 
 def test_mina_mal_styr_planen(app):
@@ -101,7 +103,7 @@ def test_mina_mal_styr_planen(app):
 
     for dag in app.plan(START).dagar:
         assert dag.kcal("jag") <= 1800
-        assert dag.protein("jag") >= 170
+        assert dag.viktat_protein("jag") >= 170
 
 
 def test_maltider_har_ratt_slotar(app):

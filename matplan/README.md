@@ -17,6 +17,9 @@ python3 -m venv .venv
 .venv/bin/matplan näring                            # nutrition matches for products without the store's values
 .venv/bin/matplan näring --bekräfta "Spetskål"      # confirm the suggested match (or --lmv <number>); --sök <text> searches
 .venv/bin/matplan slot "Keso 1,5 %" protein         # set a group's or product id's slot by hand (--ta-bort clears it)
+.venv/bin/matplan proteintyp [mål typ]              # show protein types and factors, or set one by hand
+.venv/bin/matplan godkänn 101458683_ST              # turn a product (id from `sök`) into a new ingredient group
+.venv/bin/matplan grupp ["Tonfisk vatten"]          # list groups, or show one; --byt-namn, --sökord, --uteslut, --inkludera, --ta-bort
 .venv/bin/matplan lista                             # shopping list: whole packages, kr/kg, single store vs split
 .venv/bin/matplan export [folder]                   # save plan.md and inkopslista.md for your phone
 .venv/bin/matplan produkter Kycklingfilé            # fetched products with ids
@@ -129,8 +132,44 @@ If no rule fits (cheese, eggs, oil), the product has no slot. The built-in group
 
 A combination item can fill the lunch/dinner protein slot. Its carbs count toward the meal's kcal, so the carb portion shrinks or is left out, and kcal ceilings and protein floors still hold. To meet 180 g protein within 2000 kcal, a combination item needs roughly 9–10 g protein per 100 kcal. Fish fingers and beans are well below that, so they rarely fit.
 
+## Ingredient groups
+
+The plan works with ingredient groups. The 16 built-in groups are stored in the database the first time matplan runs. Add more from the store's range: find a product with `matplan sök`, then run `matplan godkänn <id>`. That creates a group with suggested values:
+- a name from the product name, without brand and pack size ("Tonfisk vatten")
+- a search term from the same words, minus small words like "i" and "med" ("tonfisk vatten")
+- the store category ("konserver")
+- the product's slot and storage type
+
+Other products that fit join automatically, so the Eldorado tin brings in Garant, Abba and the other tuna in water. If the product already belongs to a group, matplan says which one instead of making a duplicate. New groups take part in planning, shopping lists, deals and stock-up just like the built-in ones.
+
+`matplan grupp` lists all groups with slot, search terms and how many products match. `matplan grupp <name>` shows a group's products, and the same command can:
+- rename the group (`--byt-namn`), keeping its inventory, locks and swaps
+- set new search terms (`--sökord "a, b"`)
+- exclude or include a single product (`--uteslut <id>` / `--inkludera <id>`)
+- remove the group from planning (`--ta-bort`)
+
+With many groups the planner first keeps the ten best candidates per slot. It also keeps the cheapest ones, the grain carbs and any swapped-in group. A plan with about 100 groups still takes well under a second.
+
+## Protein quality
+
+Each product and group gets a protein type from its store category and name: animaliskt, ägg, mejeri, soja, baljväxt, spannmål or övrigt. Meat or fish in the name wins over beans, so tuna with beans counts as animal. `matplan proteintyp <group or product id> <type>` sets the type by hand.
+
+Protein counts with a quality factor that roughly follows PDCAAS. Change the factors with `matplan installningar kvalitet_<typ> <factor>`:
+
+| Type | Factor |
+|---|---|
+| animaliskt, ägg, mejeri | 1.0 |
+| soja | 0.9 |
+| baljväxt | 0.7 |
+| övrigt (vegetables, berries, potatoes) | 0.6 |
+| spannmål | 0.5 |
+
+Each person's protein target is checked against weighted protein, so a day usually holds more raw protein than the target. A lunch or dinner whose protein (or combination item) is a legume must include a grain carb: rice, pasta, bread or oats. Potatoes alone don't count. The plan, the GUI and the export show raw and weighted protein side by side.
+
+Weighting makes the same targets need more real protein than before, so plans cost a little more.
+
 ## Status
 
-Done: #2–#7 and #9–#15, which is the whole spec in #1. From the second spec (#23): #24–#29.
+Done: #2–#7 and #9–#15, which is the whole spec in #1. From the second spec (#23): #24–#31.
 
 ICA Maxi (#8) is shelved because ICA blocks automated access.

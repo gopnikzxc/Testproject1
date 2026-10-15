@@ -77,7 +77,7 @@ def test_malen_haller_oavsett_vikter(tmp_path, person):
 
     for dag in app.plan(START).dagar:
         assert dag.kcal(person) <= inst[f"{person}.kcal_mal"]
-        assert dag.protein(person) >= inst[f"{person}.protein_mal"]
+        assert dag.viktat_protein(person) >= inst[f"{person}.protein_mal"]
 
 
 def test_cli_visar_poangdelarna(tmp_path, monkeypatch, capsys):
