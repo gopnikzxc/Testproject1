@@ -194,6 +194,10 @@ class CityGross:
 
             if enhet in ("KGM", "LTR"):
                 kr_per_kg = jamfor  # dryck: kr per liter räknas som kr per kg
+                # netContent är ofta en platshållare (1000 för en burk tonfisk). Pris
+                # delat med jämförpris ger vikten som jämförpriset gäller (avrunnen vikt).
+                if pris["unit"] != "KGM" and jamfor:
+                    netto = round(pris["price"] / jamfor * 1000)
             elif enhet == "PCE" and "ägg" in rad["name"].casefold():
                 kr_per_kg = jamfor / GRAM_PER_AGG * 1000
                 netto = round(pris["price"] / jamfor) * GRAM_PER_AGG if jamfor else None

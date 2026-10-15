@@ -164,3 +164,13 @@ def test_butiksnummer_saknas_ger_butiksfel(tmp_path):
 
     with pytest.raises(ButiksFel, match="butiksnummer"):
         CityGrossButiker(http).butiksnummer(plats)
+
+
+def test_forpackning_ur_pris_och_jamforpris_nar_netcontent_ar_platshallare(tmp_path):
+    """Inspelad vara där butikens netContent är 1000 för en burk tonfisk (170/120 g)."""
+    adapter, _ = _adapter(tmp_path, lambda url: _fixtur("tonfisk_platshallare"))
+
+    p = adapter.sok("tonfisk")[0]
+
+    assert (p.pris_kr, p.kr_per_kg) == (9.5, 79.17)
+    assert p.forpackning_g == 120
