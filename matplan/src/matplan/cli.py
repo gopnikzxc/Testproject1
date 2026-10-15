@@ -19,7 +19,7 @@ from .inkop import Inkopslista
 from .naring import KALLHANVISNING, Livsmedelsverket, OpenFoodFacts
 from .planerare import Maltid, Plan
 from .text import datum as _datum
-from .text import forpackning
+from .text import forpackning, kr, mangd, produkttext
 
 
 def _db_sokvag() -> Path:
@@ -177,12 +177,12 @@ def _visa_lista(konsol: Console, app: Matplan, lista: Inkopslista) -> None:
                 continue
             tabell.add_row(
                 rad.ingrediens,
-                f"{kop.produkt.namn} ({kop.produkt.produkt_id})" + (" [green](rea)[/green]" if kop.rea else ""),
-                forpackning(kop),
-                f"{kop.produkt.kr_per_kg:.2f}", f"{kop.kostnad:.2f}",
+                produkttext(kop.produkt) + (" [green](rea)[/green]" if kop.rea else ""),
+                forpackning(kop, rad.gram),
+                f"{kop.produkt.kr_per_kg:.2f}", kr(kop.kostnad),
             )
         tabell.add_section()
-        tabell.add_row("Totalt", "", "", "", f"{basta.kostnad:.2f}", style="bold")
+        tabell.add_row("Totalt", "", "", "", kr(basta.kostnad), style="bold")
         konsol.print(tabell)
 
         jamforelse = Table(title="Butiker", title_justify="left")
@@ -200,15 +200,15 @@ def _visa_lista(konsol: Console, app: Matplan, lista: Inkopslista) -> None:
         for rubrik, just in (("Vara", "left"), ("Produkt", "left"), ("Butik", "left"), ("Antal", "right"), ("kr", "right")):
             bunkring.add_column(rubrik, justify=just)
         for b in lista.bunkring:
-            bunkring.add_row(b.ingrediens, b.produkt.namn, b.produkt.butik, _bunkringsmangd(b), f"{b.kostnad:.2f}")
+            bunkring.add_row(b.ingrediens, produkttext(b.produkt), b.produkt.butik, _bunkringsmangd(b), kr(b.kostnad))
         bunkring.add_section()
-        bunkring.add_row("Totalt", "", "", "", f"{lista.bunkring_kr:.2f}", style="bold")
+        bunkring.add_row("Totalt", "", "", "", kr(lista.bunkring_kr), style="bold")
         konsol.print(bunkring)
     _visa_budget(konsol, app, app.plan())
 
 
 def _bunkringsmangd(b: Bunkring) -> str:
-    return f"{b.antal} st ({b.gram / 1000:g} kg)" if b.antal is not None else f"{b.gram / 1000:g} kg lösvikt"
+    return mangd(b.antal, b.produkt.forpackning_g, b.gram)
 
 
 def _visa_bunkringsforslag(konsol: Console, forslag: list[Bunkring]) -> None:

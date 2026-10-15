@@ -100,7 +100,7 @@ def test_markdown_export_innehaller_plan_och_lista(tmp_path):
     plan = planfil.read_text(encoding="utf-8")
     assert "# Matplan" in plan and "Lunch och middag" in plan and "Frukost" in plan and "kcal / protein" in plan
     lista = listfil.read_text(encoding="utf-8")
-    assert "# Inköpslista" in lista and "City Gross Ytterby" in lista and "kr/kg" in lista and "- [ ]" in lista
+    assert "# Inköpslista" in lista and "City Gross Ytterby" in lista and "- [ ] Märke " in lista and " st (" in lista
 
 
 def test_cli_lista_och_export(tmp_path, monkeypatch, capsys):
