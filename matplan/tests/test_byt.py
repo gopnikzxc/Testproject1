@@ -39,7 +39,7 @@ def test_bytet_galler_tills_vidare_och_malen_haller(app):
 
     assert _slot(plan, 1, "kolhydrater") == "Potatis"
     for dag in plan.block[0].dagar:
-        assert dag.kcal("jag") <= 2000 and dag.protein("jag") >= 180
+        assert dag.kcal("jag") <= 2000 and dag.viktat_protein("jag") >= 180
 
 
 def test_byt_utan_ingrediens_tar_nasta_i_tur(app):
@@ -52,11 +52,12 @@ def test_byt_utan_ingrediens_tar_nasta_i_tur(app):
 
 def test_bytet_andrar_totaler_och_inkopslista(app):
     fore_plan, fore_lista = app.plan(START), app.inkopslista(START)
+    ny = "Ris, okokt" if _slot(fore_plan, 1, "kolhydrater") != "Ris, okokt" else "Potatis"
 
-    app.byt(1, "kolhydrater", "Potatis", start=START)
+    app.byt(1, "kolhydrater", ny, start=START)
 
     assert app.plan(START).kr != pytest.approx(fore_plan.kr)
-    assert "Potatis" in {r.ingrediens for r in app.inkopslista(START).rader}
+    assert ny in {r.ingrediens for r in app.inkopslista(START).rader}
     assert {r.ingrediens for r in app.inkopslista(START).rader} != {r.ingrediens for r in fore_lista.rader}
 
 

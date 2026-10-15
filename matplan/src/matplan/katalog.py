@@ -29,6 +29,12 @@ class Ingrediens:
     livsmedelsverket: int | None = None  # nummer i Livsmedelsverkets livsmedelsdatabas
     ean: str | None = None  # streckkod för näringsvärden från Open Food Facts
     uteslut: tuple[str, ...] = ()
+    # Proteintyp ("" = härleds ur produkter och namn) och kvalitetsfaktor (sätts av kärnan).
+    proteintyp: str = ""
+    proteinkvalitet: float = 1.0
+    # Enskilda produkt-id som uteslutits ur eller lagts till i gruppen för hand.
+    undantag: tuple[str, ...] = ()
+    med: tuple[str, ...] = ()
 
 
 # Butikernas namn skiljer sig: City Gross "Frukt & grönt / Grönsaker", Willys

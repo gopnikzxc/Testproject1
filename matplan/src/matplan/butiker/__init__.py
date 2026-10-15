@@ -76,6 +76,7 @@ class Produkt:
     # "openfoodfacts" eller "katalog"; None = inga värden) och produktens slot.
     naringskalla: str | None = None
     slot: str | None = None
+    proteintyp: str | None = None
 
 
 class Butik(Protocol):

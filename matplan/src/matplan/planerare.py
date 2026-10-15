@@ -9,6 +9,11 @@ målen väljs den med bäst viktad poäng på proteintäthet, volym och kostnad.
 En kombinationsvara (t.ex. fiskpinnar, bönor, färdigrätt) kan fylla lunchens
 och middagens proteinslot. Dess kolhydrater räknas in i måltidens kcal, så
 kolhydratkällan krymper eller utgår helt; kcal-taket och proteingolvet gäller.
+
+Proteingolven gäller kvalitetsviktat protein (#30). En lunch/middag vars
+proteinkälla är en baljväxt måste ha en kolhydrat av spannmål (ris, pasta,
+bröd, havre); potatis räcker inte. Med stor katalog förfiltreras varje slot
+till sina bästa kandidater innan kombinationerna prövas (#31).
 """
 
 import math
@@ -23,6 +28,8 @@ HUVUDSLOTAR = ("protein", "kolhydrater", "grönsaker")
 GRONSAKER_GRAM = 300
 BAR_GRAM = 100
 AVRUNDNING_GRAM = 5
+TOPP_PER_SLOT = 10  # kandidater per slot efter förfiltrering
+BILLIGASTE_PER_SLOT = 3  # billigaste per slot som alltid får vara med (för budgeten)
 
 # Andel av dagens kcal och protein per måltid, före normalisering.
 VIKT_FRUKOST = 2
@@ -58,6 +65,11 @@ class Rad:
     kcal: float
     protein: float
     kr: float
+    viktat_protein: float | None = None  # protein gånger kvalitetsfaktorn; None i äldre sparade planer
+
+    @property
+    def viktat(self) -> float:
+        return self.protein if self.viktat_protein is None else self.viktat_protein
 
 
 @dataclass(frozen=True)
@@ -76,6 +88,11 @@ class Portion:
     @property
     def kr(self) -> float:
         return sum(r.kr for r in self.rader)
+
+    @property
+    def viktat_protein(self) -> float:
+        """Protein viktat med kvalitetsfaktorn (#30); det proteingolven gäller."""
+        return sum(r.viktat for r in self.rader)
 
     @property
     def ingredienser(self) -> tuple[str, ...]:
@@ -100,8 +117,8 @@ class Maltid:
 
     @property
     def protein_tathet(self) -> float:
-        """Gram protein per 100 kcal, över alla portioner."""
-        return 100 * sum(p.protein for p in self.portioner) / sum(p.kcal for p in self.portioner)
+        """Gram kvalitetsviktat protein per 100 kcal, över alla portioner."""
+        return 100 * sum(p.viktat_protein for p in self.portioner) / sum(p.kcal for p in self.portioner)
 
     @property
     def volym(self) -> float:
@@ -111,7 +128,8 @@ class Maltid:
 
     @property
     def kr_per_g_protein(self) -> float:
-        return self.kr / sum(p.protein for p in self.portioner)
+        """Kronor per gram kvalitetsviktat protein."""
+        return self.kr / sum(p.viktat_protein for p in self.portioner)
 
 
 @dataclass(frozen=True)
@@ -127,6 +145,9 @@ class Dag:
 
     def protein(self, person: str) -> float:
         return sum(m.portion(person).protein for m in self.maltider)
+
+    def viktat_protein(self, person: str) -> float:
+        return sum(m.portion(person).viktat_protein for m in self.maltider)
 
     @property
     def kr(self) -> float:
@@ -198,6 +219,7 @@ def _rad(ingrediens: Ingrediens, slot: str, gram: int) -> Rad:
         kcal=ingrediens.kcal_100g * gram / 100,
         protein=ingrediens.protein_100g * gram / 100,
         kr=ingrediens.kr_per_kg * gram / 1000,
+        viktat_protein=ingrediens.protein_100g * ingrediens.proteinkvalitet * gram / 100,
     )
 
 
@@ -222,11 +244,14 @@ def _dimensionera(
     och fyller upp till kcal-taket. Den fasta ingrediensen ger volym. Utan
     kolhydratkälla (för en kombinationsvara) räcker det att nå proteingolvet
     inom kcal-taket."""
+    def viktat(i: Ingrediens) -> float:
+        return i.protein_100g * i.proteinkvalitet
+
     kvar_kcal = kcal_tak - fast.kcal_100g * fast_gram / 100
-    kvar_protein = protein_golv - fast.protein_100g * fast_gram / 100
+    kvar_protein = protein_golv - viktat(fast) * fast_gram / 100
 
     if k is None:
-        protein_gram = _avrunda_upp(max(kvar_protein, 0.0) / p.protein_100g * 100) if p.protein_100g else 0
+        protein_gram = _avrunda_upp(max(kvar_protein, 0.0) / viktat(p) * 100) if viktat(p) else 0
         rader = (_rad(p, slotar[0], protein_gram), _rad(fast, slotar[2], fast_gram))
         if protein_gram == 0 or sum(r.kcal for r in rader) > kcal_tak:
             return None
@@ -234,10 +259,10 @@ def _dimensionera(
 
     # Lös  kcal: kp*xp + kk*xk = kvar_kcal,  protein: pp*xp + pk*xk = kvar_protein
     # med x i hektogram.
-    kp, pp = p.kcal_100g, p.protein_100g
-    kk, pk = k.kcal_100g, k.protein_100g
+    kp, pp = p.kcal_100g, viktat(p)
+    kk, pk = k.kcal_100g, viktat(k)
     determinant = kp * pk - kk * pp
-    if determinant == 0:
+    if determinant == 0 or pp <= 0:
         return None
     xk = max((kp * kvar_protein - pp * kvar_kcal) / determinant, 0.0)
     xp = max((kvar_protein - pk * xk) / pp, 0.0)
@@ -256,7 +281,7 @@ def _dimensionera(
             return None
         rader = rader_for(protein_gram, kolhydrat_gram)
         kcal = sum(r.kcal for r in rader)
-        protein = sum(r.protein for r in rader)
+        protein = sum(r.viktat for r in rader)
         if kcal <= kcal_tak and protein >= protein_golv:
             break
         if protein < protein_golv:
@@ -272,6 +297,48 @@ def _dimensionera(
 
 def _kategori(ingredienser: list[Ingrediens], *kategorier: str) -> list[Ingrediens]:
     return sorted((i for i in ingredienser if i.kategori in kategorier), key=lambda i: i.namn)
+
+
+def _kr_per_kcal(i: Ingrediens) -> float:
+    return min(i.kr_per_kg / (i.kcal_100g * 10), 1e6) if i.kcal_100g else 1e6
+
+
+def _efter_poang(kandidater: list[Ingrediens], vikter: Vikter) -> list[Ingrediens]:
+    """Bäst först på egen hand: kvalitetsviktad proteintäthet, volym och pris per
+    kcal, normaliserade och vägda som för måltider."""
+    if not kandidater:
+        return []
+
+    def normalisera(varden: list[float]) -> list[float]:
+        lagst, hogst = min(varden), max(varden)
+        return [0.0 if hogst - lagst < 1e-12 else (v - lagst) / (hogst - lagst) for v in varden]
+
+    tathet = normalisera([100 * i.protein_100g * i.proteinkvalitet / i.kcal_100g if i.kcal_100g else 0 for i in kandidater])
+    volym = normalisera([100 / i.kcal_100g if i.kcal_100g else 0 for i in kandidater])
+    kostnad = normalisera([_kr_per_kcal(i) for i in kandidater])
+    poang = {
+        i.namn: vikter.protein * t + vikter.volym * v - vikter.kostnad * k
+        for i, t, v, k in zip(kandidater, tathet, volym, kostnad)
+    }
+    return sorted(kandidater, key=lambda i: (-poang[i.namn], i.namn))
+
+
+def _forfiltrera(
+    kandidater: list[Ingrediens], vikter: Vikter, behall: set[str] = frozenset(), extra: list[Ingrediens] = ()
+) -> list[Ingrediens]:
+    """De TOPP_PER_SLOT bästa (se `_efter_poang`), plus de billigaste per kcal,
+    `extra` och de som ska behållas (låsta byten). Små slotar lämnas orörda."""
+    if len(kandidater) <= TOPP_PER_SLOT:
+        return kandidater
+    basta = _efter_poang(kandidater, vikter)[:TOPP_PER_SLOT]
+    billigast = sorted(kandidater, key=lambda i: (_kr_per_kcal(i), i.namn))[:BILLIGASTE_PER_SLOT]
+    valda = {i.namn for i in [*basta, *billigast, *extra]} | set(behall)
+    return [i for i in kandidater if i.namn in valda]
+
+
+def _baljvaxtregel(protein: Ingrediens, kolhydrat: Ingrediens | None) -> bool:
+    """En baljväxt som proteinkälla kräver en kolhydrat av spannmål."""
+    return protein.proteintyp != "baljväxt" or (kolhydrat is not None and kolhydrat.proteintyp == "spannmål")
 
 
 def _rangordna(kandidater: list[Maltid], vikter: Vikter) -> list[Maltid]:
@@ -390,7 +457,7 @@ def _planera(
     if frukost:
         frukost_maltid = _valj(
             "frukost",
-            product(_kategori(ingredienser, "mejeri"), _kategori(ingredienser, "flingor"), _kategori(ingredienser, "bär")),
+            product(*(_forfiltrera(_kategori(ingredienser, k), vikter_fasta) for k in ("mejeri", "flingor", "bär"))),
             profiler,
             {p.namn: andel(p, VIKT_FRUKOST) for p in profiler},
             lambda k, kcal, protein: _dimensionera(*k, BAR_GRAM, ("protein", "flingor", "bär"), kcal, protein),
@@ -426,15 +493,23 @@ def _planera(
     huvudmal = {}
     for profil in profiler:
         kcal = profil.kcal_mal - sum(m.portion(profil.namn).kcal for m in fasta_maltider)
-        protein = profil.protein_mal - sum(m.portion(profil.namn).protein for m in fasta_maltider)
+        protein = profil.protein_mal - sum(m.portion(profil.namn).viktat_protein for m in fasta_maltider)
         _, protein_andel = andel(profil, VIKT_HUVUDMAL)
         huvudmal[profil.namn] = (kcal / 2, max(protein / 2, protein_andel))
 
-    proteinkallor = _kategori(ingredienser, "protein", "kombination")
-    gronsaker = _kategori(ingredienser, "grönsaker")
-    huvudkombinationer = list(product(proteinkallor, _kategori(ingredienser, "kolhydrater"), gronsaker))
+    lasta = set(val.values())
+    proteinkallor = _forfiltrera(_kategori(ingredienser, "protein", "kombination"), vikter_huvudmal, lasta)
+    alla_kolhydrater = _kategori(ingredienser, "kolhydrater")
+    spannmal = [k for k in alla_kolhydrater if k.proteintyp == "spannmål"]
+    # Spannmål får alltid vara med, så att baljväxter har något att paras med.
+    kolhydrater = _forfiltrera(
+        alla_kolhydrater, vikter_huvudmal, lasta, _efter_poang(spannmal, vikter_huvudmal)[:BILLIGASTE_PER_SLOT]
+    )
+    gronsaker = _forfiltrera(_kategori(ingredienser, "grönsaker"), vikter_huvudmal, lasta)
+    huvudkombinationer = list(product(proteinkallor, kolhydrater, gronsaker))
     # En kombinationsvara kan också stå utan kolhydratkälla.
     huvudkombinationer += [(p, None, g) for p in proteinkallor if p.kategori == "kombination" for g in gronsaker]
+    huvudkombinationer = [k for k in huvudkombinationer if _baljvaxtregel(k[0], k[1])]
 
     def dimensionera_huvudmal(k, kcal, protein):
         return _dimensionera(*k, GRONSAKER_GRAM, ("protein", "kolhydrater", "grönsaker"), kcal, protein)

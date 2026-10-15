@@ -23,14 +23,17 @@ def test_standardbudget(app):
 
 
 def _snav_dagsbudget(app):
-    """En dagsbudget mellan billigaste möjliga dag och standardplanens dyraste dag,
-    så att budgeten tvingar fram billigare val men fortfarande går att nå."""
+    """En dagsbudget mellan billigaste möjliga dag och den obegränsade planens
+    dyraste dag, så att budgeten tvingar fram billigare val men fortfarande går
+    att nå. Månadstaket lyfts så att bara veckobudgeten begränsar."""
+    app.satt_installning("veckobudget", 10_000)
+    app.satt_installning("manadsbudget", 100_000)
     standard = max(dag.kr for dag in app.plan(START).dagar)
     with pytest.raises(PlaneringsFel) as fel:
         app.satt_installning("veckobudget", 7)
         app.plan(START)
     billigaste = float(str(fel.value).split("kostar ")[1].split(" kr")[0])
-    app.satt_installning("veckobudget", 1250)
+    app.satt_installning("veckobudget", 10_000)
     assert billigaste + 2 < standard
     return (billigaste + standard) / 2
 
@@ -60,8 +63,8 @@ def test_malen_haller_aven_med_snav_budget(app):
     plan = app.plan(START)
 
     for dag in plan.dagar:
-        assert dag.kcal("jag") <= 2000 and dag.protein("jag") >= 180
-        assert dag.kcal("fru") <= 1700 and dag.protein("fru") >= 110
+        assert dag.kcal("jag") <= 2000 and dag.viktat_protein("jag") >= 180
+        assert dag.kcal("fru") <= 1700 and dag.viktat_protein("fru") >= 110
 
 
 def test_omojlig_budget_ger_tydligt_fel(app):

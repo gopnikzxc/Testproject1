@@ -1,0 +1,209 @@
+{
+ "searchResults": {
+  "products": [
+   {
+    "id": "101355565_ST",
+    "gtin": "7340083493768",
+    "sellable": true,
+    "visible": null,
+    "url": "/matvaror/skafferiet/konserver/eldorado-tonfisk-vatten-finfördelad-p101355565_ST",
+    "name": "Tonfisk Vatten Finfördelad",
+    "subtitle": "170/120G ELDORADO",
+    "description": null,
+    "brand": "ELDORADO",
+    "contactName": "Axfood AB",
+    "communicationAddress": "konsument@axfood.se Tel 0771-87 67 70",
+    "superCategory": "Skafferiet",
+    "category": "Konserver",
+    "bfCategory": "Fisk & skaldjurskonserver",
+    "bfCategoryCode": "10213704",
+    "country": null,
+    "countryOfOrigin": "MAURITIUS",
+    "countryOfOriginIsoCode": null,
+    "countryOfManufacture": null,
+    "provenanceStatement": null,
+    "activeSubstance": null,
+    "prescriptionFreeMedicine": false,
+    "originStatement": null,
+    "recyclingInformation": null,
+    "storageInformation": "Förvaras torrt och svalt. Innehåll i öppnad,förpackning förvaras i annat kärl i kylskåp i cirka 2 dagar",
+    "descriptiveSize": "170/120G",
+    "netContent": {
+     "unitOfMeasure": 0,
+     "value": 1000
+    },
+    "width": {
+     "unitOfMeasure": 2,
+     "value": 85
+    },
+    "height": {
+     "unitOfMeasure": 2,
+     "value": 42
+    },
+    "depth": {
+     "unitOfMeasure": 2,
+     "value": 85
+    },
+    "grossWeight": {
+     "unitOfMeasure": 0,
+     "value": 211
+    },
+    "markings": [
+     {
+      "agency": "http://www.gs1.se/",
+      "qualifier": "http://www.gs1.se/services/codelist/3.1/T4028.xml",
+      "codeListVersion": "3.1",
+      "code": "NYCKELHALET",
+      "descriptions": null
+     },
+     {
+      "agency": "http://www.gs1.se/",
+      "qualifier": "http://www.gs1.se/services/codelist/3.1/T3777.xml",
+      "codeListVersion": "3.1",
+      "code": "MARINE_STEWARDSHIP_COUNCIL_LABEL",
+      "descriptions": null
+     }
+    ],
+    "tags": null,
+    "images": [
+     {
+      "url": "07340083493768_C1C1_2022-04-08.jpg",
+      "alt": "Tonfisk Vatten Finfördelad",
+      "type": 0
+     }
+    ],
+    "searchKeywords": null,
+    "sellingUnitOfMeasure": 1,
+    "handling": {
+     "code": null,
+     "minimumLifespanFromTimeOfArrivalInDays": null,
+     "averageLifespanFromTimeOfArrivalInDays": null
+    },
+    "foodAndBeverageExtension": {
+     "allergenInformation": {
+      "allergenStatement": null,
+      "allergens": [
+       {
+        "levelOfContainment": 0,
+        "typeCode": "Fisk"
+       }
+      ]
+     },
+     "ingredientStatement": "INGREDIENSER: TONFISK*, vatten, salt. *Tonfisk av arten Skipjack (Katsuwonus pelamis).",
+     "nutrientInformations": [
+      {
+       "nutrientStatement": "energi 350 Kilojoule, energi 83 Kilokalori, fett 1.2 Gram, varav mättat fett 0.2 Gram, kolhydrat 0 Gram, varav sockerarter 0 Gram, protein 18 Gram, salt 1.1 Gram",
+       "nutrientBasisQuantity": 100,
+       "nutrientBasisQuantityUnit": "gram",
+       "preparationState": 0,
+       "nutrients": [
+        {
+         "measurementPrecision": 0,
+         "typeCode": "ENER-",
+         "unitOfMeasure": "kilojoule",
+         "value": 350,
+         "dailyValueIntakePercent": null
+        },
+        {
+         "measurementPrecision": 0,
+         "typeCode": "ENER-",
+         "unitOfMeasure": "kilokalori",
+         "value": 83,
+         "dailyValueIntakePercent": null
+        },
+        {
+         "measurementPrecision": 0,
+         "typeCode": "FAT",
+         "unitOfMeasure": "gram",
+         "value": 1.2,
+         "dailyValueIntakePercent": null
+        },
+        {
+         "measurementPrecision": 0,
+         "typeCode": "FASAT",
+         "unitOfMeasure": "gram",
+         "value": 0.2,
+         "dailyValueIntakePercent": null
+        },
+        {
+         "measurementPrecision": 0,
+         "typeCode": "CHOAVL",
+         "unitOfMeasure": "gram",
+         "value": 0,
+         "dailyValueIntakePercent": null
+        },
+        {
+         "measurementPrecision": 0,
+         "typeCode": "SUGER-",
+         "unitOfMeasure": "gram",
+         "value": 0,
+         "dailyValueIntakePercent": null
+        },
+        {
+         "measurementPrecision": 0,
+         "typeCode": "PRO-",
+         "unitOfMeasure": "gram",
+         "value": 18,
+         "dailyValueIntakePercent": null
+        },
+        {
+         "measurementPrecision": 0,
+         "typeCode": "SALTEQ",
+         "unitOfMeasure": "gram",
+         "value": 1.1,
+         "dailyValueIntakePercent": null
+        }
+       ]
+      }
+     ],
+     "preparationInformations": null
+    },
+    "safetyDataSheetInformation": null,
+    "newProductFrom": null,
+    "newProductTo": null,
+    "sellableFrom": null,
+    "returnablePackageDepositInformation": null,
+    "maximumQuantity": 25,
+    "marketingKeyWords": null,
+    "relatedBfabid": "5680152",
+    "uniformResourceIdentifier": null,
+    "sortCountryInfo": null,
+    "validFrom": null,
+    "validTo": null,
+    "productStoreDetails": {
+     "p_has_price": true,
+     "p_availablefrom": "2023-04-17",
+     "p_availableto": "9999-12-31",
+     "p_has_current_week_only_discount": false,
+     "p_has_long_time_discount": false,
+     "p_has_members_only_price": false,
+     "prices": {
+      "currentPrice": {
+       "price": 9.5,
+       "unit": "PCE",
+       "comparativePrice": 79.17,
+       "comparativePriceUnit": "KGM"
+      },
+      "ordinaryPrice": {
+       "price": 9.5,
+       "unit": "PCE",
+       "comparativePrice": 79.17,
+       "comparativePriceUnit": "KGM"
+      },
+      "memberPrice": null,
+      "promotions": [],
+      "activePromotion": null,
+      "hasDiscount": false,
+      "hasPromotion": false,
+      "displayLowestPriceLast30Days": false,
+      "lowestPriceLast30Days": null
+     },
+     "stockStatus": 2,
+     "availableFrom": null,
+     "availableTo": null,
+     "id": "3204"
+    }
+   }
+  ]
+ }
+}

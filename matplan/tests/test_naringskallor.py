@@ -65,6 +65,8 @@ def _app(db, produkter, off=None, katalog=STARTKATALOG + (SPETSKAL,)):
     off = off if off is not None else FalskOpenFoodFacts({})
     butik = SortimentButik(standardsortiment() + produkter)
     app = Matplan(db, katalog=katalog, butiker=(butik,), livsmedelsverket=lmv, openfoodfacts=off)
+    app.satt_installning("veckobudget", 5000)
+    app.satt_installning("manadsbudget", 20000)
     return app, butik, lmv, off
 
 
