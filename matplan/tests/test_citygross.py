@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from matplan.butiker import ButiksFel
-from matplan.butiker.citygross import CityGross
+from matplan.butiker import Butiksplats, ButiksFel
+from matplan.butiker.citygross import CityGross, CityGrossButiker
 from matplan.http import HttpKlient
 
 FIXTURER = Path(__file__).parent / "fixtures" / "citygross"
@@ -109,3 +109,58 @@ def test_natverksfel_ger_butiksfel(tmp_path):
 
     with pytest.raises(ButiksFel, match="Kunde inte nå"):
         adapter.sok("keso")
+
+
+# --- Butikslistan och butiksnumret (#27) ---
+
+
+def _register(tmp_path):
+    anrop = []
+
+    def transport(url, headers, metod="GET", data=None):
+        anrop.append((url, metod, data))
+        if url.endswith("/graphql"):
+            return (FIXTURER / "graphql_butiksnummer_31.json").read_bytes()
+        return (FIXTURER / "butiker.json").read_bytes()
+
+    http = HttpKlient(tmp_path / "cache", paus_s=0, transport=transport, sov=lambda s: None)
+    return CityGrossButiker(http), anrop
+
+
+def test_butikslistan_ger_namn_adress_postnummer_och_position(tmp_path):
+    register, anrop = _register(tmp_path)
+
+    platser = {p.namn: p for p in register.butiker()}
+
+    assert anrop[0][0] == "https://www.citygross.se/api/v1/PageData/stores"
+    assert len(platser) == 38
+    ytterby = platser["City Gross Ytterby"]
+    assert (ytterby.id, ytterby.ort, ytterby.postnummer, ytterby.adress) == ("31", "Ytterby", "44250", "Torsbyvägen 12")
+    assert ytterby.lat == pytest.approx(57.8592, abs=1e-3) and ytterby.lng == pytest.approx(11.9182, abs=1e-3)
+    # Butiksnamn med blanksteg på slutet och postnummer utan mellanslag normaliseras.
+    assert platser["City Gross Kristianstad"].postnummer == "29128"
+    assert platser["City Gross Linköping Tornby"].postnummer == "58273"
+
+
+def test_butiksnumret_slas_upp_via_graphql(tmp_path):
+    register, anrop = _register(tmp_path)
+    ytterby = next(p for p in register.butiker() if p.id == "31")
+
+    assert register.butiksnummer(ytterby) == 3240
+
+    url, metod, data = anrop[-1]
+    assert (url, metod) == ("https://www.citygross.se/graphql", "POST")
+    fraga = json.loads(data)
+    assert fraga["variables"] == {"siteId": "31"}
+    assert "lindbakstorenumber" in fraga["query"]
+
+
+def test_butiksnummer_saknas_ger_butiksfel(tmp_path):
+    def transport(url, headers, metod="GET", data=None):
+        return b'{"data":{"lindbakstorenumber":null}}'
+
+    http = HttpKlient(tmp_path / "cache", paus_s=0, transport=transport, sov=lambda s: None)
+    plats = Butiksplats("citygross", "999", "City Gross X", "X", "00000")
+
+    with pytest.raises(ButiksFel, match="butiksnummer"):
+        CityGrossButiker(http).butiksnummer(plats)

@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .bunkra import Bunkring
-from .butiker import Produkt
+from .butiker import WILLYS_KUNGALV, YTTERBY, Produkt, ValdButik
 from .katalog import Ingrediens
 from .naring import Naring
 from .planerare import Plan
@@ -33,9 +33,6 @@ STANDARDINSTALLNINGAR = {
     "rea_veckor": 8,
     "frys_kg": 10,
     "torr_kg": 2,
-    # Vilka butiker som hämtas och planeras mot (1 = på, 0 = av).
-    "butik_citygross": 1,
-    "butik_willys": 0,
 }
 
 _SCHEMA = """
@@ -142,9 +139,33 @@ class Lagring:
     def __init__(self, sokvag: Path):
         sokvag = Path(sokvag)
         sokvag.parent.mkdir(parents=True, exist_ok=True)
-        self._db = sqlite3.connect(sokvag)
+        # GUI:t kör hämtningar och butiksval i en bakgrundstråd (en åt gången).
+        self._db = sqlite3.connect(sokvag, check_same_thread=False)
         self._db.executescript(_SCHEMA)
+        self._migrera_butiksval()
         self._seeda()
+
+    def _migrera_butiksval(self) -> None:
+        """Första gången: gör de gamla av/på-inställningarna butik_citygross och
+        butik_willys till ett butiksval. Ytterby är standard; Willys Kungälv blir
+        vald bara om den var den enda påslagna."""
+        if self._db.execute("SELECT 1 FROM meta WHERE nyckel = 'butik'").fetchone():
+            return
+        gamla = dict(self._db.execute(
+            "SELECT nyckel, varde FROM installningar WHERE nyckel IN ('butik_citygross', 'butik_willys')"
+        ))
+        vald = WILLYS_KUNGALV if gamla.get("butik_willys") and not gamla.get("butik_citygross", 1) else YTTERBY
+        self.spara_vald_butik(vald)
+
+    def vald_butik(self) -> ValdButik:
+        rad = self._db.execute("SELECT varde FROM meta WHERE nyckel = 'butik'").fetchone()
+        return ValdButik(**json.loads(rad[0])) if rad else YTTERBY
+
+    def spara_vald_butik(self, butik: ValdButik) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO meta VALUES ('butik', ?)", (json.dumps(dataclasses.asdict(butik)),)
+            )
 
     def _seeda(self) -> None:
         with self._db:

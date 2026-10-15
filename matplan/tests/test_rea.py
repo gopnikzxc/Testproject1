@@ -107,7 +107,7 @@ def test_cli_markerar_rea(tmp_path, monkeypatch, capsys):
     import matplan.cli as cli
 
     monkeypatch.setenv("MATPLAN_DB", str(tmp_path / "cli.db"))
-    monkeypatch.setattr(cli, "_butiker", lambda: (hel_butik(CITY, erbjudande=("Kycklingfilé", "Ris, okokt", "Morot")),))
+    monkeypatch.setattr(cli, "_butiker", lambda vald: (hel_butik(CITY, erbjudande=("Kycklingfilé", "Ris, okokt", "Morot")),))
 
     assert main(["refresh"]) == 0
     assert main(["plan", "--ny"]) == 0

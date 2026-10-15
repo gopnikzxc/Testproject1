@@ -45,7 +45,8 @@ def inga_riktiga_butiker(monkeypatch):
     """CLI-tester får aldrig anropa riktiga butiker; tester som vill ha butiker sätter egna."""
     import matplan.cli
 
-    monkeypatch.setattr(matplan.cli, "_butiker", lambda: ())
+    monkeypatch.setattr(matplan.cli, "_butiker", lambda vald: ())
+    monkeypatch.setattr(matplan.cli, "_butiksregister", lambda: ())
     monkeypatch.setattr(matplan.cli, "_naringskallor", lambda: (None, None))
 
 

@@ -9,7 +9,8 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.widgets import DataTable, Footer, Header, Input, Static, TabbedContent, TabPane
 
-from .core import DAGAR_PER_MANAD, Matplan, PlaneringsFel
+from .butiker import ButiksFel
+from .core import DAGAR_PER_MANAD, Butiksrad, Matplan, PlaneringsFel
 from .export import exportera
 from .naring import KALLHANVISNING
 from .text import datum, forpackning, kr, mangd, produkttext
@@ -40,6 +41,7 @@ class MatplanApp(App):
         self.exportmapp = exportmapp
         self.summa_text = ""
         self._markorer: dict[str, int] = {}  # markörens rad per tabell, så den står kvar efter uppdatering
+        self._butiksfilter: dict[str, str | None] = {"postnummer": None, "sok": None}
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -55,6 +57,10 @@ class MatplanApp(App):
                 yield DataTable(id="bunkringstabell", cursor_type="row")
             with TabPane("Priser", id="priser"):
                 yield DataTable(id="pristabell", cursor_type="row")
+            with TabPane("Butik", id="butik"):
+                yield DataTable(id="butikstabell", cursor_type="row")
+                yield Input(placeholder="Postnummer (närmast först) eller sök på namn/ort, t.ex. 442 50 eller Borås",
+                            id="butiksinmatning")
             with TabPane("Inställningar", id="installningar"):
                 yield DataTable(id="installningstabell", cursor_type="row")
                 yield Input(placeholder="Ändra: <nyckel> <värde>, t.ex. veckobudget 1300", id="installningsinmatning")
@@ -90,6 +96,7 @@ class MatplanApp(App):
                 for p in plan.profiler
             ),
         ]
+        delar.append(f"Butik: {self.karna.vald_butik().namn}")
         if lista.basta_butik:
             delar.append(f"Inköp {lista.basta_butik.butik}: {lista.basta_butik.kostnad:.0f} kr")
         if plan.aktiv:
@@ -196,6 +203,49 @@ class MatplanApp(App):
             tabell.add_row(nyckel, f"{varde:g}", key=nyckel)
         self._aterstall(tabell)
 
+    def _fyll_butiker(self, rader: list[Butiksrad]) -> None:
+        tabell = self._tabell("butikstabell", "", "Butik", "Adress", "Avstånd")
+        for r in rader:
+            p = r.plats
+            tabell.add_row(
+                "✓" if r.vald else "", p.namn, f"{p.adress}, {p.postnummer[:3]} {p.postnummer[3:]} {p.ort}",
+                "" if r.km is None else f"{r.km:.0f} km", key=p.namn,
+            )
+        self._aterstall(tabell)
+
+    # --- Butiksval (butikslistan och butiksnumret hämtas från nätet, i bakgrunden) ---
+
+    def on_tabbed_content_tab_activated(self, event: TabbedContent.TabActivated) -> None:
+        if event.pane.id == "butik" and not self.query_one("#butikstabell", DataTable).row_count:
+            self._ladda_butiker()
+
+    def _ladda_butiker(self) -> None:
+        self.run_worker(self._hamta_butiker, thread=True, exclusive=True, group="butiker")
+
+    def _hamta_butiker(self) -> None:
+        try:
+            rader = self.karna.butikslista(**self._butiksfilter)
+        except (ButiksFel, ValueError) as fel:
+            self.call_from_thread(self.notify, str(fel), severity="error")
+            return
+        self.call_from_thread(self._fyll_butiker, rader)
+
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        if event.data_table.id == "butikstabell" and event.row_key.value:
+            namn = event.row_key.value
+            self.run_worker(lambda: self._valj_butik(namn), thread=True, exclusive=True, group="butiker")
+
+    def _valj_butik(self, namn: str) -> None:
+        try:
+            vald = self.karna.valj_butik(namn)
+            rader = self.karna.butikslista(**self._butiksfilter)
+        except (ButiksFel, ValueError) as fel:
+            self.call_from_thread(self.notify, str(fel), severity="error")
+            return
+        self.call_from_thread(self._fyll_butiker, rader)
+        self.call_from_thread(self.uppdatera)
+        self.call_from_thread(self.notify, f"Vald butik: {vald.namn}. Tryck r för att hämta dess sortiment.")
+
     # --- Åtgärder --------------------------------------------------------------
 
     def _gor(self, atgard, meddelande=None) -> None:
@@ -272,6 +322,12 @@ class MatplanApp(App):
     def on_input_submitted(self, event: Input.Submitted) -> None:
         text = event.value.strip()
         event.input.value = ""
+        if event.input.id == "butiksinmatning":
+            ar_postnummer = text.replace(" ", "").isdigit()
+            self._butiksfilter = {"postnummer": text if ar_postnummer else None,
+                                  "sok": None if ar_postnummer else (text or None)}
+            self._ladda_butiker()
+            return
         if not text or " " not in text:
             return
         nyckel, varde = text.rsplit(" ", 1)

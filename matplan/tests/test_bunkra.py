@@ -124,7 +124,7 @@ def test_cli_bunkra(tmp_path, monkeypatch, capsys):
     import matplan.cli as cli
 
     monkeypatch.setenv("MATPLAN_DB", str(tmp_path / "cli.db"))
-    monkeypatch.setattr(cli, "_butiker", lambda: (hel_butik(CITY, erbjudande=("Kycklingfilé",)),))
+    monkeypatch.setattr(cli, "_butiker", lambda vald: (hel_butik(CITY, erbjudande=("Kycklingfilé",)),))
 
     assert main(["refresh"]) == 0
     assert main(["bunkra"]) == 0

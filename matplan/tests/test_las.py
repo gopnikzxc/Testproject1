@@ -81,7 +81,7 @@ def test_cli_produkter_och_las(tmp_path, monkeypatch, capsys):
     import matplan.cli as cli
 
     monkeypatch.setenv("MATPLAN_DB", str(tmp_path / "cli.db"))
-    monkeypatch.setattr(cli, "_butiker", lambda: (_butik(BILLIG, KRONFAGEL),))
+    monkeypatch.setattr(cli, "_butiker", lambda vald: (_butik(BILLIG, KRONFAGEL),))
 
     assert cli.main(["refresh"]) == 0
     assert cli.main(["lås", "Kycklingfilé", CITY, "kronfagel"]) == 0

@@ -1,7 +1,8 @@
 """City Gross: produktsök med butikspriser via webbutikens Loop54-API.
 
+Butikerna listas i `/api/v1/PageData/stores` (siteId, adress, koordinater).
 Butiksnumret hittas via webbutikens GraphQL (`lindbakstorenumber(siteId)`);
-Ytterby har siteId 31 i `/api/v1/PageData/stores` och butiksnummer 3240.
+Ytterby har siteId 31 och butiksnummer 3240.
 Med `store=<butiksnummer>` returnerar sökningen den butikens sortiment och
 priser (`productStoreDetails.id` blir butiksnumret).
 
@@ -11,12 +12,19 @@ icke-mat, godis, snacks och vissa underkategorier (glass, fikabröd, kex,
 kryddor, såser, smör m.m.) sorteras bort.
 """
 
+import json
+import re
 import urllib.error
 
 from ..http import HttpKlient
-from . import ButiksFel, Produkt
+from . import Butiksplats, ButiksFel, Produkt
 
 BAS = "https://www.citygross.se/api/v1"
+GRAPHQL = "https://www.citygross.se/graphql"
+BUTIKSNUMMERFRAGA = (
+    "query Lindbakstorenumber($siteId: String!) "
+    "{ lindbakstorenumber(siteId: $siteId) { storeNumber provider } }"
+)
 YTTERBY = 3240
 MATVAROR = 69
 SIDSTORLEK = 2000
@@ -67,8 +75,61 @@ def _naring(rad: dict) -> dict[str, float] | None:
     if "kcal" not in varden or "protein" not in varden:
         return None
     return varden
+
 # Ägg jämförpris anges per styck; räkna om med en normalstor äggvikt.
 GRAM_PER_AGG = 60
+
+
+class CityGrossButiker:
+    """City Gross butikslista (`/PageData/stores`) och butiksnummer via GraphQL."""
+
+    kedja = "citygross"
+
+    def __init__(self, http: HttpKlient):
+        self._http = http
+
+    def butiker(self) -> list[Butiksplats]:
+        try:
+            sidor = self._http.hamta_json(f"{BAS}/PageData/stores")
+            platser = [p for p in (self._plats(sida.get("data") or {}) for sida in sidor) if p is not None]
+        except (urllib.error.URLError, TimeoutError) as fel:
+            raise ButiksFel(f"Kunde inte nå City Gross: {fel}") from fel
+        except (ValueError, TypeError, AttributeError) as fel:
+            raise ButiksFel(f"Oväntat svar från City Gross ({type(fel).__name__}: {fel})") from fel
+        return sorted(platser, key=lambda p: p.namn)
+
+    def butiksnummer(self, plats: Butiksplats) -> int:
+        fraga = {"operationName": "Lindbakstorenumber", "variables": {"siteId": plats.id}, "query": BUTIKSNUMMERFRAGA}
+        try:
+            svar = json.loads(self._http.skicka(
+                GRAPHQL, headers={"Content-Type": "application/json", "Accept": "application/json"},
+                data=json.dumps(fraga).encode(),
+            ))
+            return int(svar["data"]["lindbakstorenumber"]["storeNumber"])
+        except (urllib.error.URLError, TimeoutError) as fel:
+            raise ButiksFel(f"Kunde inte nå City Gross: {fel}") from fel
+        except (ValueError, KeyError, TypeError) as fel:
+            raise ButiksFel(f"Hittade inget butiksnummer för {plats.namn} ({type(fel).__name__}: {fel})") from fel
+
+    def _plats(self, sida: dict) -> Butiksplats | None:
+        if sida.get("siteId") is None or not sida.get("storeName") or sida.get("ispublished") is False:
+            return None
+        adress = sida.get("address") or {}
+        lat = lng = None
+        try:
+            lat, lng = (float(v) for v in (sida.get("storeLocation") or {}).get("coordinates", "").split(","))
+        except ValueError:
+            pass
+        return Butiksplats(
+            kedja=self.kedja,
+            id=str(sida["siteId"]),
+            namn=f"City Gross {sida['storeName'].strip()}",
+            ort=(adress.get("city") or "").strip(),
+            postnummer=re.sub(r"\D", "", adress.get("zipCode") or ""),
+            adress=(adress.get("streetAddress") or "").strip(),
+            lat=lat,
+            lng=lng,
+        )
 
 
 class CityGross:

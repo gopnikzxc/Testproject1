@@ -4,6 +4,7 @@ CLI och (senare) Textual-GUI är tunna skal ovanpå den här klassen.
 """
 
 import dataclasses
+import math
 import re
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
@@ -11,7 +12,9 @@ from pathlib import Path
 from typing import Callable
 
 from .bunkra import Bunkring, forslag
-from .butiker import BUTIKSNYCKLAR, Butik, ButiksFel, Produkt, matchar, ratt_kategori, utesluten
+from .butiker import (
+    Butik, ButiksFel, Butiksplats, Butiksregister, Produkt, ValdButik, matchar, ratt_kategori, utesluten,
+)
 from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
@@ -19,7 +22,7 @@ from .naring import Livsmedelsverket, NaringsFel, OpenFoodFacts
 from .planerare import HUVUDSLOTAR, Plan, PlaneringsFel, Profil, Vikter, planera
 from .rea import ar_rea
 
-__all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD"]
+__all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD", "Butiksrad"]
 
 # Barnet planeras inte (se spec #1).
 PERSONER = ("jag", "fru")
@@ -38,6 +41,42 @@ class Hamtningsresultat:
 
 
 @dataclass(frozen=True)
+class Butiksrad:
+    plats: Butiksplats
+    km: float | None  # avstånd från det angivna postnumret, om ett gavs
+    vald: bool
+
+
+def uppskattad_position(postnummer: str, referenser: list[Butiksplats]) -> tuple[float, float] | None:
+    """Ungefärlig position för ett postnummer: koordinaterna för den butik vars
+    postnummer liknar det mest (längst gemensam början, sedan minst numerisk
+    skillnad). Svenska postnummer är geografiskt ordnade, så det räcker för att
+    sortera butiker efter närhet."""
+    siffror = re.sub(r"\D", "", postnummer)
+    if len(siffror) != 5:
+        raise ValueError(f"Postnummer ska ha fem siffror, t.ex. 442 50 (fick {postnummer!r}).")
+    med_plats = [p for p in referenser if p.lat is not None and len(p.postnummer) == 5]
+    if not med_plats:
+        return None
+
+    def likhet(p: Butiksplats) -> tuple[int, int]:
+        gemensamt = next((i for i, (a, b) in enumerate(zip(siffror, p.postnummer)) if a != b), 5)
+        return (-gemensamt, abs(int(siffror) - int(p.postnummer)))
+
+    basta = min(med_plats, key=likhet)
+    return (basta.lat, basta.lng)
+
+
+def avstand_km(position: tuple[float, float] | None, plats: Butiksplats) -> float | None:
+    """Fågelvägen (haversine)."""
+    if position is None or plats.lat is None:
+        return None
+    lat1, lng1, lat2, lng2 = map(math.radians, (*position, plats.lat, plats.lng))
+    a = math.sin((lat2 - lat1) / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin((lng2 - lng1) / 2) ** 2
+    return 2 * 6371 * math.asin(math.sqrt(a))
+
+
+@dataclass(frozen=True)
 class _Priser:
     produkter: dict[str, list[Produkt]]  # efter produktlås
     hamtade: datetime | None
@@ -50,12 +89,17 @@ class Matplan:
         self,
         db_sokvag: Path,
         katalog: tuple[Ingrediens, ...] | None = None,
-        butiker: tuple[Butik, ...] = (),
+        butiker: tuple[Butik, ...] | Callable[[ValdButik], tuple[Butik, ...]] = (),
         livsmedelsverket: Livsmedelsverket | None = None,
         openfoodfacts: OpenFoodFacts | None = None,
+        butiksregister: tuple[Butiksregister, ...] = (),
     ):
+        """`butiker` är adaptrar, eller en funktion som bygger adaptrarna för den
+        valda butiken. `butiksregister` listar kedjornas butiker för butiksvalet."""
         self._lagring = Lagring(db_sokvag)
         self._butiker = butiker
+        self._butiksregister = butiksregister
+        self._byggda: tuple[ValdButik, tuple[Butik, ...]] | None = None
         self._livsmedelsverket = livsmedelsverket
         self._openfoodfacts = openfoodfacts
         # Utan given katalog används grupperna i databasen (de inbyggda läggs in första gången).
@@ -379,10 +423,10 @@ class Matplan:
         sokord = set(re.findall(r"\w+", text.casefold()))
         if not sokord:
             return []
-        avstangda = self._avstangda_butiker()
+        med = self._medraknade_butiker()
         traffar = []
         for p in self._lagring.katalog():
-            if p.butik in avstangda:
+            if p.butik not in med:
                 continue
             ord_ = set(re.findall(r"\w+", f"{p.varumarke} {p.namn} {p.beskrivning}".casefold()))
             if sokord <= ord_:
@@ -458,29 +502,77 @@ class Matplan:
     def lasningar(self) -> dict[tuple[str, str], str]:
         return self._lagring.lasningar()
 
-    def _aktiva_butiker(self) -> tuple[Butik, ...]:
-        """Butiker som är påslagna med inställningen butik_<nyckel> (utan nyckel: alltid på)."""
-        inst = self._lagring.installningar()
-        return tuple(b for b in self._butiker if inst.get(f"butik_{getattr(b, 'nyckel', '')}", 1))
+    def _adaptrar(self) -> tuple[Butik, ...]:
+        """Adaptrarna; byggs en gång per vald butik när de ges som funktion."""
+        if not callable(self._butiker):
+            return tuple(self._butiker)
+        vald = self.vald_butik()
+        if self._byggda is None or self._byggda[0] != vald:
+            self._byggda = (vald, tuple(self._butiker(vald)))
+        return self._byggda[1]
 
-    def _avstangda_butiker(self) -> set[str]:
-        """Namnen på avstängda butiker, så att deras sparade priser ignoreras även
-        när kärnan körs utan butiksadaptrar."""
-        inst = self._lagring.installningar()
-        nycklar = {**BUTIKSNYCKLAR, **{b.namn: b.nyckel for b in self._butiker if hasattr(b, "nyckel")}}
-        return {namn for namn, nyckel in nycklar.items() if not inst.get(f"butik_{nyckel}", 1)}
+    def _aktiva_butiker(self) -> tuple[Butik, ...]:
+        """Adaptrar för den valda butiken. Adaptrar utan kedja (t.ex. i tester) är alltid med."""
+        vald = self.vald_butik()
+        return tuple(b for b in self._adaptrar() if not hasattr(b, "nyckel") or b.namn == vald.namn)
+
+    def _medraknade_butiker(self) -> set[str]:
+        """Butiker vars sparade priser och sortiment räknas: den valda (och adaptrar
+        utan kedja). Andra butikers historik ligger kvar och kommer tillbaka när
+        man byter tillbaka."""
+        return {self.vald_butik().namn} | {b.namn for b in self._adaptrar() if not hasattr(b, "nyckel")}
+
+    # --- Butiksval ---
+
+    def vald_butik(self) -> ValdButik:
+        return self._lagring.vald_butik()
+
+    def butikslista(self, postnummer: str | None = None, sok: str | None = None) -> list[Butiksrad]:
+        """Kedjornas butiker. Med postnummer: närmast först; med sökord: de vars
+        namn, ort eller postnummer innehåller texten; annars i namnordning."""
+        alla = [p for register in self._butiksregister for p in register.butiker()]
+        platser = alla
+        if sok:
+            text = sok.casefold().strip()
+            platser = [p for p in alla if text in p.namn.casefold() or text in p.ort.casefold()
+                       or p.postnummer.startswith(text.replace(" ", ""))]
+        vald = self.vald_butik().namn
+        if postnummer:
+            # Alla butiker är referenspunkter, även de som sökningen sorterat bort.
+            position = uppskattad_position(postnummer, alla)
+            rader = [Butiksrad(p, avstand_km(position, p), p.namn == vald) for p in platser]
+            return sorted(rader, key=lambda r: (r.km is None, r.km or 0, r.plats.namn))
+        return sorted((Butiksrad(p, None, p.namn == vald) for p in platser), key=lambda r: r.plats.namn)
+
+    def valj_butik(self, namn: str) -> ValdButik:
+        """Väljer butiken vars namn (eller ort, om den är entydig) är `namn`, slår
+        upp dess butiksnummer och sparar valet. Grupper, lager och inställningar
+        påverkas inte; tidigare butikers priser och sortiment ligger kvar."""
+        text = namn.casefold().strip()
+        kandidater = [(r, p) for r in self._butiksregister for p in r.butiker()]
+        traffar = [(r, p) for r, p in kandidater if p.namn.casefold() in (text, f"city gross {text}")]
+        if not traffar:
+            traffar = [(r, p) for r, p in kandidater if p.ort.casefold() == text]
+        if not traffar:
+            raise ValueError(f"Hittar ingen butik som heter {namn!r}. Lista butikerna med `matplan butik`.")
+        if len(traffar) > 1:
+            raise ValueError(f"Flera butiker passar {namn!r}: " + ", ".join(p.namn for _, p in traffar))
+        register, plats = traffar[0]
+        vald = ValdButik(plats.kedja, register.butiksnummer(plats), plats.namn)
+        self._lagring.spara_vald_butik(vald)
+        return vald
 
     def _matchade(self) -> tuple[dict[str, list[Produkt]], datetime | None]:
         """Produkter per grupp, före lås. Butiker med synkat sortiment matchas lokalt
         mot det; övriga från senaste sökhämtningen. Andra värdet är när de äldsta
         av priserna hämtades."""
         produkter: dict[str, list[Produkt]] = {}
-        avstangda = self._avstangda_butiker()
-        katalogtider = {b: t for b, t in self._lagring.katalogtider().items() if b not in avstangda}
+        med = self._medraknade_butiker()
+        katalogtider = {b: t for b, t in self._lagring.katalogtider().items() if b in med}
         tider = list(katalogtider.values())
 
         for ingrediens, produkt, tid in self._lagring.senaste_priser():
-            if produkt.butik in avstangda or produkt.butik in katalogtider:
+            if produkt.butik not in med or produkt.butik in katalogtider:
                 continue
             produkter.setdefault(ingrediens, []).append(produkt)
             tider.append(tid)
