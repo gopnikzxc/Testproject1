@@ -5,7 +5,7 @@ from pathlib import Path
 from .inkop import Inkopslista
 from .naring import KALLHANVISNING
 from .planerare import Maltid, Plan
-from .text import datum, forpackning
+from .text import datum, kr, listrad
 
 
 def _maltid(
@@ -56,32 +56,31 @@ def lista_markdown(lista: Inkopslista) -> str:
         rader += ["", f"**Totalt ca {lista.platshallar_kr:.0f} kr**"]
         return "\n".join(rader + _bunkring(lista)) + "\n"
 
-    rader += [f"## {basta.butik}: {basta.kostnad:.2f} kr", ""]
-    rader += ["- [ ] " + _kopstext(rad.ingrediens, rad.alternativ[basta.butik]) for rad in lista.rader if basta.butik in rad.alternativ]
+    rader += [f"## {basta.butik}: {kr(basta.kostnad)}", ""]
+    rader += ["- [ ] " + _kopstext(rad, rad.alternativ[basta.butik]) for rad in lista.rader if basta.butik in rad.alternativ]
     if basta.saknas:
         rader += ["", f"Saknas i {basta.butik}: {', '.join(basta.saknas)}"]
     if lista.besparing > 0.005:
-        rader += ["", f"## Uppdelat på flera butiker: {lista.delad_kostnad:.2f} kr (spar {lista.besparing:.2f} kr)", ""]
+        rader += ["", f"## Uppdelat på flera butiker: {kr(lista.delad_kostnad)} (spar {kr(lista.besparing)})", ""]
         for rad in lista.rader:
             if rad.billigast:
                 butik, kop = rad.billigast
-                rader.append(f"- [ ] {_kopstext(rad.ingrediens, kop)} – {butik}")
+                rader.append(f"- [ ] {_kopstext(rad, kop)} – {butik}")
     return "\n".join(rader + _bunkring(lista)) + "\n"
 
 
 def _bunkring(lista: Inkopslista) -> list[str]:
     if not lista.bunkring:
         return []
-    rader = ["", f"## Bunkring (utanför budgeten): {lista.bunkring_kr:.2f} kr", ""]
+    rader = ["", f"## Bunkring (utanför budgeten): {kr(lista.bunkring_kr)}", ""]
     for b in lista.bunkring:
-        mangd = f"{b.antal} st" if b.antal is not None else f"{b.gram:.0f} g lösvikt"
-        rader.append(f"- [ ] {b.ingrediens}: {mangd} {b.produkt.namn} ({b.kostnad:.2f} kr, {b.produkt.kr_per_kg:.2f} kr/kg) – {b.produkt.butik}")
+        rader.append(f"- [ ] {listrad(b.produkt, b.antal, b.gram, b.kostnad)} – {b.produkt.butik}")
     return rader
 
 
-def _kopstext(ingrediens: str, kop) -> str:
-    rea = " – rea" if kop.rea else ""
-    return f"{ingrediens}: {forpackning(kop)} {kop.produkt.namn} ({kop.kostnad:.2f} kr, {kop.produkt.kr_per_kg:.2f} kr/kg{rea})"
+def _kopstext(rad, kop) -> str:
+    rea = " (rea)" if kop.rea else ""
+    return f"{listrad(kop.produkt, kop.antal, rad.gram, kop.kostnad)}{rea}"
 
 
 def exportera(plan: Plan, lista: Inkopslista, katalog: Path) -> tuple[Path, Path]:

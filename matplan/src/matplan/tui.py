@@ -12,7 +12,7 @@ from textual.widgets import DataTable, Footer, Header, Input, Static, TabbedCont
 from .core import DAGAR_PER_MANAD, Matplan, PlaneringsFel
 from .export import exportera
 from .naring import KALLHANVISNING
-from .text import datum, forpackning
+from .text import datum, forpackning, kr, mangd, produkttext
 
 
 class MatplanApp(App):
@@ -145,15 +145,18 @@ class MatplanApp(App):
             butik = lista.basta_butik.butik if lista.basta_butik and lista.basta_butik.butik in rad.alternativ else rad.billigast[0]
             kop = rad.alternativ[butik]
             tabell.add_row(
-                rad.ingrediens, kop.produkt.namn + (" (rea)" if kop.rea else ""), butik, forpackning(kop),
-                f"{kop.produkt.kr_per_kg:.2f}", f"{kop.kostnad:.2f}",
+                rad.ingrediens, produkttext(kop.produkt) + (" (rea)" if kop.rea else ""), butik,
+                forpackning(kop, rad.gram), f"{kop.produkt.kr_per_kg:.2f}", kr(kop.kostnad),
             )
         for total in lista.butiker:
             tabell.add_row("", f"Allt i {total.butik}", "", "", "", f"{total.kostnad:.2f}")
         if lista.butiker:
             tabell.add_row("", "Uppdelat (billigast per vara)", "", "", "", f"{lista.delad_kostnad:.2f}")
         for b in lista.bunkring:
-            tabell.add_row(b.ingrediens, f"Bunkring: {b.produkt.namn}", b.produkt.butik, f"{b.gram / 1000:g} kg", "", f"{b.kostnad:.2f}")
+            tabell.add_row(
+                b.ingrediens, f"Bunkring: {produkttext(b.produkt)}", b.produkt.butik,
+                mangd(b.antal, b.produkt.forpackning_g, b.gram), "", kr(b.kostnad),
+            )
         self._aterstall(tabell)
 
     def _fyll_lager(self) -> None:

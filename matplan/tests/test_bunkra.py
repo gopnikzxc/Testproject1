@@ -144,4 +144,5 @@ def test_bunkring_i_markdownexporten(tmp_path):
 
     text = lista_markdown(app.inkopslista(START))
 
-    assert "## Bunkring (utanför budgeten)" in text and "- [ ] Kycklingfilé: 10 st" in text
+    assert "## Bunkring (utanför budgeten)" in text
+    assert "- [ ] Märke Kycklingfilé City Gross Ytterby 1 kg – 10 st (10 kg) – 990,00 kr – City Gross Ytterby" in text

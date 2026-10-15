@@ -19,7 +19,7 @@ from .inkop import Inkopslista
 from .naring import KALLHANVISNING, Livsmedelsverket, OpenFoodFacts
 from .planerare import Maltid, Plan
 from .text import datum as _datum
-from .text import forpackning
+from .text import forpackning, kr, mangd, produkttext
 
 
 def _db_sokvag() -> Path:
@@ -107,6 +107,8 @@ def _visa_budget(konsol: Console, app: Matplan, plan: Plan) -> None:
 def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
     if not resultat.antal_produkter and not resultat.fel:
         konsol.print("[yellow]Inga butiker är konfigurerade ännu.[/yellow]")
+    for butik, (antal, nya, utgangna) in resultat.sortiment.items():
+        konsol.print(f"{butik}: sortiment {antal} livsmedel ({nya} nya, {utgangna} utgångna)")
     for butik, antal in resultat.antal_produkter.items():
         konsol.print(f"{butik}: {antal} produkter")
     for butik, fel in resultat.fel.items():
@@ -175,12 +177,12 @@ def _visa_lista(konsol: Console, app: Matplan, lista: Inkopslista) -> None:
                 continue
             tabell.add_row(
                 rad.ingrediens,
-                f"{kop.produkt.namn} ({kop.produkt.produkt_id})" + (" [green](rea)[/green]" if kop.rea else ""),
-                forpackning(kop),
-                f"{kop.produkt.kr_per_kg:.2f}", f"{kop.kostnad:.2f}",
+                produkttext(kop.produkt) + (" [green](rea)[/green]" if kop.rea else ""),
+                forpackning(kop, rad.gram),
+                f"{kop.produkt.kr_per_kg:.2f}", kr(kop.kostnad),
             )
         tabell.add_section()
-        tabell.add_row("Totalt", "", "", "", f"{basta.kostnad:.2f}", style="bold")
+        tabell.add_row("Totalt", "", "", "", kr(basta.kostnad), style="bold")
         konsol.print(tabell)
 
         jamforelse = Table(title="Butiker", title_justify="left")
@@ -198,15 +200,15 @@ def _visa_lista(konsol: Console, app: Matplan, lista: Inkopslista) -> None:
         for rubrik, just in (("Vara", "left"), ("Produkt", "left"), ("Butik", "left"), ("Antal", "right"), ("kr", "right")):
             bunkring.add_column(rubrik, justify=just)
         for b in lista.bunkring:
-            bunkring.add_row(b.ingrediens, b.produkt.namn, b.produkt.butik, _bunkringsmangd(b), f"{b.kostnad:.2f}")
+            bunkring.add_row(b.ingrediens, produkttext(b.produkt), b.produkt.butik, _bunkringsmangd(b), kr(b.kostnad))
         bunkring.add_section()
-        bunkring.add_row("Totalt", "", "", "", f"{lista.bunkring_kr:.2f}", style="bold")
+        bunkring.add_row("Totalt", "", "", "", kr(lista.bunkring_kr), style="bold")
         konsol.print(bunkring)
     _visa_budget(konsol, app, app.plan())
 
 
 def _bunkringsmangd(b: Bunkring) -> str:
-    return f"{b.antal} st ({b.gram / 1000:g} kg)" if b.antal is not None else f"{b.gram / 1000:g} kg lösvikt"
+    return mangd(b.antal, b.produkt.forpackning_g, b.gram)
 
 
 def _visa_bunkringsforslag(konsol: Console, forslag: list[Bunkring]) -> None:
@@ -223,6 +225,26 @@ def _visa_bunkringsforslag(konsol: Console, forslag: list[Bunkring]) -> None:
                        f"{b.produkt.kr_per_kg:.2f}", f"{b.protein_per_kr:.2f}", f"{b.kostnad:.2f}")
     konsol.print(tabell)
     konsol.print("Lägg på inköpslistan med `matplan bunkra --ta <vara>`.")
+
+
+def _visa_sok(konsol: Console, traffar: list) -> None:
+    if not traffar:
+        konsol.print("Inga träffar i sortimentet. Har du kört `matplan refresh`?")
+        return
+    tabell = Table(title=f"Sökträffar ({len(traffar)})", title_justify="left")
+    for rubrik, just in (("Märke", "left"), ("Produkt", "left"), ("Förpackning", "left"), ("Pris", "right"),
+                         ("kr/kg", "right"), ("kcal", "right"), ("Protein", "right")):
+        tabell.add_column(rubrik, justify=just)
+    for p in traffar[:50]:
+        tabell.add_row(
+            p.varumarke, p.namn, p.beskrivning, f"{p.pris_kr:.2f}",
+            f"{p.kr_per_kg:.2f}" if p.kr_per_kg > 0 else "–",
+            f"{p.kcal:.0f}" if p.kcal is not None else "–",
+            f"{p.protein:.1f} g" if p.protein is not None else "–",
+        )
+    konsol.print(tabell)
+    if len(traffar) > 50:
+        konsol.print(f"… och {len(traffar) - 50} till. Förfina sökningen.")
 
 
 def _visa_produkter(konsol: Console, app: Matplan, ingrediens: str) -> None:
@@ -248,6 +270,8 @@ def main(argv: list[str] | None = None) -> int:
     export = kommandon.add_parser("export", help="Spara plan och inköpslista som Markdown")
     export.add_argument("mapp", nargs="?", default="matplan-export")
     kommandon.add_parser("refresh", help="Hämta aktuella priser från butikerna")
+    sok = kommandon.add_parser("sök", aliases=["sok"], help="Sök i butikens sortiment")
+    sok.add_argument("text", nargs="+")
     produkter = kommandon.add_parser("produkter", help="Visa hämtade produkter för en ingrediens")
     produkter.add_argument("ingrediens")
     las = kommandon.add_parser("lås", aliases=["las"], help="Lås en ingrediens till en produkt i en butik")
@@ -287,7 +311,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
-    kommando = {"las": "lås", "kopt": "köpt"}.get(args.kommando, args.kommando)
+    kommando = {"las": "lås", "kopt": "köpt", "sok": "sök"}.get(args.kommando, args.kommando)
 
     if kommando == "gui":
         from .tui import MatplanApp
@@ -305,6 +329,8 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
             resultat = app.refresh(framsteg=lambda butik, namn: status.update(f"{butik}: {namn} …"))
         _visa_hamtning(konsol, resultat)
         return 1 if resultat.fel and not resultat.antal_produkter else 0
+    elif kommando == "sök":
+        _visa_sok(konsol, app.sok(" ".join(args.text)))
     elif kommando == "produkter":
         _visa_produkter(konsol, app, args.ingrediens)
     elif kommando == "lås":
