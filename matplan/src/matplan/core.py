@@ -49,7 +49,7 @@ class Matplan:
     def __init__(
         self,
         db_sokvag: Path,
-        katalog: tuple[Ingrediens, ...] = STARTKATALOG,
+        katalog: tuple[Ingrediens, ...] | None = None,
         butiker: tuple[Butik, ...] = (),
         livsmedelsverket: Livsmedelsverket | None = None,
         openfoodfacts: OpenFoodFacts | None = None,
@@ -58,7 +58,17 @@ class Matplan:
         self._butiker = butiker
         self._livsmedelsverket = livsmedelsverket
         self._openfoodfacts = openfoodfacts
-        self._grundkatalog = tuple(sorted(katalog, key=lambda i: i.namn))
+        # Utan given katalog används grupperna i databasen (de inbyggda läggs in första gången).
+        self._fast_katalog = None if katalog is None else tuple(sorted(katalog, key=lambda i: i.namn))
+        if katalog is None:
+            self._lagring.seeda_grupper(STARTKATALOG)
+
+    @property
+    def _grundkatalog(self) -> tuple[Ingrediens, ...]:
+        """Ingrediensgrupperna: från databasen, eller den katalog som gavs (t.ex. i tester)."""
+        if self._fast_katalog is not None:
+            return self._fast_katalog
+        return tuple(self._lagring.grupper())
 
     # --- Planering -------------------------------------------------------
 
@@ -317,6 +327,8 @@ class Matplan:
         self._synka_sortiment(resultat, framsteg)
         priser: dict[str, list[Produkt]] = {}
         for butik in self._aktiva_butiker():
+            if getattr(butik, "sortiment", None) is not None:
+                continue  # hela sortimentet är synkat; grupperna matchas mot det lokalt
             try:
                 fynd = {}
                 for ingrediens in self._katalog:
@@ -413,15 +425,10 @@ class Matplan:
         )
 
     def produkter(self, ingrediens: str) -> list[Produkt]:
-        """Senast hämtade matchande produkter, billigast per kg först (före lås)."""
+        """Matchande produkter för gruppen, billigast per kg först (före lås)."""
         self._ingrediens(ingrediens)
-        return sorted(
-            (
-                p for namn, p, _ in self._lagring.senaste_priser()
-                if namn == ingrediens and p.butik not in self._avstangda_butiker()
-            ),
-            key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id),
-        )
+        produkter, _ = self._matchade()
+        return sorted(produkter.get(ingrediens, []), key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id))
 
     def prisoversikt(self) -> list[tuple[str, Produkt | None, bool, bool]]:
         """Per ingrediens: billigaste produkt per kg (efter lås), om den är på rea
@@ -463,15 +470,43 @@ class Matplan:
         nycklar = {**BUTIKSNYCKLAR, **{b.namn: b.nyckel for b in self._butiker if hasattr(b, "nyckel")}}
         return {namn for namn, nyckel in nycklar.items() if not inst.get(f"butik_{nyckel}", 1)}
 
-    def _priser(self) -> _Priser:
+    def _matchade(self) -> tuple[dict[str, list[Produkt]], datetime | None]:
+        """Produkter per grupp, före lås. Butiker med synkat sortiment matchas lokalt
+        mot det; övriga från senaste sökhämtningen. Andra värdet är när de äldsta
+        av priserna hämtades."""
         produkter: dict[str, list[Produkt]] = {}
-        hamtade: datetime | None = None
         avstangda = self._avstangda_butiker()
+        katalogtider = {b: t for b, t in self._lagring.katalogtider().items() if b not in avstangda}
+        tider = list(katalogtider.values())
+
         for ingrediens, produkt, tid in self._lagring.senaste_priser():
-            if produkt.butik in avstangda:
+            if produkt.butik in avstangda or produkt.butik in katalogtider:
                 continue
             produkter.setdefault(ingrediens, []).append(produkt)
-            hamtade = tid if hamtade is None else min(hamtade, tid)
+            tider.append(tid)
+
+        if katalogtider:
+            katalog = [p for p in self._lagring.katalog(set(katalogtider)) if p.kr_per_kg > 0]
+            # Samma regler som matchar/ratt_kategori/utesluten, men med orden förberäknade
+            # eftersom varje grupp jämförs mot hela sortimentet.
+            ordlista = []
+            for p in katalog:
+                namnord = set(re.findall(r"\w+", p.namn.casefold()))
+                ordlista.append((p, namnord, namnord | set(re.findall(r"\w+", p.beskrivning.casefold()))))
+            for grupp in self._grundkatalog:
+                termer = [re.findall(r"\w+", t.casefold()) for t in grupp.sokord]
+                uteslut = {o.casefold() for o in grupp.uteslut}
+                for p, namnord, ord_ in ordlista:
+                    if (
+                        any(t and t[0] in namnord and set(t) <= ord_ for t in termer)
+                        and ratt_kategori(p.kategori, grupp.butikskategori)
+                        and not (namnord & uteslut)
+                    ):
+                        produkter.setdefault(grupp.namn, []).append(p)
+        return produkter, (min(tider) if tider else None)
+
+    def _priser(self) -> _Priser:
+        produkter, hamtade = self._matchade()
 
         varningar = []
         for (ingrediens, butik), produkt_id in self._lagring.lasningar().items():
@@ -505,13 +540,21 @@ class Matplan:
         )
 
     def _butikspriser(self, priser: _Priser) -> tuple[Ingrediens, ...]:
-        """Katalogen med billigaste butikspris per kg; platshållarpris där butikspris saknas."""
-        return tuple(
-            dataclasses.replace(i, kr_per_kg=min(p.kr_per_kg for p in priser.produkter[i.namn]))
-            if priser.produkter.get(i.namn)
-            else i
-            for i in self._katalog
-        )
+        """Varje grupp med pris och näring från den produkt planen köper: billigast
+        per kg (efter lås). Saknar produkten näringsvärden gäller gruppens egna.
+        Utan butikspris gäller gruppens platshållarpris."""
+        resultat = []
+        for i in self._katalog:
+            kandidater = priser.produkter.get(i.namn)
+            if not kandidater:
+                resultat.append(i)
+                continue
+            vald = min(kandidater, key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id))
+            grupp = dataclasses.replace(i, kr_per_kg=vald.kr_per_kg)
+            if vald.kcal and vald.protein is not None:
+                grupp = dataclasses.replace(grupp, kcal_100g=vald.kcal, protein_100g=vald.protein)
+            resultat.append(grupp)
+        return tuple(resultat)
 
     # --- Inställningar ---------------------------------------------------
 

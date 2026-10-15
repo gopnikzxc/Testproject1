@@ -83,7 +83,9 @@ A fresh protein deal (eggs, dairy, fresh meat) that gives more protein per krona
 | City Gross Ytterby | ✅ | Store number 3240, looked up from siteId 31 via the web shop's GraphQL. Search returns Ytterby's own range and prices |
 | Willys Kungälv | ✅ (off by default; `matplan installningar butik_willys 1` turns it on) | Store 2104 (Komarken). The store is selected in the session with a CSRF token and `store/activate`. Results have no category, so the module filters with the search's category facet |
 
-`refresh` searches with each ingredient's Swedish search terms. A product counts only if its name contains the search words as whole words and the store's category fits, which keeps out cat food, ready meals and pickled cucumber. Eggs are compared per egg and converted to kr/kg at 60 g per egg. Products sold by weight count as loose weight. Products can also be excluded by word, which drops for example a frozen smoothie listed among the berries. Responses are cached for 6 hours under `~/.cache/matplan/http`. A full refresh against both stores takes just over a minute, because requests are spaced out.
+The plan works with ingredient groups (Kycklingfilé, Potatis, Keso …). The built-in groups are stored in the database the first time matplan runs. For City Gross, `refresh` doesn't search per group: each group is matched against the synced range. A product counts only if its name contains the group's first search word as a whole word, the other search words appear in the name or description, the store's category fits, and no excluded word is in the name. That keeps out cat food, ready meals, pickled cucumber and chicken sausage. For each group the plan uses the cheapest product by kr/kg, with that product's own price and nutrition. If the product lacks nutrition, the group's values are used. Products that are no longer sold aren't used.
+
+Eggs are compared per egg and converted to kr/kg at 60 g per egg. Products sold by weight count as loose weight. Stores without range sync (Willys) are still searched per group with its Swedish search terms. Responses are cached for 6 hours under `~/.cache/matplan/http`.
 
 ## Nutrition values
 

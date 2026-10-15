@@ -105,7 +105,7 @@ def _visa_budget(konsol: Console, app: Matplan, plan: Plan) -> None:
 
 
 def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
-    if not resultat.antal_produkter and not resultat.fel:
+    if not resultat.antal_produkter and not resultat.sortiment and not resultat.fel:
         konsol.print("[yellow]Inga butiker är konfigurerade ännu.[/yellow]")
     for butik, (antal, nya, utgangna) in resultat.sortiment.items():
         konsol.print(f"{butik}: sortiment {antal} livsmedel ({nya} nya, {utgangna} utgångna)")
