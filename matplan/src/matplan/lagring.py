@@ -89,6 +89,37 @@ CREATE TABLE IF NOT EXISTS plan_val (
     ingrediens TEXT NOT NULL,
     PRIMARY KEY (block, slot)
 );
+CREATE TABLE IF NOT EXISTS katalog (
+    butik TEXT NOT NULL,
+    produkt_id TEXT NOT NULL,
+    varumarke TEXT NOT NULL,
+    namn TEXT NOT NULL,
+    beskrivning TEXT NOT NULL,
+    ean TEXT NOT NULL,
+    kategori TEXT NOT NULL,
+    forpackning_g REAL,
+    pris_kr REAL NOT NULL,
+    kr_per_kg REAL NOT NULL,
+    erbjudande INTEGER NOT NULL,
+    kcal REAL,
+    protein REAL,
+    fett REAL,
+    kolhydrater REAL,
+    fiber REAL,
+    forst_sedd TEXT NOT NULL,
+    senast_sedd TEXT NOT NULL,
+    aktiv INTEGER NOT NULL,
+    PRIMARY KEY (butik, produkt_id)
+);
+CREATE TABLE IF NOT EXISTS katalogpriser (
+    tid TEXT NOT NULL,
+    butik TEXT NOT NULL,
+    produkt_id TEXT NOT NULL,
+    pris_kr REAL NOT NULL,
+    kr_per_kg REAL NOT NULL,
+    erbjudande INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS katalogpriser_produkt ON katalogpriser (butik, produkt_id, tid);
 CREATE TABLE IF NOT EXISTS aktiv_plan (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     plan BLOB NOT NULL
@@ -266,3 +297,66 @@ class Lagring:
             self._db.executemany(
                 "INSERT INTO plan_val VALUES (?, ?, ?)", [(b, slot, namn) for (b, slot), namn in val.items()]
             )
+
+    def synka_katalog(self, butik: str, produkter: list[Produkt], tid: datetime) -> tuple[int, int, int]:
+        """Ersätter butikens sortiment: nya läggs till, befintliga uppdateras och de
+        som saknas markeras som inte längre sålda. Pris sparas i historiken.
+        Returnerar (antal, nya, utgångna)."""
+        nu = tid.isoformat()
+        with self._db:
+            fore = {pid for (pid,) in self._db.execute(
+                "SELECT produkt_id FROM katalog WHERE butik = ? AND aktiv = 1", (butik,)
+            )}
+            kanda = {pid for (pid,) in self._db.execute("SELECT produkt_id FROM katalog WHERE butik = ?", (butik,))}
+            unika = {p.produkt_id: p for p in produkter}
+            for p in unika.values():
+                self._db.execute(
+                    """
+                    INSERT INTO katalog VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                    ON CONFLICT (butik, produkt_id) DO UPDATE SET
+                        varumarke = excluded.varumarke, namn = excluded.namn, beskrivning = excluded.beskrivning,
+                        ean = excluded.ean, kategori = excluded.kategori, forpackning_g = excluded.forpackning_g,
+                        pris_kr = excluded.pris_kr, kr_per_kg = excluded.kr_per_kg, erbjudande = excluded.erbjudande,
+                        kcal = excluded.kcal, protein = excluded.protein, fett = excluded.fett,
+                        kolhydrater = excluded.kolhydrater, fiber = excluded.fiber,
+                        senast_sedd = excluded.senast_sedd, aktiv = 1
+                    """,
+                    (
+                        butik, p.produkt_id, p.varumarke, p.namn, p.beskrivning, p.ean, p.kategori, p.forpackning_g,
+                        p.pris_kr, p.kr_per_kg, int(p.erbjudande), p.kcal, p.protein, p.fett, p.kolhydrater,
+                        p.fiber, nu, nu,
+                    ),
+                )
+            self._db.executemany(
+                "INSERT INTO katalogpriser VALUES (?, ?, ?, ?, ?, ?)",
+                [(nu, butik, p.produkt_id, p.pris_kr, p.kr_per_kg, int(p.erbjudande)) for p in unika.values()],
+            )
+            utgangna = fore - set(unika)
+            self._db.executemany(
+                "UPDATE katalog SET aktiv = 0 WHERE butik = ? AND produkt_id = ?", [(butik, pid) for pid in utgangna]
+            )
+        return len(unika), len(set(unika) - kanda), len(utgangna)
+
+    def katalog(self, butiker: set[str] | None = None, bara_aktiva: bool = True) -> list[Produkt]:
+        rader = self._db.execute(
+            """
+            SELECT butik, produkt_id, namn, varumarke, forpackning_g, pris_kr, kr_per_kg, erbjudande, kategori,
+                   beskrivning, ean, kcal, protein, fett, kolhydrater, fiber, aktiv
+            FROM katalog ORDER BY butik, namn, produkt_id
+            """
+        )
+        produkter = []
+        for (butik, pid, namn, marke, forp, pris, krkg, erb, kat, besk, ean, kcal, prot, fett, kh, fib, aktiv) in rader:
+            if bara_aktiva and not aktiv:
+                continue
+            if butiker is not None and butik not in butiker:
+                continue
+            produkter.append(Produkt(butik, pid, namn, marke, forp, pris, krkg, bool(erb), kat, besk, ean, kcal, prot, fett, kh, fib))
+        return produkter
+
+    def katalogpriser(self, butik: str, produkt_id: str) -> list[tuple[datetime, float]]:
+        rader = self._db.execute(
+            "SELECT tid, kr_per_kg FROM katalogpriser WHERE butik = ? AND produkt_id = ? ORDER BY tid",
+            (butik, produkt_id),
+        )
+        return [(datetime.fromisoformat(tid), kr) for tid, kr in rader]

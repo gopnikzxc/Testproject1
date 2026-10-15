@@ -4,6 +4,7 @@ CLI och (senare) Textual-GUI är tunna skal ovanpå den här klassen.
 """
 
 import dataclasses
+import re
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -33,6 +34,7 @@ class Hamtningsresultat:
     fel: dict[str, str] = field(default_factory=dict)
     naring_hamtad: int = 0
     naring_fel: dict[str, str] = field(default_factory=dict)  # ingrediens -> fel
+    sortiment: dict[str, tuple[int, int, int]] = field(default_factory=dict)  # butik -> (antal, nya, utgångna)
 
 
 @dataclass(frozen=True)
@@ -312,6 +314,7 @@ class Matplan:
         """Hämtar priser från alla butiker. En trasig butik stoppar inte de andra.
         `framsteg(butik, ingrediens)` anropas före varje ingrediens."""
         resultat = Hamtningsresultat(tid=nu or datetime.now().replace(microsecond=0))
+        self._synka_sortiment(resultat, framsteg)
         priser: dict[str, list[Produkt]] = {}
         for butik in self._aktiva_butiker():
             try:
@@ -343,6 +346,36 @@ class Matplan:
             self._lagring.spara_hamtning(resultat.tid, priser)
         self._hamta_naring(resultat, framsteg)
         return resultat
+
+    def _synka_sortiment(self, resultat: Hamtningsresultat, framsteg: Callable[[str, str], None] | None) -> None:
+        """Synkar hela sortimentet för butiker som kan lista det. Misslyckas en
+        synk ligger det tidigare sortimentet kvar."""
+        for butik in self._aktiva_butiker():
+            sortiment = getattr(butik, "sortiment", None)
+            if sortiment is None:
+                continue
+            try:
+                produkter = sortiment(framsteg)
+            except ButiksFel as fel:
+                resultat.fel[butik.namn] = f"Sortimentet: {fel}"
+                continue
+            resultat.sortiment[butik.namn] = self._lagring.synka_katalog(butik.namn, produkter, resultat.tid)
+
+    def sok(self, text: str) -> list[Produkt]:
+        """Aktiva produkter i sortimentet där alla sökorden finns som hela ord i
+        märke, namn eller beskrivning."""
+        sokord = set(re.findall(r"\w+", text.casefold()))
+        if not sokord:
+            return []
+        avstangda = self._avstangda_butiker()
+        traffar = []
+        for p in self._lagring.katalog():
+            if p.butik in avstangda:
+                continue
+            ord_ = set(re.findall(r"\w+", f"{p.varumarke} {p.namn} {p.beskrivning}".casefold()))
+            if sokord <= ord_:
+                traffar.append(p)
+        return sorted(traffar, key=lambda p: (p.kr_per_kg <= 0, p.kr_per_kg, p.namn))
 
     def _hamta_naring(self, resultat: Hamtningsresultat, framsteg: Callable[[str, str], None] | None) -> None:
         """Hämtar näringsvärden för ingredienser som saknar sparade värden.

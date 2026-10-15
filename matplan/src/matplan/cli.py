@@ -107,6 +107,8 @@ def _visa_budget(konsol: Console, app: Matplan, plan: Plan) -> None:
 def _visa_hamtning(konsol: Console, resultat: Hamtningsresultat) -> None:
     if not resultat.antal_produkter and not resultat.fel:
         konsol.print("[yellow]Inga butiker är konfigurerade ännu.[/yellow]")
+    for butik, (antal, nya, utgangna) in resultat.sortiment.items():
+        konsol.print(f"{butik}: sortiment {antal} livsmedel ({nya} nya, {utgangna} utgångna)")
     for butik, antal in resultat.antal_produkter.items():
         konsol.print(f"{butik}: {antal} produkter")
     for butik, fel in resultat.fel.items():
@@ -225,6 +227,26 @@ def _visa_bunkringsforslag(konsol: Console, forslag: list[Bunkring]) -> None:
     konsol.print("Lägg på inköpslistan med `matplan bunkra --ta <vara>`.")
 
 
+def _visa_sok(konsol: Console, traffar: list) -> None:
+    if not traffar:
+        konsol.print("Inga träffar i sortimentet. Har du kört `matplan refresh`?")
+        return
+    tabell = Table(title=f"Sökträffar ({len(traffar)})", title_justify="left")
+    for rubrik, just in (("Märke", "left"), ("Produkt", "left"), ("Förpackning", "left"), ("Pris", "right"),
+                         ("kr/kg", "right"), ("kcal", "right"), ("Protein", "right")):
+        tabell.add_column(rubrik, justify=just)
+    for p in traffar[:50]:
+        tabell.add_row(
+            p.varumarke, p.namn, p.beskrivning, f"{p.pris_kr:.2f}",
+            f"{p.kr_per_kg:.2f}" if p.kr_per_kg > 0 else "–",
+            f"{p.kcal:.0f}" if p.kcal is not None else "–",
+            f"{p.protein:.1f} g" if p.protein is not None else "–",
+        )
+    konsol.print(tabell)
+    if len(traffar) > 50:
+        konsol.print(f"… och {len(traffar) - 50} till. Förfina sökningen.")
+
+
 def _visa_produkter(konsol: Console, app: Matplan, ingrediens: str) -> None:
     lasta = {butik: pid for (namn, butik), pid in app.lasningar().items() if namn == ingrediens}
     tabell = Table(title=f"Produkter för {ingrediens}", title_justify="left")
@@ -248,6 +270,8 @@ def main(argv: list[str] | None = None) -> int:
     export = kommandon.add_parser("export", help="Spara plan och inköpslista som Markdown")
     export.add_argument("mapp", nargs="?", default="matplan-export")
     kommandon.add_parser("refresh", help="Hämta aktuella priser från butikerna")
+    sok = kommandon.add_parser("sök", aliases=["sok"], help="Sök i butikens sortiment")
+    sok.add_argument("text", nargs="+")
     produkter = kommandon.add_parser("produkter", help="Visa hämtade produkter för en ingrediens")
     produkter.add_argument("ingrediens")
     las = kommandon.add_parser("lås", aliases=["las"], help="Lås en ingrediens till en produkt i en butik")
@@ -287,7 +311,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
-    kommando = {"las": "lås", "kopt": "köpt"}.get(args.kommando, args.kommando)
+    kommando = {"las": "lås", "kopt": "köpt", "sok": "sök"}.get(args.kommando, args.kommando)
 
     if kommando == "gui":
         from .tui import MatplanApp
@@ -305,6 +329,8 @@ def _kor(konsol: Console, app: Matplan, args: argparse.Namespace) -> int:
             resultat = app.refresh(framsteg=lambda butik, namn: status.update(f"{butik}: {namn} …"))
         _visa_hamtning(konsol, resultat)
         return 1 if resultat.fel and not resultat.antal_produkter else 0
+    elif kommando == "sök":
+        _visa_sok(konsol, app.sok(" ".join(args.text)))
     elif kommando == "produkter":
         _visa_produkter(konsol, app, args.ingrediens)
     elif kommando == "lås":

@@ -30,7 +30,14 @@ class Produkt:
     kr_per_kg: float
     erbjudande: bool = False
     kategori: str = ""  # butikens egen kategori, t.ex. "Fryst / Frysta bär & frukt"
-    beskrivning: str = ""  # t.ex. "500G 1,5% KESO"; används vid matchning men sparas inte
+    beskrivning: str = ""  # t.ex. "500G 1,5% KESO"; förpackning och fetthalt
+    ean: str = ""
+    # Näringsvärden per 100 g (eller ml) enligt butikens data; None om de saknas.
+    kcal: float | None = None
+    protein: float | None = None
+    fett: float | None = None
+    kolhydrater: float | None = None
+    fiber: float | None = None
 
 
 class Butik(Protocol):

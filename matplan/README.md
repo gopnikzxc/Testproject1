@@ -10,7 +10,8 @@ python3 -m venv .venv
 .venv/bin/matplan gui                               # interactive terminal GUI (see below)
 .venv/bin/matplan plan                              # plan the coming days in 3-day blocks
 .venv/bin/matplan byt 1 kolhydrater Potatis         # swap an ingredient in block 1 (without an ingredient: next in turn)
-.venv/bin/matplan refresh                           # fetch current prices from the stores
+.venv/bin/matplan refresh                           # sync the store's whole food range + current prices
+.venv/bin/matplan sök tonfisk                       # search the synced range (brand, pack, price, kcal, protein)
 .venv/bin/matplan lista                             # shopping list: whole packages, kr/kg, single store vs split
 .venv/bin/matplan export [folder]                   # save plan.md and inkopslista.md for your phone
 .venv/bin/matplan produkter Kycklingfilé            # fetched products with ids
@@ -60,6 +61,10 @@ Settings and inventory amounts are changed in the input box at the bottom of the
 | `butik_citygross` / `butik_willys` | 1 / 0 | Which stores are fetched and planned against. A store that's off is skipped by `refresh`, and its saved prices are ignored |
 
 Planning uses inventory first: whatever is already at home costs 0 kr, and the shopping list only covers what's missing. Once you've run `köpt`, that plan stays in place until it ends or you run `plan --ny`.
+
+## The store's range
+
+`refresh` syncs City Gross's whole food range for your store, about 7,400 products, in pages of 2000. Non-food, sweets, snacks, ice cream, buns, biscuits, spices, sauces and butter are left out. Each product stores brand, name, pack size, barcode, category, price, kr/kg and nutrition per 100 g from the store's data (other explicit bases are scaled to 100). Products that disappear are marked as no longer sold. Prices are saved as history per product. `matplan sök` searches by whole words in brand, name and description.
 
 ## Deals
 

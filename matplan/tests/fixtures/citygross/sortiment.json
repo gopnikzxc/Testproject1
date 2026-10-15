@@ -1,0 +1,1970 @@
+{
+ "items": [
+  {
+   "id": "101361686_ST",
+   "gtin": "7340083496066",
+   "name": "Tonfisk Vatten",
+   "subtitle": "510/360G 3X170G GARANT",
+   "brand": "GARANT",
+   "superCategory": "Skafferiet",
+   "category": "Konserver",
+   "descriptiveSize": "510/360G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 1000
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 427 Kilojoule, energi 101 Kilokalori, fett 0.5 Gram, varav mättat fett 0 Gram, kolhydrat 0 Gram, varav sockerarter 0 Gram, protein 24 Gram, salt 1.1 Gram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 427,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 101,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 0.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 24,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 1.1,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     },
+     {
+      "nutrientStatement": null,
+      "nutrientBasisQuantity": 0,
+      "nutrientBasisQuantityUnit": null,
+      "preparationState": 0,
+      "nutrients": null
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": true,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 55.75,
+      "unit": "PCE",
+      "comparativePrice": 154.86,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 55.75,
+      "unit": "PCE",
+      "comparativePrice": 154.86,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [
+      {
+       "id": "1642328,2500317827",
+       "type": "1",
+       "campaignTypeId": "0",
+       "name": "2500317827",
+       "couponId": null,
+       "effectType": "ItemsTotal",
+       "membersOnly": false,
+       "from": "2026-10-05T00:00:00+02:00",
+       "to": "2026-11-01T23:59:00+01:00",
+       "minAmount": null,
+       "minQuantity": 1,
+       "value": 49.95,
+       "maxAppliedPerReceipt": 0,
+       "displayLowestPriceLast30Days": true,
+       "priceDetails": {
+        "price": 49.95,
+        "unit": "PCE",
+        "comparativePrice": 138.75,
+        "comparativePriceUnit": "KGM"
+       }
+      }
+     ],
+     "activePromotion": {
+      "id": "1642328,2500317827",
+      "type": "1",
+      "campaignTypeId": "0",
+      "name": "2500317827",
+      "couponId": null,
+      "effectType": "ItemsTotal",
+      "membersOnly": false,
+      "from": "2026-10-05T00:00:00+02:00",
+      "to": "2026-11-01T23:59:00+01:00",
+      "minAmount": null,
+      "minQuantity": 1,
+      "value": 49.95,
+      "maxAppliedPerReceipt": 0,
+      "displayLowestPriceLast30Days": true,
+      "priceDetails": {
+       "price": 49.95,
+       "unit": "PCE",
+       "comparativePrice": 138.75,
+       "comparativePriceUnit": "KGM"
+      }
+     },
+     "hasDiscount": true,
+     "hasPromotion": true,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": 55.75
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101228286_ST",
+   "gtin": "7311171007105",
+   "name": "Tonfisk Vatten",
+   "subtitle": "285/210G 3X95G ABBA",
+   "brand": "ABBA",
+   "superCategory": "Skafferiet",
+   "category": "Konserver",
+   "descriptiveSize": "285/210G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 1000
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 460 Kilojoule, energi 110 Kilokalori, fett 0.2 Gram, varav mättat fett 0 Gram, kolhydrat 0 Gram, varav sockerarter 0 Gram, protein 26 Gram, salt 1 Gram",
+      "nutrientBasisQuantity": 0,
+      "nutrientBasisQuantityUnit": null,
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 460,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 110,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 0.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 26,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 1,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 42.5,
+      "unit": "PCE",
+      "comparativePrice": 202.38,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 42.5,
+      "unit": "PCE",
+      "comparativePrice": 202.38,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101545504_ST",
+   "gtin": "7311043007691",
+   "name": "Sejfilé",
+   "subtitle": "400G GARANT",
+   "brand": "GARANT",
+   "superCategory": "Fryst",
+   "category": "Fryst fisk & skaldjur",
+   "descriptiveSize": "400G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 400
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 380 Kilojoule, energi 90 Kilokalori, fett 0.9 Gram, varav mättat fett 0.1 Gram, varav omättat fett 0 Gram, varav fleromättat fett 0 Gram, kolhydrat 0 Gram, varav sockerarter 0 Gram, protein 20 Gram, salt 0.1 Gram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 380,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 90,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 0.9,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 0.1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "varav omättat fett",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAPUCIS",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 20,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.1,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 64.3,
+      "unit": "PCE",
+      "comparativePrice": 160.75,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 64.3,
+      "unit": "PCE",
+      "comparativePrice": 160.75,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101245204_ST",
+   "gtin": "7340083446962",
+   "name": "Svarta Bönor",
+   "subtitle": "380/230G NATURELLA GARANT",
+   "brand": "GARANT",
+   "superCategory": "Skafferiet",
+   "category": "Bönor, ärtor & linser",
+   "descriptiveSize": "380/230G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 1000
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 381 Kilojoule, energi 91 Kilokalori, fett 1.1 Gram, varav mättat fett 0.3 Gram, kolhydrat 8.5 Gram, varav sockerarter 0.4 Gram, fiber 8.5 Gram, protein 7.5 Gram, salt 0.4 Gram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 381,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 91,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 1.1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 0.3,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 8.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 0.4,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FIBGT",
+        "unitOfMeasure": "gram",
+        "value": 8.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 7.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.4,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": true,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 12.25,
+      "unit": "PCE",
+      "comparativePrice": 53.26,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 12.25,
+      "unit": "PCE",
+      "comparativePrice": 53.26,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [
+      {
+       "id": "1610614,2500312807",
+       "type": "1",
+       "campaignTypeId": "0",
+       "name": "2500312807",
+       "couponId": null,
+       "effectType": "ItemsTotal",
+       "membersOnly": false,
+       "from": "2026-08-31T00:00:00+02:00",
+       "to": "2027-01-03T23:59:00+01:00",
+       "minAmount": null,
+       "minQuantity": 4,
+       "value": 42,
+       "maxAppliedPerReceipt": 0,
+       "displayLowestPriceLast30Days": false,
+       "priceDetails": {
+        "price": 10.5,
+        "unit": "PCE",
+        "comparativePrice": 45.65,
+        "comparativePriceUnit": "KGM"
+       }
+      }
+     ],
+     "activePromotion": {
+      "id": "1610614,2500312807",
+      "type": "1",
+      "campaignTypeId": "0",
+      "name": "2500312807",
+      "couponId": null,
+      "effectType": "ItemsTotal",
+      "membersOnly": false,
+      "from": "2026-08-31T00:00:00+02:00",
+      "to": "2027-01-03T23:59:00+01:00",
+      "minAmount": null,
+      "minQuantity": 4,
+      "value": 42,
+      "maxAppliedPerReceipt": 0,
+      "displayLowestPriceLast30Days": false,
+      "priceDetails": {
+       "price": 10.5,
+       "unit": "PCE",
+       "comparativePrice": 45.65,
+       "comparativePriceUnit": "KGM"
+      }
+     },
+     "hasDiscount": true,
+     "hasPromotion": true,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101191252_ST",
+   "gtin": "7350004661480",
+   "name": "Chili Cheese Nuggets",
+   "subtitle": "250G FRYSTA LINDSTRÖMS",
+   "brand": "LINDSTRÖMS",
+   "superCategory": "Fryst",
+   "category": "Fryst färdigmat",
+   "descriptiveSize": "250G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 250
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 1050 Kilojoule, energi 250 Kilokalori, fett 11 Gram, varav mättat fett 5.4 Gram, kolhydrat 27 Gram, varav sockerarter 1.2 Gram, protein 9 Gram, salt 1.8 Gram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 1050,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 250,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 11,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 5.4,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 27,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 1.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 9,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 1.8,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 30.2,
+      "unit": "PCE",
+      "comparativePrice": 120.8,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 30.2,
+      "unit": "PCE",
+      "comparativePrice": 120.8,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "100164778_ST",
+   "gtin": "7310350109906",
+   "name": "Ahlgrens Bilar Original",
+   "subtitle": "160G AHLGRENS BILAR",
+   "brand": "AHLGRENS BILAR",
+   "superCategory": "Godis",
+   "category": "Godis",
+   "descriptiveSize": "160G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 160
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 1493 Kilojoule, energi 352 Kilokalori, fett 0.2 Gram, varav mättat fett 0.2 Gram, kolhydrat 82 Gram, varav sockerarter 57 Gram, protein 4.4 Gram, salt 0.02 Gram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 1493,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 352,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 0.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 0.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 82,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 57,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 4.4,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.02,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 15.05,
+      "unit": "PCE",
+      "comparativePrice": 94.06,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 15.05,
+      "unit": "PCE",
+      "comparativePrice": 94.06,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101773953_ST",
+   "gtin": "7622202238383",
+   "name": "Schweizernöt Mjölkchoklad",
+   "subtitle": "160G CHOKLADKAKA MARABOU",
+   "brand": "MARABOU",
+   "superCategory": "Godis",
+   "category": "Choklad",
+   "descriptiveSize": "160G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 160
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 2367 Kilojoule, fett 37 Gram, energi 568 Kilokalori, varav mättat fett 17 Gram, kolhydrat 51 Gram, varav sockerarter 50 Gram, fiber 3.1 Gram, protein 6.2 Gram, salt 0.22 Gram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 2367,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 37,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 568,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 17,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 51,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 50,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FIBGT",
+        "unitOfMeasure": "gram",
+        "value": 3.1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 6.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.22,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     },
+     {
+      "nutrientStatement": "energi 544 Kilojoule, fett 8.5 Gram, energi 131 Kilokalori, varav mättat fett 3.9 Gram, kolhydrat 12 Gram, varav sockerarter 12 Gram, fiber 0.7 Gram, protein 1.4 Gram, salt 0.05 Gram",
+      "nutrientBasisQuantity": 23,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 544,
+        "dailyValueIntakePercent": "6"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 8.5,
+        "dailyValueIntakePercent": "12"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 131,
+        "dailyValueIntakePercent": "6"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 3.9,
+        "dailyValueIntakePercent": "19"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 12,
+        "dailyValueIntakePercent": "5"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 12,
+        "dailyValueIntakePercent": "13"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FIBGT",
+        "unitOfMeasure": "gram",
+        "value": 0.7,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 1.4,
+        "dailyValueIntakePercent": "3"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.05,
+        "dailyValueIntakePercent": "1"
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 23.95,
+      "unit": "PCE",
+      "comparativePrice": 149.69,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 23.95,
+      "unit": "PCE",
+      "comparativePrice": 149.69,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101340586_ST",
+   "gtin": "7613039847558",
+   "name": "Mixed Selectio Gelé",
+   "subtitle": "1,02KG KATTMAT VÅT 12-PACK LATZ",
+   "brand": "LATZ",
+   "superCategory": "Husdjur",
+   "category": "Katt",
+   "descriptiveSize": "1,02KG",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 1020
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": null,
+      "nutrientBasisQuantity": 0,
+      "nutrientBasisQuantityUnit": null,
+      "preparationState": 0,
+      "nutrients": null
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 56.95,
+      "unit": "PCE",
+      "comparativePrice": 55.83,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 56.95,
+      "unit": "PCE",
+      "comparativePrice": 55.83,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "100148868_KG",
+   "gtin": "2090195400004",
+   "name": "Morot",
+   "subtitle": "CA 100G KLASS 1",
+   "brand": null,
+   "superCategory": "Frukt & grönt",
+   "category": "Potatis & rotsaker",
+   "descriptiveSize": "CA 100G",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 100
+   },
+   "sellingUnitOfMeasure": 2,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": null,
+      "nutrientBasisQuantity": 0,
+      "nutrientBasisQuantityUnit": null,
+      "preparationState": 0,
+      "nutrients": null
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "2026-10-30",
+    "p_has_current_week_only_discount": true,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 17.95,
+      "unit": "KGM",
+      "comparativePrice": 17.95,
+      "comparativePriceUnit": "KGM"
+     },
+     "ordinaryPrice": {
+      "price": 17.95,
+      "unit": "KGM",
+      "comparativePrice": 17.95,
+      "comparativePriceUnit": "KGM"
+     },
+     "memberPrice": null,
+     "promotions": [
+      {
+       "id": "1653715,2500330795",
+       "type": "5",
+       "campaignTypeId": "0",
+       "name": "2500330795",
+       "couponId": null,
+       "effectType": "PriceChangeAll",
+       "membersOnly": false,
+       "from": "2026-10-12T00:00:00+02:00",
+       "to": "2026-10-18T23:59:00+02:00",
+       "minAmount": null,
+       "minQuantity": 1,
+       "value": 7.95,
+       "maxAppliedPerReceipt": 0,
+       "displayLowestPriceLast30Days": false,
+       "priceDetails": {
+        "price": 7.95,
+        "unit": "KGM",
+        "comparativePrice": 7.95,
+        "comparativePriceUnit": "KGM"
+       }
+      }
+     ],
+     "activePromotion": {
+      "id": "1653715,2500330795",
+      "type": "5",
+      "campaignTypeId": "0",
+      "name": "2500330795",
+      "couponId": null,
+      "effectType": "PriceChangeAll",
+      "membersOnly": false,
+      "from": "2026-10-12T00:00:00+02:00",
+      "to": "2026-10-18T23:59:00+02:00",
+      "minAmount": null,
+      "minQuantity": 1,
+      "value": 7.95,
+      "maxAppliedPerReceipt": 0,
+      "displayLowestPriceLast30Days": false,
+      "priceDetails": {
+       "price": 7.95,
+       "unit": "KGM",
+       "comparativePrice": 7.95,
+       "comparativePriceUnit": "KGM"
+      }
+     },
+     "hasDiscount": true,
+     "hasPromotion": true,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "100717814_ST",
+   "gtin": "7312690021405",
+   "name": "Vanilj",
+   "subtitle": "1,5L GRÄDDGLASS SIA GLASS",
+   "brand": "SIA GLASS",
+   "superCategory": "Fryst",
+   "category": "Glass",
+   "descriptiveSize": "1,5L",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 1500
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 850 Kilojoule, fett 10 Gram, energi 210 Kilokalori, varav mättat fett 6.8 Gram, kolhydrat 23 Gram, varav sockerarter 22 Gram, sockeralkoholer 0 Gram, fiber 0 Gram, protein 3.8 Gram, salt 0.1 Gram, vitamin D 0 Mikrogram, folsyra 0 Mikrogram, vitamin B12 0 Mikrogram, selen 0 Mikrogram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 850,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 10,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 210,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 6.8,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 23,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 22,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "POLYL",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FIBGT",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 3.8,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITD-",
+        "unitOfMeasure": "mikrogram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FOLDFE",
+        "unitOfMeasure": "mikrogram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITB12",
+        "unitOfMeasure": "mikrogram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SE",
+        "unitOfMeasure": "mikrogram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 39.7,
+      "unit": "PCE",
+      "comparativePrice": 26.47,
+      "comparativePriceUnit": "LTR"
+     },
+     "ordinaryPrice": {
+      "price": 39.7,
+      "unit": "PCE",
+      "comparativePrice": 26.47,
+      "comparativePriceUnit": "LTR"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101206929_ST",
+   "gtin": "7310865085733",
+   "name": "Mellanmjölk",
+   "subtitle": "1,5L LAKTOSFRI 1,5% ARLA KO",
+   "brand": "ARLA KO",
+   "superCategory": "Mejeri, ost & ägg",
+   "category": "Mjölk & dryck",
+   "descriptiveSize": "1,5L",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 1500
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 154 Kilojoule, fett 1.5 Gram, energi 37 Kilokalori, varav mättat fett 1 Gram, kolhydrat 2.4 Gram, varav sockerarter 2.4 Gram, protein 3.4 Gram, salt 0.08 Gram, vitamin D 1 Mikrogram, riboflavin 0.13 Milligram, vitamin B12 0.4 Mikrogram, kalcium 112 Milligram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 154,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 1.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 37,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 2.4,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 2.4,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 3.4,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.08,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITD-",
+        "unitOfMeasure": "mikrogram",
+        "value": 1,
+        "dailyValueIntakePercent": "20"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "RIBF",
+        "unitOfMeasure": "milligram",
+        "value": 0.13,
+        "dailyValueIntakePercent": "9"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITB12",
+        "unitOfMeasure": "mikrogram",
+        "value": 0.4,
+        "dailyValueIntakePercent": "16"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CA",
+        "unitOfMeasure": "milligram",
+        "value": 112,
+        "dailyValueIntakePercent": "14"
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 19.95,
+      "unit": "PCE",
+      "comparativePrice": 13.3,
+      "comparativePriceUnit": "LTR"
+     },
+     "ordinaryPrice": {
+      "price": 19.95,
+      "unit": "PCE",
+      "comparativePrice": 13.3,
+      "comparativePriceUnit": "LTR"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101872392_ST",
+   "gtin": "5000112689808",
+   "name": "Coca-Cola",
+   "subtitle": "1,5L LÄSK PET COCA-COLA",
+   "brand": "COCA-COLA",
+   "superCategory": "Dryck",
+   "category": "Läsk",
+   "descriptiveSize": "1,5L",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 1500
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 180 Kilojoule, fett 0 Gram, energi 42 Kilokalori, varav mättat fett 0 Gram, kolhydrat 10.6 Gram, varav sockerarter 10.6 Gram, protein 0 Gram, salt 0 Gram",
+      "nutrientBasisQuantity": 100,
+      "nutrientBasisQuantityUnit": "milliliter",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 180,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 42,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 10.6,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 10.6,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     },
+     {
+      "nutrientStatement": "energi 450 Kilojoule, energi 105 Kilokalori, fett 0 Gram, varav mättat fett 0 Gram, kolhydrat 27 Gram, varav sockerarter 27 Gram, protein 0 Gram, salt 0 Gram",
+      "nutrientBasisQuantity": 250,
+      "nutrientBasisQuantityUnit": "milliliter",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 450,
+        "dailyValueIntakePercent": "5"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 105,
+        "dailyValueIntakePercent": "5"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": "0"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": "0"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 27,
+        "dailyValueIntakePercent": "10"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 27,
+        "dailyValueIntakePercent": "29"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": "0"
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0,
+        "dailyValueIntakePercent": "0"
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 19.95,
+      "unit": "PCE",
+      "comparativePrice": 13.3,
+      "comparativePriceUnit": "LTR"
+     },
+     "ordinaryPrice": {
+      "price": 19.95,
+      "unit": "PCE",
+      "comparativePrice": 13.3,
+      "comparativePriceUnit": "LTR"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  },
+  {
+   "id": "101418664_ST",
+   "gtin": "7070866035341",
+   "name": "Rich Chocolate Shake",
+   "subtitle": "20ST 20 PORT NUTRILETT",
+   "brand": "NUTRILETT",
+   "superCategory": "Hälsa",
+   "category": "Viktkontroll",
+   "descriptiveSize": "20ST",
+   "netContent": {
+    "unitOfMeasure": 0,
+    "value": 20000
+   },
+   "sellingUnitOfMeasure": 1,
+   "foodAndBeverageExtension": {
+    "nutrientInformations": [
+     {
+      "nutrientStatement": "energi 630 Kilojoule, energi 150 Kilokalori, fett 6.6 Gram, varav mättat fett 1.1 Gram, varav omättat fett 1.9 Gram, varav fleromättat fett 3.1 Gram, kolhydrat 6.5 Gram, varav sockerarter 5.1 Gram, fiber 2.2 Gram, protein 15 Gram, salt 0.84 Gram, vitamin A 170 Mikrogram, vitamin D 2.9 Mikrogram, vitamin E 2.5 Milligram, vitamin C 32 Milligram, tiamin 0.2 Milligram, riboflavin 0.54 Milligram, niacin 4.2 Milligram, vitamin B6 0.41 Milligram, folsyra 50 Mikrogram, vitamin B12 1.5 Mikrogram, biotin 10 Mikrogram, pantotensyra 1.3 Milligram, kalium 0.694 Gram, klor 486 Milligram, kalcium 230 Milligram, fosfor 196 Milligram, magnesium 41.7 Milligram, järn 3 Milligram, zink 2.4 Milligram, koppar 0.36 Milligram, mangan 0.72 Milligram, selen 17 Mikrogram, molybden 16 Mikrogram, jod 36 Mikrogram, VITK 17 Mikrogram",
+      "nutrientBasisQuantity": 235,
+      "nutrientBasisQuantityUnit": "gram",
+      "preparationState": 0,
+      "nutrients": [
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilojoule",
+        "value": 630,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ENER-",
+        "unitOfMeasure": "kilokalori",
+        "value": 150,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAT",
+        "unitOfMeasure": "gram",
+        "value": 6.6,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FASAT",
+        "unitOfMeasure": "gram",
+        "value": 1.1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "varav omättat fett",
+        "unitOfMeasure": "gram",
+        "value": 1.9,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FAPUCIS",
+        "unitOfMeasure": "gram",
+        "value": 3.1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CHOAVL",
+        "unitOfMeasure": "gram",
+        "value": 6.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SUGER-",
+        "unitOfMeasure": "gram",
+        "value": 5.1,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FIBGT",
+        "unitOfMeasure": "gram",
+        "value": 2.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PRO-",
+        "unitOfMeasure": "gram",
+        "value": 15,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SALTEQ",
+        "unitOfMeasure": "gram",
+        "value": 0.84,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITA-",
+        "unitOfMeasure": "mikrogram",
+        "value": 170,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITD-",
+        "unitOfMeasure": "mikrogram",
+        "value": 2.9,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITE-",
+        "unitOfMeasure": "milligram",
+        "value": 2.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITC-",
+        "unitOfMeasure": "milligram",
+        "value": 32,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "THIA",
+        "unitOfMeasure": "milligram",
+        "value": 0.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "RIBF",
+        "unitOfMeasure": "milligram",
+        "value": 0.54,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "NIA",
+        "unitOfMeasure": "milligram",
+        "value": 4.2,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITB6-",
+        "unitOfMeasure": "milligram",
+        "value": 0.41,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FOLDFE",
+        "unitOfMeasure": "mikrogram",
+        "value": 50,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITB12",
+        "unitOfMeasure": "mikrogram",
+        "value": 1.5,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "BIOT",
+        "unitOfMeasure": "mikrogram",
+        "value": 10,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "PANTAC",
+        "unitOfMeasure": "milligram",
+        "value": 1.3,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "K",
+        "unitOfMeasure": "gram",
+        "value": 0.694,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CLD",
+        "unitOfMeasure": "milligram",
+        "value": 486,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CA",
+        "unitOfMeasure": "milligram",
+        "value": 230,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "P",
+        "unitOfMeasure": "milligram",
+        "value": 196,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "MG",
+        "unitOfMeasure": "milligram",
+        "value": 41.7,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "FE",
+        "unitOfMeasure": "milligram",
+        "value": 3,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ZN",
+        "unitOfMeasure": "milligram",
+        "value": 2.4,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "CU",
+        "unitOfMeasure": "milligram",
+        "value": 0.36,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "MN",
+        "unitOfMeasure": "milligram",
+        "value": 0.72,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "SE",
+        "unitOfMeasure": "mikrogram",
+        "value": 17,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "MO",
+        "unitOfMeasure": "mikrogram",
+        "value": 16,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "ID",
+        "unitOfMeasure": "mikrogram",
+        "value": 36,
+        "dailyValueIntakePercent": null
+       },
+       {
+        "measurementPrecision": 0,
+        "typeCode": "VITK",
+        "unitOfMeasure": "mikrogram",
+        "value": 17,
+        "dailyValueIntakePercent": null
+       }
+      ]
+     }
+    ]
+   },
+   "productStoreDetails": {
+    "p_has_price": true,
+    "p_availablefrom": "2026-10-15",
+    "p_availableto": "9999-12-30",
+    "p_has_current_week_only_discount": false,
+    "p_has_long_time_discount": false,
+    "p_has_members_only_price": false,
+    "prices": {
+     "currentPrice": {
+      "price": 254.55,
+      "unit": "PCE",
+      "comparativePrice": 12.73,
+      "comparativePriceUnit": "PCE"
+     },
+     "ordinaryPrice": {
+      "price": 254.55,
+      "unit": "PCE",
+      "comparativePrice": 12.73,
+      "comparativePriceUnit": "PCE"
+     },
+     "memberPrice": null,
+     "promotions": [],
+     "activePromotion": null,
+     "hasDiscount": false,
+     "hasPromotion": false,
+     "displayLowestPriceLast30Days": false,
+     "lowestPriceLast30Days": null
+    },
+    "stockStatus": 1,
+    "availableFrom": null,
+    "availableTo": null,
+    "id": "3240"
+   }
+  }
+ ],
+ "totalCount": 13,
+ "pageSize": 13,
+ "currentPage": 0,
+ "totalPages": 1
+}
