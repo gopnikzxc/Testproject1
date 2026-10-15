@@ -187,6 +187,7 @@ def test_cli_sok(tmp_path, monkeypatch, capsys):
     import matplan.cli as cli
 
     monkeypatch.setenv("MATPLAN_DB", str(tmp_path / "cli.db"))
+    monkeypatch.setenv("COLUMNS", "200")
     monkeypatch.setattr(cli, "_butiker", lambda vald: (SortimentButik([_vara("1", "Tonfisk Vatten", besk="3X170G")]),))
 
     assert main(["refresh"]) == 0

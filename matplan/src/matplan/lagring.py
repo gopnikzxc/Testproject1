@@ -124,6 +124,39 @@ CREATE TABLE IF NOT EXISTS grupper (
     namn TEXT PRIMARY KEY,
     data TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS familjer (
+    familj TEXT PRIMARY KEY,
+    nummer INTEGER NOT NULL,
+    namn TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS lmv_lista (
+    nummer INTEGER PRIMARY KEY,
+    namn TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS lmv_varden (
+    nummer INTEGER PRIMARY KEY,
+    kalla TEXT NOT NULL,
+    kcal REAL NOT NULL,
+    protein REAL NOT NULL,
+    fett REAL,
+    kolhydrater REAL,
+    fiber REAL,
+    vatten REAL,
+    hamtad TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS off_varden (
+    ean TEXT PRIMARY KEY,
+    kcal REAL,
+    protein REAL,
+    fett REAL,
+    kolhydrater REAL,
+    fiber REAL,
+    hamtad TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS slotval (
+    nyckel TEXT PRIMARY KEY,
+    slot TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS meta (
     nyckel TEXT PRIMARY KEY,
     varde TEXT NOT NULL
@@ -301,6 +334,66 @@ class Lagring:
             "SELECT ingrediens, kalla, kcal, protein, fett, kolhydrater, fiber, vatten FROM naring"
         )
         return {rad[0]: Naring(*rad[1:]) for rad in rader}
+
+    # --- Näring per produktfamilj (#28) ---
+
+    def familjer(self) -> dict[str, tuple[int, str]]:
+        """Bekräftade Livsmedelsverket-matchningar: familj -> (nummer, namn)."""
+        return {f: (n, namn) for f, n, namn in self._db.execute("SELECT familj, nummer, namn FROM familjer")}
+
+    def bekrafta_familj(self, familj: str, nummer: int, namn: str) -> None:
+        with self._db:
+            self._db.execute("INSERT OR REPLACE INTO familjer VALUES (?, ?, ?)", (familj, nummer, namn))
+
+    def lmv_lista(self) -> list[tuple[int, str]]:
+        return list(self._db.execute("SELECT nummer, namn FROM lmv_lista ORDER BY nummer"))
+
+    def spara_lmv_lista(self, lista: list[tuple[int, str]]) -> None:
+        with self._db:
+            self._db.execute("DELETE FROM lmv_lista")
+            self._db.executemany("INSERT INTO lmv_lista VALUES (?, ?)", lista)
+
+    def lmv_varden(self) -> dict[int, Naring]:
+        rader = self._db.execute("SELECT nummer, kalla, kcal, protein, fett, kolhydrater, fiber, vatten FROM lmv_varden")
+        return {rad[0]: Naring(*rad[1:]) for rad in rader}
+
+    def spara_lmv_varden(self, nummer: int, naring: Naring, tid: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO lmv_varden VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (nummer, naring.kalla, naring.kcal, naring.protein, naring.fett, naring.kolhydrater,
+                 naring.fiber, naring.vatten, tid.isoformat()),
+            )
+
+    def off_varden(self) -> dict[str, Naring | None]:
+        """Open Food Facts per streckkod; None = OFF saknar kcal/protein för varan."""
+        resultat: dict[str, Naring | None] = {}
+        for ean, kcal, prot, fett, kh, fib in self._db.execute(
+            "SELECT ean, kcal, protein, fett, kolhydrater, fiber FROM off_varden"
+        ):
+            resultat[ean] = None if kcal is None or prot is None else Naring("openfoodfacts", kcal, prot, fett, kh, fib, None)
+        return resultat
+
+    def spara_off_varden(self, ean: str, naring: Naring | None, tid: datetime) -> None:
+        n = naring
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO off_varden VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (ean, n and n.kcal, n and n.protein, n and n.fett, n and n.kolhydrater, n and n.fiber, tid.isoformat()),
+            )
+
+    # --- Slotval (#29) ---
+
+    def slotval(self) -> dict[str, str]:
+        """Handvalda slotar: "grupp:<namn>" eller "produkt:<id>" -> slot."""
+        return dict(self._db.execute("SELECT nyckel, slot FROM slotval"))
+
+    def satt_slotval(self, nyckel: str, slot: str | None) -> None:
+        with self._db:
+            if slot is None:
+                self._db.execute("DELETE FROM slotval WHERE nyckel = ?", (nyckel,))
+            else:
+                self._db.execute("INSERT OR REPLACE INTO slotval VALUES (?, ?)", (nyckel, slot))
 
     def spara_bunkring(self, bunkring: Bunkring) -> None:
         with self._db:

@@ -1,0 +1,501 @@
+{
+ "_meta": {
+  "totalRecords": 2606,
+  "offset": 0,
+  "limit": 3000,
+  "count": 18
+ },
+ "_links": [
+  {
+   "href": "/api/v1/livsmedel?offset=0&limit=3000&sprak=1",
+   "rel": "self",
+   "method": "GET"
+  },
+  {
+   "href": "/api/v1/livsmedel?offset=0&limit=3000&sprak=1",
+   "rel": "first",
+   "method": "GET"
+  },
+  {
+   "href": "/api/v1/livsmedel?offset=-394&limit=3000&sprak=1",
+   "rel": "last",
+   "method": "GET"
+  }
+ ],
+ "livsmedel": [
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 1,
+   "version": "2026-06-29T00:18:24.893",
+   "namn": "Nöt talg",
+   "vetenskapligtNamn": "Bos taurus",
+   "projekt": "2025 Fetter, mejeri och ägg",
+   "analys": "I det analyserade provet från 2025 ingår: Johan Jureskog Talg (61%), Hagshultskossornas kopensionat Krögartalg (39%)",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/1/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 2,
+   "version": "2026-06-29T00:18:28.61",
+   "namn": "Gris späck",
+   "vetenskapligtNamn": "Sus scrofa",
+   "projekt": "2023 Uppdatering av laktosvärden",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/2/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/2/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/2/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 150,
+   "version": "2026-06-29T00:23:07.257",
+   "namn": "Mellanmjölk fett 1,5% berikad",
+   "vetenskapligtNamn": "Bos taurus",
+   "projekt": "2024 Inlånade värden",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/150/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/150/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/150/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 289,
+   "version": "2026-06-29T00:27:01.797",
+   "namn": "Morot",
+   "vetenskapligtNamn": "Daucus carota L. ssp. sativa (Hoffm.) Schübl. & Mart.",
+   "projekt": "2012 Grönsaker och rotfrukter",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/289/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/289/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/289/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 325,
+   "version": "2026-06-30T15:19:44.153",
+   "namn": "Broccoli",
+   "vetenskapligtNamn": "Brassica oleracea convar. botrytis var. italica",
+   "projekt": "2025 Beräknade livsmedel",
+   "analys": "Värden inlånade från Norge. Kielland E. (2024) Analyser av næringsstoffer i norske og importerte grønnsaker.Kartlegging av tungmetaller, nitrat, nitritt og per- og polyfluor. Mattilsynet og Havforskningsinstituttet. Livsmedlet avser ett aggregerat värde för fäska broccoli från södra och östra regionerna i Norge.",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/325/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/325/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/325/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 370,
+   "version": "2026-06-30T15:26:32.187",
+   "namn": "Vitkål",
+   "vetenskapligtNamn": "Brassica oleracea L. ",
+   "projekt": "2025 Beräknade livsmedel",
+   "analys": "Värden inlånade från Norge. Kielland E. (2024) Analyser av næringsstoffer i norske og importerte grønnsaker.Kartlegging av tungmetaller, nitrat, nitritt og per- og polyfluor. Mattilsynet og Havforskningsinstituttet. Livsmedlet avser ett aggregerat analysvärde för färska vitkål från två regioner i Norge.",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/370/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/370/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/370/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 555,
+   "version": "2026-06-29T00:32:32.283",
+   "namn": "Blåbär",
+   "vetenskapligtNamn": "Vaccinium myrtillus L.",
+   "projekt": "2010 Bär",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/555/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/555/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/555/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 643,
+   "version": "2026-06-29T00:35:14.75",
+   "namn": "Apelsinjuice drickf.",
+   "vetenskapligtNamn": "Citrus sinensis (L.)",
+   "projekt": "2014 Drycker",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/643/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/643/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/643/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 702,
+   "version": "2026-06-29T00:36:49.773",
+   "namn": "Havregryn fullkorn",
+   "vetenskapligtNamn": "Avena sativa L.",
+   "projekt": "2016 Spannmål",
+   "analys": "I det analyserade provet från 2016 ingår: Axa (33 %), Gyllenhammar (18 %), Coop änglamark ekologiska (12 %), Garant (10 %), Ica (8 %), Coop (7 %), Favorit (7 %), Coop X-tra (6 %).",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/702/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/702/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/702/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 1173,
+   "version": "2026-06-29T00:46:46.17",
+   "namn": "Kyckling bröstfilé rå u. skinn",
+   "vetenskapligtNamn": "Gallus gallus (Linnaeus, 1758) (ITIS TSN 176086)",
+   "projekt": "2023 Uppdatering av laktosvärden",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/1173/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1173/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1173/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 1202,
+   "version": "2026-06-29T00:47:19.563",
+   "namn": "Sej rå",
+   "vetenskapligtNamn": "Pollachius virens",
+   "projekt": "2010 Fisk, skaldjur och fiskprodukter",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/1202/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1202/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1202/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 1207,
+   "version": "2026-06-29T00:47:25.987",
+   "namn": "Kyckling nugget friterad tillagad på restaurang",
+   "vetenskapligtNamn": "",
+   "projekt": "2004 Barn stora",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/1207/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1207/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1207/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 1278,
+   "version": "2026-06-29T00:50:31.333",
+   "namn": "Tonfisk i vatten konserv. avrunnen",
+   "vetenskapligtNamn": "Thunnus tonggol",
+   "projekt": "2010 Fisk, skaldjur och fiskprodukter",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/1278/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1278/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1278/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 1294,
+   "version": "2026-06-29T00:51:28.293",
+   "namn": "Fiskpinnar stekta",
+   "vetenskapligtNamn": "",
+   "projekt": "2010 Fisk, skaldjur och fiskprodukter",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/1294/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1294/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1294/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 1828,
+   "version": "2026-06-29T01:06:02.663",
+   "namn": "Läsk",
+   "vetenskapligtNamn": "",
+   "projekt": "2022 Snacks, sötsaker och dryck",
+   "analys": "I det analyserade provet från 2022 ingår: Spendrups Trocadero (14 %), Coca cola company Fanta exotic (14 %), Coca cola company Fanta (14 %), Zingo (14 %), Spendrups Champis (14 %), Coca cola company Sprite (14 %), Carlsberg 7-up (14 %).",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/1828/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1828/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/1828/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 3243,
+   "version": "2026-06-29T01:32:27.357",
+   "namn": "Kvarg naturell fett 0,2%",
+   "vetenskapligtNamn": "Bos taurus",
+   "projekt": "2016 Mejeri",
+   "analys": "I det analyserade provet från 2016 ingår: Lindahls vanilj (12 %), Lindahls hallon (12 %), Lindahls naturell (10 %), Lindahls persika/passion (7 %), Lindahls nötchoklad (7 %), Lindahls kokos (6 %), Skånemejerier naturell ekologisk (6 %), Lindahls citron/lime (6 %), Garant lätt (5 %), Skånemejerier jordgubb ekologisk (4 %), Skånemejerier päron (4 %), Eldorado vanilj (4 %), Arla blåbär (4 %), Coop lätt naturell (4 %), Lindahls toffee therapy (3 %), Arla päron/vanilj (3 %), Arla vanilj (3 %). Sockerarter analyserades separat i kvarg osötad, kvarg sötad och kvarg naturell. I kvarg naturell ingår: Lindahls naturell, Skånemejerier naturell eko, Garant naturell och Coop naturell. ",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/3243/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/3243/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/3243/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 3817,
+   "version": "2026-06-29T01:42:41.35",
+   "namn": "Svarta bönor konserv. u. lag",
+   "vetenskapligtNamn": "Phaseolus vulgaris L. ssp. vulgaris",
+   "projekt": "2008 Fullkorn, bönor och ägg",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/3817/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/3817/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/3817/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  },
+  {
+   "livsmedelsTypId": 1,
+   "livsmedelsTyp": "Analyserat",
+   "nummer": 4457,
+   "version": "2026-06-29T01:47:06.633",
+   "namn": "Potatis rå",
+   "vetenskapligtNamn": "Solanum tuberosum  ",
+   "projekt": "2009 Potatis",
+   "links": [
+    {
+     "href": "/api/v1/livsmedel/4457/naringsvarden?sprak=1",
+     "rel": "naringvarden",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/4457/klassificeringar?sprak=1",
+     "rel": "klassificeringar",
+     "method": "GET"
+    },
+    {
+     "href": "/api/v1/livsmedel/4457/ravaror?sprak=1",
+     "rel": "ravaror",
+     "method": "GET"
+    }
+   ]
+  }
+ ]
+}

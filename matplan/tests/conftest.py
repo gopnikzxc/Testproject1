@@ -51,10 +51,11 @@ def inga_riktiga_butiker(monkeypatch):
 
 
 def katalogvara(pid, namn, marke="GARANT", besk="", kr=50.0, kcal=100.0, protein=20.0,
-                kategori="Skafferiet / Konserver", butik="City Gross Ytterby", forpackning_g=400.0, erbjudande=False):
-    """En produkt i butikens synkade sortiment."""
+                kategori="Skafferiet / Konserver", butik="City Gross Ytterby", forpackning_g=400.0, erbjudande=False,
+                ean="", kolhydrater=None, fett=None):
+    """En produkt i butikens synkade sortiment. kcal=None: butiken saknar näringsvärden."""
     return Produkt(butik, pid, namn, marke, forpackning_g, kr * forpackning_g / 1000 if forpackning_g else kr, kr,
-                   erbjudande, kategori, besk, "", kcal, protein)
+                   erbjudande, kategori, besk, ean, kcal, protein if kcal is not None else None, fett, kolhydrater)
 
 
 class SortimentButik:
@@ -74,3 +75,14 @@ class SortimentButik:
 
     def sok(self, sokord, butikskategori=()):
         raise AssertionError("butiker med synkat sortiment ska inte sökas per term")
+
+
+def standardsortiment():
+    """En vara per inbyggd grupp i sortimentet, med katalogens pris och näring."""
+    return [
+        katalogvara(
+            f"id-{i.namn}", f"{i.sokord[0].capitalize()} Vara", kr=i.kr_per_kg, kcal=i.kcal_100g,
+            protein=i.protein_100g, kategori=f"Mat / {i.butikskategori[0]}" if i.butikskategori else "Mat / Övrigt",
+        )
+        for i in STARTKATALOG
+    ]

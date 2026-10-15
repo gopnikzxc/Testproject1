@@ -18,11 +18,12 @@ from .butiker import (
 from .inkop import Inkopslista, bygg_lista
 from .katalog import STARTKATALOG, Ingrediens
 from .lagring import Lagring
-from .naring import Livsmedelsverket, NaringsFel, OpenFoodFacts
+from .naring import Livsmedelsverket, Naring, NaringsFel, NaringsNatverksFel, OpenFoodFacts, foresla
 from .planerare import HUVUDSLOTAR, Plan, PlaneringsFel, Profil, Vikter, planera
 from .rea import ar_rea
+from .slot import SLOTAR, klassificera
 
-__all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD", "Butiksrad"]
+__all__ = ["Matplan", "PlaneringsFel", "PERSONER", "Hamtningsresultat", "DAGAR_PER_MANAD", "Butiksrad", "Familj"]
 
 # Barnet planeras inte (se spec #1).
 PERSONER = ("jag", "fru")
@@ -77,11 +78,39 @@ def avstand_km(position: tuple[float, float] | None, plats: Butiksplats) -> floa
 
 
 @dataclass(frozen=True)
+class Familj:
+    """En produktfamilj (en grupp, eller ett normaliserat produktnamn) och dess
+    Livsmedelsverket-matchning för produkter som saknar butikens näringsvärden."""
+
+    familj: str
+    produkter: tuple[str, ...]  # produkter i familjen som saknar butikens värden
+    bekraftad: tuple[int, str] | None  # (nummer, namn)
+    forslag: tuple[int, str] | None
+
+
+@dataclass(frozen=True)
+class _Naringsdata:
+    """Allt som behövs för att slå upp produkters näring och slot, läst en gång."""
+
+    familjer: dict[str, tuple[int, str]]
+    lmv: dict[int, Naring]
+    off: dict[str, Naring | None]
+    gruppnaring: dict[str, Naring]
+    slotval: dict[str, str]
+
+
+def familjenamn(produktnamn: str) -> str:
+    """Normaliserat produktnamn för produkter utan grupp: gemener, bara ord."""
+    return " ".join(re.findall(r"[^\W\d_]+", produktnamn.casefold()))
+
+
+@dataclass(frozen=True)
 class _Priser:
     produkter: dict[str, list[Produkt]]  # efter produktlås
     hamtade: datetime | None
     varningar: tuple[str, ...]
     rea: frozenset[tuple[str, str]] = frozenset()  # (butik, produkt_id) som är rea just nu
+    ej_planerbara: tuple[str, ...] = ()  # grupper där ingen produkt har näringsvärden
 
 
 class Matplan:
@@ -109,10 +138,14 @@ class Matplan:
 
     @property
     def _grundkatalog(self) -> tuple[Ingrediens, ...]:
-        """Ingrediensgrupperna: från databasen, eller den katalog som gavs (t.ex. i tester)."""
-        if self._fast_katalog is not None:
-            return self._fast_katalog
-        return tuple(self._lagring.grupper())
+        """Ingrediensgrupperna: från databasen, eller den katalog som gavs (t.ex. i
+        tester), med handvalda slotar (#29)."""
+        grupper = self._fast_katalog if self._fast_katalog is not None else tuple(self._lagring.grupper())
+        slotval = self._lagring.slotval()
+        return tuple(
+            dataclasses.replace(g, kategori=slotval[f"grupp:{g.namn}"]) if f"grupp:{g.namn}" in slotval else g
+            for g in grupper
+        )
 
     # --- Planering -------------------------------------------------------
 
@@ -129,7 +162,8 @@ class Matplan:
 
     def _ny_plan(self, start: date | None) -> Plan:
         priser = self._priser()
-        katalog = self._butikspriser(priser)
+        pool = self._planpool(priser)
+        katalog = tuple(i for i, _ in pool.values())
         rea = self._rea_ingredienser(priser)
         lager = self._lagring.lager()
         vantar, notiser = self._farska_rea_fore_lager(katalog, rea, lager)
@@ -152,12 +186,19 @@ class Matplan:
             }
             plan = self._planera(med_lager(andel), start)
 
-        utan_pris = tuple(i.namn for i in self._katalog if i.namn not in priser.produkter) if priser.hamtade else ()
+        utan_pris = tuple(
+            i.namn for i in self._katalog if i.namn not in priser.produkter and i.namn not in priser.ej_planerbara
+        ) if priser.hamtade else ()
         anvanda = plan.total_gram()
-        kallor = tuple(sorted({n.kalla for namn, n in self._lagring.naring().items() if namn in anvanda}))
+        produktkallor = tuple((namn, kalla) for namn, (_, kalla) in sorted(pool.items()) if namn in anvanda)
+        kallor = tuple(sorted({k for _, k in produktkallor} & {"livsmedelsverket", "openfoodfacts"}))
+        hoppade = tuple(
+            f"{namn}: ingen produkt har näringsvärden, så gruppen hoppas över i planen." for namn in priser.ej_planerbara
+        )
         return dataclasses.replace(
             plan, priser_hamtade=priser.hamtade, utan_butikspris=utan_pris,
-            varningar=priser.varningar + notiser, naringskallor=kallor, rea=rea,
+            varningar=priser.varningar + notiser + hoppade, naringskallor=kallor, rea=rea,
+            produktkallor=produktkallor,
         )
 
     def _farska_rea_fore_lager(
@@ -223,15 +264,20 @@ class Matplan:
             raise KeyError(f"Block {block} finns inte; planen har {len(plan.block)} block.")
         if slot not in HUVUDSLOTAR:
             raise KeyError(f"Okänd slot: {slot}. Välj {', '.join(HUVUDSLOTAR)}.")
-        alternativ = [i.namn for i in self._grundkatalog if i.kategori == slot]
+        # Proteinslotten kan också fyllas av en kombinationsvara.
+        slotar_for = {"protein": ("protein", "kombination")}.get(slot, (slot,))
+        alternativ = [g.namn for g, _ in self._planpool(self._priser()).values() if g.kategori in slotar_for]
         if ingrediens is not None:
             if ingrediens not in alternativ:
                 raise KeyError(f"{ingrediens} är ingen ingrediens för {slot}.")
             forsok = [ingrediens]
         else:
-            nuvarande = next(r.namn for r in plan.block[block - 1].batch.portioner[0].rader if r.slot == slot)
-            i = alternativ.index(nuvarande)
-            forsok = alternativ[i + 1 :] + alternativ[:i]
+            nuvarande = next((r.namn for r in plan.block[block - 1].batch.portioner[0].rader if r.slot == slot), None)
+            if nuvarande in alternativ:
+                i = alternativ.index(nuvarande)
+                forsok = alternativ[i + 1 :] + alternativ[:i]
+            else:
+                forsok = alternativ
 
         tidigare = self._lagring.plan_val()
         senaste_fel: PlaneringsFel | None = None
@@ -401,6 +447,7 @@ class Matplan:
         if resultat.antal_produkter:
             self._lagring.spara_hamtning(resultat.tid, priser)
         self._hamta_naring(resultat, framsteg)
+        self._hamta_produktnaring(resultat, framsteg)
         return resultat
 
     def _synka_sortiment(self, resultat: Hamtningsresultat, framsteg: Callable[[str, str], None] | None) -> None:
@@ -431,6 +478,11 @@ class Matplan:
             ord_ = set(re.findall(r"\w+", f"{p.varumarke} {p.namn} {p.beskrivning}".casefold()))
             if sokord <= ord_:
                 traffar.append(p)
+        if traffar:
+            # Produkter i en grupp får gruppens näringsfamilj; övriga sitt normaliserade namn.
+            i_grupp = {(p.butik, p.produkt_id): p for lista in self._matchade()[0].values() for p in lista}
+            data = self._naringsdata()
+            traffar = [i_grupp.get((p.butik, p.produkt_id)) or self._med_naring(p, None, data) for p in traffar]
         return sorted(traffar, key=lambda p: (p.kr_per_kg <= 0, p.kr_per_kg, p.namn))
 
     def _hamta_naring(self, resultat: Hamtningsresultat, framsteg: Callable[[str, str], None] | None) -> None:
@@ -457,16 +509,202 @@ class Matplan:
             self._lagring.spara_naring(ingrediens.namn, naring, resultat.tid)
             resultat.naring_hamtad += 1
 
+    def _hamta_produktnaring(
+        self, resultat: Hamtningsresultat, framsteg: Callable[[str, str], None] | None
+    ) -> None:
+        """Livsmedelsverkets värden för bekräftade familjer som saknar dem, och Open
+        Food Facts (per streckkod) för gruppernas produkter som annars saknar värden."""
+        if self._livsmedelsverket:
+            lmv = self._lagring.lmv_varden()
+            for familj, (nummer, _) in sorted(self._lagring.familjer().items()):
+                if nummer in lmv:
+                    continue
+                if framsteg:
+                    framsteg("Livsmedelsverket", familj)
+                try:
+                    naring = self._livsmedelsverket.hamta(nummer)
+                except NaringsFel as fel:
+                    resultat.naring_fel[familj] = str(fel)
+                    continue
+                self._lagring.spara_lmv_varden(nummer, naring, resultat.tid)
+                lmv[nummer] = naring
+                resultat.naring_hamtad += 1
+        if self._openfoodfacts:
+            kanda = self._lagring.off_varden()
+            saknar = sorted({
+                p.ean for lista in self._matchade()[0].values() for p in lista
+                if p.naringskalla is None and p.ean and p.ean not in kanda
+            })
+            for ean in saknar:
+                if framsteg:
+                    framsteg("Open Food Facts", ean)
+                try:
+                    naring = self._openfoodfacts.hamta(ean)
+                except NaringsNatverksFel as fel:
+                    resultat.naring_fel[ean] = str(fel)
+                    continue
+                except NaringsFel:
+                    naring = None  # OFF saknar varan; frågas inte igen
+                self._lagring.spara_off_varden(ean, naring, resultat.tid)
+                if naring is not None:
+                    resultat.naring_hamtad += 1
+
+    def _lmv_lista(self) -> list[tuple[int, str]]:
+        """Livsmedelsverkets lista, hämtad en gång och sparad i databasen."""
+        lista = self._lagring.lmv_lista()
+        if not lista and self._livsmedelsverket:
+            try:
+                lista = self._livsmedelsverket.lista()
+            except NaringsFel:
+                return []
+            self._lagring.spara_lmv_lista(lista)
+        return lista
+
+    def _familjenyckel(self, text: str) -> str:
+        """En grupps namn, annars det normaliserade produktnamnet."""
+        grupp = next((g.namn for g in self._grundkatalog if g.namn.casefold() == text.strip().casefold()), None)
+        return grupp or familjenamn(text)
+
+    def naringsfamiljer(self) -> list[Familj]:
+        """Grupper vars produkter saknar butikens näringsvärden, med gruppens
+        bekräftade Livsmedelsverket-matchning eller ett förslag, och bekräftade
+        familjer för produktnamn utanför grupperna."""
+        data = self._naringsdata()
+        matchade, _ = self._matchade()
+        lista = self._lmv_lista()
+        namn_for = dict(lista)
+        resultat = []
+        for grupp in self._grundkatalog:
+            saknar = tuple(sorted({p.namn for p in matchade.get(grupp.namn, []) if p.naringskalla != "butik"}))
+            bekraftad = data.familjer.get(grupp.namn)
+            if bekraftad is None and grupp.livsmedelsverket is not None:
+                bekraftad = (grupp.livsmedelsverket, namn_for.get(grupp.livsmedelsverket, f"nummer {grupp.livsmedelsverket}"))
+            if not saknar and grupp.namn not in data.familjer:
+                continue
+            forslag = None
+            if bekraftad is None:
+                forslag = foresla(grupp.namn, lista) or next((f for n in saknar if (f := foresla(n, lista))), None)
+            resultat.append(Familj(grupp.namn, saknar, bekraftad, forslag))
+        grupper = {g.namn for g in self._grundkatalog}
+        for familj, match in sorted(data.familjer.items()):
+            if familj not in grupper:
+                resultat.append(Familj(familj, (), match, None))
+        return resultat
+
+    def bekrafta_familj(self, familj: str, nummer: int | None = None, nu: datetime | None = None) -> Familj:
+        """Bekräftar en familjs Livsmedelsverket-matchning: förslaget, eller
+        livsmedlet med `nummer`. Gäller alla produkter i familjen, även nya."""
+        nyckel = self._familjenyckel(familj)
+        lista = self._lmv_lista()
+        if nummer is None:
+            befintlig = next((f for f in self.naringsfamiljer() if f.familj == nyckel), None)
+            forslag = (befintlig.forslag if befintlig else None) or foresla(nyckel, lista)
+            if forslag is None:
+                raise ValueError(
+                    f"Inget förslag för {nyckel}. Sök ett livsmedel med `matplan näring --sök <text>` och ange dess nummer."
+                )
+            nummer, namn = forslag
+        else:
+            namn = dict(lista).get(nummer)
+            if namn is None and lista:
+                raise ValueError(f"Livsmedelsverket har inget livsmedel med nummer {nummer}.")
+            namn = namn or f"nummer {nummer}"
+        self._lagring.bekrafta_familj(nyckel, nummer, namn)
+        if self._livsmedelsverket and nummer not in self._lagring.lmv_varden():
+            try:
+                self._lagring.spara_lmv_varden(
+                    nummer, self._livsmedelsverket.hamta(nummer), nu or datetime.now().replace(microsecond=0)
+                )
+            except NaringsFel:
+                pass  # hämtas vid nästa refresh
+        return Familj(nyckel, (), (nummer, namn), None)
+
+    def sok_livsmedel(self, text: str) -> list[tuple[int, str]]:
+        """Livsmedel i Livsmedelsverkets lista vars namn innehåller alla orden."""
+        ord_ = text.casefold().split()
+        return [(n, namn) for n, namn in self._lmv_lista() if all(o in namn.casefold() for o in ord_)]
+
+    def satt_slot(self, mal: str, slot: str | None) -> str:
+        """Handvald slot för en grupp (namn) eller produkt (produkt-id); None tar
+        bort valet. Returnerar vad som ändrades."""
+        if slot is not None and slot not in SLOTAR:
+            raise KeyError(f"Okänd slot: {slot}. Välj bland {', '.join(SLOTAR)}.")
+        grupp = next((g.namn for g in self._grundkatalog if g.namn.casefold() == mal.strip().casefold()), None)
+        if grupp is not None:
+            self._lagring.satt_slotval(f"grupp:{grupp}", slot)
+            return grupp
+        produkt = next((p for p in self._lagring.katalog() if p.produkt_id == mal), None)
+        if produkt is None:
+            produkt = next((p for _, p, _ in self._lagring.senaste_priser() if p.produkt_id == mal), None)
+        if produkt is None:
+            raise KeyError(f"Hittar ingen grupp eller produkt {mal!r}.")
+        self._lagring.satt_slotval(f"produkt:{mal}", slot)
+        return f"{produkt.namn} ({mal})"
+
+    def slotval(self) -> dict[str, str]:
+        return self._lagring.slotval()
+
     @property
     def _katalog(self) -> tuple[Ingrediens, ...]:
-        """Katalogen med hämtade näringsvärden där sådana finns."""
-        naring = self._lagring.naring()
-        return tuple(
-            dataclasses.replace(i, kcal_100g=naring[i.namn].kcal, protein_100g=naring[i.namn].protein)
-            if i.namn in naring
-            else i
-            for i in self._grundkatalog
+        """Katalogen med gruppernas hämtade eller bekräftade näringsvärden där sådana finns."""
+        data = self._naringsdata()
+        resultat = []
+        for i in self._grundkatalog:
+            varden = self._gruppvarden(i, data)
+            if varden is not None and varden.kalla != "katalog":
+                i = dataclasses.replace(i, kcal_100g=varden.kcal, protein_100g=varden.protein)
+            resultat.append(i)
+        return tuple(resultat)
+
+    # --- Näring per produkt (#28) och slot (#29) ----------------------------
+
+    def _naringsdata(self) -> _Naringsdata:
+        return _Naringsdata(
+            self._lagring.familjer(), self._lagring.lmv_varden(), self._lagring.off_varden(),
+            self._lagring.naring(), self._lagring.slotval(),
         )
+
+    def _gruppvarden(self, grupp: Ingrediens, data: _Naringsdata) -> Naring | None:
+        """Familjens värden för en grupp: en bekräftad Livsmedelsverket-matchning,
+        annars gruppens hämtade värden (från dess nummer eller streckkod), annars
+        katalogens handinlagda värden om gruppen har en källa att hämta från."""
+        bekraftad = data.familjer.get(grupp.namn)
+        if bekraftad and bekraftad[0] in data.lmv:
+            return data.lmv[bekraftad[0]]
+        if grupp.namn in data.gruppnaring:
+            return data.gruppnaring[grupp.namn]
+        if grupp.livsmedelsverket is not None or grupp.ean or bekraftad:
+            return Naring("katalog", grupp.kcal_100g, grupp.protein_100g, None, None, None, None)
+        return None
+
+    def _med_naring(self, produkt: Produkt, grupp: Ingrediens | None, data: _Naringsdata) -> Produkt:
+        """Produkten med näringsvärden och källa (butiken, familjens matchning,
+        Open Food Facts) och slot (handvald eller klassificerad)."""
+        varden: Naring | None = None
+        if produkt.kcal and produkt.protein is not None:
+            kalla = "butik"
+        else:
+            if grupp is not None:
+                varden = self._gruppvarden(grupp, data)
+            else:
+                bekraftad = data.familjer.get(familjenamn(produkt.namn))
+                varden = data.lmv.get(bekraftad[0]) if bekraftad else None
+            if varden is None and produkt.ean:
+                varden = data.off.get(produkt.ean)
+            kalla = varden.kalla if varden else None
+        if varden is not None:
+            produkt = dataclasses.replace(
+                produkt, kcal=varden.kcal, protein=varden.protein, fett=varden.fett,
+                kolhydrater=varden.kolhydrater, fiber=varden.fiber,
+            )
+        slot = data.slotval.get(f"produkt:{produkt.produkt_id}") or klassificera(
+            produkt.kcal, produkt.protein, produkt.kolhydrater, produkt.fett, produkt.kategori, produkt.namn
+        )
+        return dataclasses.replace(produkt, naringskalla=kalla, slot=slot)
+
+    @staticmethod
+    def _planerbar(produkt: Produkt) -> bool:
+        return produkt.naringskalla is not None and produkt.slot != "utesluten"
 
     def produkter(self, ingrediens: str) -> list[Produkt]:
         """Matchande produkter för gruppen, billigast per kg först (före lås)."""
@@ -563,9 +801,9 @@ class Matplan:
         return vald
 
     def _matchade(self) -> tuple[dict[str, list[Produkt]], datetime | None]:
-        """Produkter per grupp, före lås. Butiker med synkat sortiment matchas lokalt
-        mot det; övriga från senaste sökhämtningen. Andra värdet är när de äldsta
-        av priserna hämtades."""
+        """Produkter per grupp, före lås, med näring och slot. Butiker med synkat
+        sortiment matchas lokalt mot det; övriga från senaste sökhämtningen. Andra
+        värdet är när de äldsta av priserna hämtades."""
         produkter: dict[str, list[Produkt]] = {}
         med = self._medraknade_butiker()
         katalogtider = {b: t for b, t in self._lagring.katalogtider().items() if b in med}
@@ -595,10 +833,20 @@ class Matplan:
                         and not (namnord & uteslut)
                     ):
                         produkter.setdefault(grupp.namn, []).append(p)
+        data = self._naringsdata()
+        grupper = {g.namn: g for g in self._grundkatalog}
+        produkter = {
+            namn: [self._med_naring(p, grupper.get(namn), data) for p in lista] for namn, lista in produkter.items()
+        }
         return produkter, (min(tider) if tider else None)
 
     def _priser(self) -> _Priser:
-        produkter, hamtade = self._matchade()
+        """Planerbara produkter per grupp (med näringsvärden, inte uteslutna), efter lås.
+        Grupper med produkter där ingen är planerbar listas i `ej_planerbara`."""
+        matchade, hamtade = self._matchade()
+        produkter = {namn: [p for p in lista if self._planerbar(p)] for namn, lista in matchade.items()}
+        ej_planerbara = tuple(sorted(namn for namn, lista in produkter.items() if not lista))
+        produkter = {namn: lista for namn, lista in produkter.items() if lista}
 
         varningar = []
         for (ingrediens, butik), produkt_id in self._lagring.lasningar().items():
@@ -613,7 +861,7 @@ class Matplan:
                 )
                 continue
             produkter[ingrediens] = [p for p in produkter[ingrediens] if p.butik != butik] + last
-        return _Priser(produkter, hamtade, tuple(varningar), self._rea(produkter))
+        return _Priser(produkter, hamtade, tuple(varningar), self._rea(produkter), ej_planerbara)
 
     def _rea(self, produkter: dict[str, list[Produkt]]) -> frozenset[tuple[str, str]]:
         """Produkter vars pris är minst rea_procent under medianen de senaste
@@ -632,21 +880,33 @@ class Matplan:
         )
 
     def _butikspriser(self, priser: _Priser) -> tuple[Ingrediens, ...]:
-        """Varje grupp med pris och näring från den produkt planen köper: billigast
-        per kg (efter lås). Saknar produkten näringsvärden gäller gruppens egna.
-        Utan butikspris gäller gruppens platshållarpris."""
-        resultat = []
+        """Planens grupper med pris och näring från den produkt planen köper:
+        billigast per kg (efter lås). Utan butikspris gäller gruppens platshållarpris
+        och egna värden. Grupper utan planerbar produkt hoppas över, liksom grupper
+        utan slot vars produkt inte går att klassificera."""
+        return tuple(i for i, _ in self._planpool(priser).values())
+
+    def _planpool(self, priser: _Priser) -> dict[str, tuple[Ingrediens, str]]:
+        """Grupp -> (gruppen som planen ser den, näringskälla)."""
+        data = self._naringsdata()
+        pool: dict[str, tuple[Ingrediens, str]] = {}
         for i in self._katalog:
+            if i.namn in priser.ej_planerbara:
+                continue
             kandidater = priser.produkter.get(i.namn)
             if not kandidater:
-                resultat.append(i)
+                varden = self._gruppvarden(i, data)
+                pool[i.namn] = (i, varden.kalla if varden else "katalog")
                 continue
             vald = min(kandidater, key=lambda p: (p.kr_per_kg, p.butik, p.produkt_id))
-            grupp = dataclasses.replace(i, kr_per_kg=vald.kr_per_kg)
-            if vald.kcal and vald.protein is not None:
-                grupp = dataclasses.replace(grupp, kcal_100g=vald.kcal, protein_100g=vald.protein)
-            resultat.append(grupp)
-        return tuple(resultat)
+            slot = i.kategori or vald.slot
+            if slot not in SLOTAR or slot == "utesluten":
+                continue
+            pool[i.namn] = (
+                dataclasses.replace(i, kategori=slot, kr_per_kg=vald.kr_per_kg, kcal_100g=vald.kcal, protein_100g=vald.protein),
+                vald.naringskalla,
+            )
+        return pool
 
     # --- Inställningar ---------------------------------------------------
 

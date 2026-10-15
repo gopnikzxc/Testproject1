@@ -10,7 +10,7 @@ from matplan.core import Matplan
 from matplan.export import plan_markdown
 from matplan.http import HttpKlient
 from matplan.katalog import STARTKATALOG
-from matplan.naring import Livsmedelsverket, Naring, NaringsFel, OpenFoodFacts
+from matplan.naring import Livsmedelsverket, Naring, NaringsFel, OpenFoodFacts, foresla
 
 FIXTURER = Path(__file__).parent / "fixtures" / "naring"
 START = date(2026, 10, 15)
@@ -183,3 +183,20 @@ def test_livsmedelsverket_rader_utan_matrisenhetkod(tmp_path):
     naring = lmv.hamta(1225)
 
     assert (naring.kcal, naring.protein, naring.fett) == (136, 12.1, 9.8)
+
+
+def test_livsmedelsverkets_lista_och_forslag(tmp_path):
+    """Inspelat urval ur hela listan (`/livsmedel?limit=3000`)."""
+    anrop = []
+    lista = Livsmedelsverket(_http(tmp_path, lambda url: _fixtur("lmv_lista.json"), anrop)).lista()
+
+    assert "limit=3000" in anrop[0] and "sprak=1" in anrop[0]
+    assert (370, "Vitkål") in lista and (1278, "Tonfisk i vatten konserv. avrunnen") in lista
+    assert foresla("Vitkål Sverige", lista) == (370, "Vitkål")
+    assert foresla("Kycklingfilé", lista) == (1173, "Kyckling bröstfilé rå u. skinn")
+    assert foresla("Sejfilé", lista) == (1202, "Sej rå")
+    assert foresla("Svarta Bönor Ekologiska", lista) == (3817, "Svarta bönor konserv. u. lag")
+    assert foresla("Fiskpinnar", lista) == (1294, "Fiskpinnar stekta")
+    assert foresla("Mellanmjölk 1,5%", lista) == (150, "Mellanmjölk fett 1,5% berikad")
+    assert foresla("Tonfisk i Vatten", lista) == (1278, "Tonfisk i vatten konserv. avrunnen")
+    assert foresla("Rabarberkräm", lista) is None

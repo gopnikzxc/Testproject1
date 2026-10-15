@@ -12,7 +12,7 @@ from textual.widgets import DataTable, Footer, Header, Input, Static, TabbedCont
 from .butiker import ButiksFel
 from .core import DAGAR_PER_MANAD, Butiksrad, Matplan, PlaneringsFel
 from .export import exportera
-from .naring import KALLHANVISNING
+from .naring import KALLHANVISNING, KALLNAMN
 from .text import datum, forpackning, kr, mangd, produkttext
 
 
@@ -182,19 +182,19 @@ class MatplanApp(App):
         self._aterstall(tabell)
 
     def _fyll_priser(self, plan) -> None:
-        tabell = self._tabell("pristabell", "Ingrediens", "Billigast", "Butik", "kr/kg", "")
+        tabell = self._tabell("pristabell", "Ingrediens", "Billigast", "Butik", "kr/kg", "Näring", "")
         for namn, produkt, rea, last in self.karna.prisoversikt():
             if produkt is None:
-                tabell.add_row(namn, "inget butikspris", "", "", "")
+                tabell.add_row(namn, "inget butikspris", "", "", "", "")
                 continue
             tabell.add_row(
-                namn, produkt.namn, produkt.butik, f"{produkt.kr_per_kg:.2f}",
+                namn, produkt.namn, produkt.butik, f"{produkt.kr_per_kg:.2f}", KALLNAMN.get(produkt.naringskalla, ""),
                 " ".join(t for t, pa in (("rea", rea), ("låst", last)) if pa),
             )
         if plan.priser_hamtade:
-            tabell.add_row("", f"Hämtade {plan.priser_hamtade:%Y-%m-%d %H:%M}", "", "", "")
+            tabell.add_row("", f"Hämtade {plan.priser_hamtade:%Y-%m-%d %H:%M}", "", "", "", "")
         for kalla in plan.naringskallor:
-            tabell.add_row("", KALLHANVISNING[kalla], "", "", "")
+            tabell.add_row("", KALLHANVISNING[kalla], "", "", "", "")
         self._aterstall(tabell)
 
     def _fyll_installningar(self) -> None:
