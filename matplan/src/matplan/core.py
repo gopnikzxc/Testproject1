@@ -1022,6 +1022,48 @@ class Matplan:
         self._lagring.spara_grupp(grupp)
         return Godkannande(grupp, True, len(self._matchade()[0].get(grupp.namn, [])))
 
+    def forslag(self, antal: int = 50) -> list[Produkt]:
+        """Planerbara, aktiva produkter i sortimentet som inte hör till någon grupp
+        och inte har avfärdats, bäst först. Protein per kcal och protein per krona
+        räknas om till percentilrang; poängen är den bästa av dem plus en fjärdedel
+        av den andra, så att både täta (sej) och billiga (bönor) proteinkällor
+        kommer högt. Samma märke och namn visas en gång (billigast per kg)."""
+        med = self._medraknade_butiker()
+        i_grupp = {(p.butik, p.produkt_id) for lista in self._matchade()[0].values() for p in lista}
+        avfardade = self._lagring.avfardade()
+        data = self._naringsdata()
+        unika: dict[tuple[str, str], Produkt] = {}
+        for p in self._lagring.katalog():
+            if p.butik not in med or p.kr_per_kg <= 0 or p.produkt_id in avfardade or (p.butik, p.produkt_id) in i_grupp:
+                continue
+            p = self._med_naring(p, None, data)
+            if not self._planerbar(p) or p.slot is None or not p.kcal:
+                continue
+            nyckel = (p.varumarke.casefold(), p.namn.casefold())
+            if nyckel not in unika or p.kr_per_kg < unika[nyckel].kr_per_kg:
+                unika[nyckel] = p
+        kandidater = list(unika.values())
+        if not kandidater:
+            return []
+
+        def percentilrang(varden: list[float]) -> list[float]:
+            ordning = sorted(range(len(varden)), key=lambda i: varden[i])
+            rang = [0.0] * len(varden)
+            for plats, i in enumerate(ordning):
+                rang[i] = plats / max(len(varden) - 1, 1)
+            return rang
+
+        tathet = percentilrang([100 * p.protein / p.kcal for p in kandidater])
+        per_kr = percentilrang([p.protein * 10 / p.kr_per_kg for p in kandidater])
+        poang = {id(p): max(t, k) + min(t, k) / 4 for p, t, k in zip(kandidater, tathet, per_kr)}
+        return sorted(kandidater, key=lambda p: (-poang[id(p)], p.kr_per_kg, p.namn))[:antal]
+
+    def avfarda_forslag(self, produkt_id: str) -> None:
+        """Produkten föreslås inte igen."""
+        if self._produkt(produkt_id) is None:
+            raise KeyError(f"Hittar ingen produkt {produkt_id!r}.")
+        self._lagring.avfarda(produkt_id)
+
     def grupper(self) -> list[tuple[Ingrediens, int]]:
         """Alla grupper och hur många produkter i sortimentet som hör till var."""
         matchade, _ = self._matchade()

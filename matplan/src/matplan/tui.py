@@ -13,7 +13,7 @@ from .butiker import ButiksFel
 from .core import DAGAR_PER_MANAD, Butiksrad, Matplan, PlaneringsFel
 from .export import exportera
 from .naring import KALLHANVISNING, KALLNAMN
-from .text import datum, forpackning, kr, mangd, produkttext
+from .text import datum, forpackning, kr, mangd, marke, produkttext
 
 
 class MatplanApp(App):
@@ -32,6 +32,8 @@ class MatplanApp(App):
         Binding("r", "hamta", "Hämta priser"),
         Binding("e", "exportera", "Exportera"),
         Binding("n", "ny_plan", "Ny plan"),
+        Binding("g", "godkann", "Godkänn (Upptäck)"),
+        Binding("x", "avfarda", "Avfärda (Upptäck)"),
         Binding("q", "quit", "Avsluta"),
     ]
 
@@ -42,6 +44,7 @@ class MatplanApp(App):
         self.summa_text = ""
         self._markorer: dict[str, int] = {}  # markörens rad per tabell, så den står kvar efter uppdatering
         self._butiksfilter: dict[str, str | None] = {"postnummer": None, "sok": None}
+        self._upptacksok = ""  # tomt: förslag
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -57,6 +60,9 @@ class MatplanApp(App):
                 yield DataTable(id="bunkringstabell", cursor_type="row")
             with TabPane("Priser", id="priser"):
                 yield DataTable(id="pristabell", cursor_type="row")
+            with TabPane("Upptäck", id="upptack"):
+                yield Input(placeholder="Sök i sortimentet, t.ex. tonfisk (tomt = förslag)", id="upptacksok")
+                yield DataTable(id="upptacktabell", cursor_type="row")
             with TabPane("Butik", id="butik"):
                 yield DataTable(id="butikstabell", cursor_type="row")
                 yield Input(placeholder="Postnummer (närmast först) eller sök på namn/ort, t.ex. 442 50 eller Borås",
@@ -219,6 +225,58 @@ class MatplanApp(App):
     def on_tabbed_content_tab_activated(self, event: TabbedContent.TabActivated) -> None:
         if event.pane.id == "butik" and not self.query_one("#butikstabell", DataTable).row_count:
             self._ladda_butiker()
+        elif event.pane.id == "upptack":
+            self._fyll_upptack()
+
+    # --- Upptäck: förslag och sökning i sortimentet (#32) ---------------------
+
+    def _fyll_upptack(self) -> None:
+        traffar = self.karna.sok(self._upptacksok) if self._upptacksok else self.karna.forslag()
+        tabell = self._tabell(
+            "upptacktabell", "Märke", "Produkt", "Förpackning", "Pris", "kr/kg", "kcal", "Protein", "Slot",
+        )
+        for p in traffar[:100]:
+            tabell.add_row(
+                marke(p.varumarke), p.namn, p.beskrivning, f"{p.pris_kr:.2f}",
+                f"{p.kr_per_kg:.2f}" if p.kr_per_kg > 0 else "–",
+                f"{p.kcal:.0f}" if p.kcal is not None else "–",
+                f"{p.protein:.1f}" if p.protein is not None else "–",
+                p.slot or "–", key=p.produkt_id,
+            )
+        self._aterstall(tabell)
+
+    def _valt_upptack(self) -> str | None:
+        if self.query_one("#flikar", TabbedContent).active != "upptack":
+            self.notify("Gå till fliken Upptäck och välj en produkt.", severity="warning")
+            return None
+        produkt_id = self._vald_nyckel("upptacktabell")
+        if produkt_id is None:
+            self.notify("Ingen produkt vald.", severity="warning")
+        return produkt_id
+
+    def action_godkann(self) -> None:
+        produkt_id = self._valt_upptack()
+        if produkt_id is None:
+            return
+        try:
+            g = self.karna.godkann(produkt_id)
+        except (KeyError, ValueError) as fel:
+            self.notify(str(fel.args[0]), severity="error")
+            return
+        self._fyll_upptack()
+        self.uppdatera()
+        self.notify(
+            f"Ny grupp {g.grupp.namn} ({g.produkter} produkter)." if g.ny
+            else f"Hör redan till gruppen {g.grupp.namn}."
+        )
+
+    def action_avfarda(self) -> None:
+        produkt_id = self._valt_upptack()
+        if produkt_id is None:
+            return
+        self.karna.avfarda_forslag(produkt_id)
+        self._fyll_upptack()
+        self.notify("Föreslås inte igen.")
 
     def _ladda_butiker(self) -> None:
         self.run_worker(self._hamta_butiker, thread=True, exclusive=True, group="butiker")
@@ -323,6 +381,10 @@ class MatplanApp(App):
     def on_input_submitted(self, event: Input.Submitted) -> None:
         text = event.value.strip()
         event.input.value = ""
+        if event.input.id == "upptacksok":
+            self._upptacksok = text
+            self._fyll_upptack()
+            return
         if event.input.id == "butiksinmatning":
             ar_postnummer = text.replace(" ", "").isdigit()
             self._butiksfilter = {"postnummer": text if ar_postnummer else None,
